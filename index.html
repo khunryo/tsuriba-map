@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>釣り場スコア｜鹿島灘〜仙台湾（公開版・実潮汐＋地形＋断面（釣果は外部リンク））</title>
+<meta name="theme-color" content="#0d1b2a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="釣り場マップ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+
+<style>
+  :root{
+    --bg:#0d1b2a; --panel:#152a3f; --panel2:#1b3350;
+    --line:#284a68; --txt:#e8f1f8; --sub:#9fb7cc; --accent:#38bdf8;
+    --good:#22c55e; --mid:#eab308; --low:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+       background:var(--bg);color:var(--txt);font-size:14px}
+  header{padding:12px 16px;border-bottom:1px solid var(--line);background:#0a1622}
+  header h1{margin:0;font-size:17px}
+  header .meta{color:var(--sub);font-size:12px;margin-top:3px}
+  #nojs{background:#7c2d12;color:#fed7aa;padding:8px 16px;font-size:13px}
+  .wrap{display:grid;grid-template-columns:minmax(320px,1fr) minmax(360px,1.15fr);gap:14px;padding:14px}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .card h2{margin:0 0 8px;font-size:14px;color:var(--accent);font-weight:600}
+  .controls{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .fish button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+    border-radius:20px;padding:6px 16px;cursor:pointer;font-size:14px}
+  .fish button.on{background:var(--accent);color:#04263a;border-color:var(--accent);font-weight:700}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .val{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600}
+  label.lbl{color:var(--sub);font-size:12px;min-width:52px}
+  canvas{width:100%;display:block;background:#0a1622;border-radius:8px}
+  #mapC{height:520px}
+  #tideC{height:180px}
+  #flowNote{color:var(--sub);font-size:11px;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:5px 6px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--sub);font-weight:600;cursor:pointer;user-select:none}
+  td.sc{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+  tr.sel{background:#1e3a55}
+  tr:hover{background:#16324a;cursor:pointer}
+  .legend{display:flex;gap:2px;align-items:center;font-size:11px;color:var(--sub);margin-top:6px;flex-wrap:wrap}
+  .legend .bar{height:10px;flex:1;min-width:120px;border-radius:3px;
+    background:linear-gradient(90deg,#334155,#3b82f6,#22c55e,#eab308,#ef4444)}
+  .pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;background:var(--panel2);color:var(--sub);border:1px solid var(--line)}
+  .spotinfo{font-size:12.5px;line-height:1.7}
+  .spotinfo b{color:var(--accent)}
+  .bars{margin-top:6px}
+  .bars .b{display:flex;align-items:center;gap:8px;margin:3px 0}
+  .bars .b span:first-child{width:64px;color:var(--sub);font-size:11.5px}
+  .bars .track{flex:1;height:9px;background:#0a1622;border-radius:5px;overflow:hidden}
+  .bars .fill{height:100%;background:var(--accent)}
+  details{margin-top:8px}
+  summary{cursor:pointer;color:var(--sub);font-size:12px}
+  .src{font-size:11px;color:var(--sub);line-height:1.7}
+  .src a{color:var(--accent)}
+  .tag{font-size:10.5px;color:var(--sub)}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  #leafmap{height:480px;border-radius:8px;overflow:hidden;background:#0a1622}
+  .leaflet-container{background:#0a1622}
+  #detailStatic svg{width:100%;display:block;border-radius:8px}
+  .tracepop{font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎣 釣り場スコア可視化 ― 鹿島灘〜仙台湾（実潮汐版）</h1>
+  <div class="meta">対象魚：アジ / キス / ヒラメ｜対象22地点｜潮汐＝気象庁 港別調和定数によるブラウザ内推算（近傍験潮所を緯度補間）｜公開安全版：釣れやすさ推定＋地形＋断面。実釣果データは非保持（アングラーズへリンク）</div>
+</header>
+<div id="nojs">※このプレビューはJavaScriptが無効です。地図・グラフ・スコアは動きません。<b>ファイルをブラウザで開くと</b>日付/時刻スライダー・魚種切替・潮汐が動作します。</div>
+
+<div class="wrap">
+  <!-- LEFT: controls + map -->
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card controls">
+      <h2>操作</h2>
+      <div class="row fish" id="fishSel">
+        <button data-f="aji" class="on">アジ</button>
+        <button data-f="kisu">キス</button>
+        <button data-f="hirame">ヒラメ</button>
+      </div>
+      <div class="row"><label class="lbl">日付</label>
+        <input type="range" id="dateR" min="0" max="364" value="0">
+        <span class="val" id="dateV" style="min-width:110px"></span></div>
+      <div class="row"><label class="lbl">時刻</label>
+        <input type="range" id="timeR" min="0" max="1425" step="15" value="360">
+        <span class="val" id="timeV" style="min-width:56px"></span></div>
+      <div class="tag">潮回り: <span id="moonV" class="pill"></span> ／ 全地点スコアは上記の日時での値</div>
+    </div>
+
+    <div class="card">
+      <h2>釣れやすさヒートマップ（面的補間・時刻連動）<span id="mapClock" class="tag"></span></h2>
+      <div id="mapWrap" style="position:relative">
+        <div id="mapStatic"><svg viewBox="0 0 460 520" width="100%" style="display:block;border-radius:8px;background:#0a1622" xmlns="http://www.w3.org/2000/svg"><rect x="186" y="50" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.03"/><rect x="194" y="50" width="9" height="9" fill="rgb(47,160,177)" fill-opacity="0.18"/><rect x="202" y="50" width="9" height="9" fill="rgb(47,160,175)" fill-opacity="0.32"/><rect x="210" y="50" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.42"/><rect x="218" y="50" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.48"/><rect x="226" y="50" width="9" height="9" fill="rgb(47,162,173)" fill-opacity="0.50"/><rect x="234" y="50" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.46"/><rect x="242" y="50" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.39"/><rect x="250" y="50" width="9" height="9" fill="rgb(47,162,173)" fill-opacity="0.27"/><rect x="258" y="50" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.17"/><rect x="266" y="50" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.06"/><rect x="338" y="50" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.03"/><rect x="346" y="50" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.14"/><rect x="354" y="50" width="9" height="9" fill="rgb(45,164,166)" fill-opacity="0.22"/><rect x="362" y="50" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.26"/><rect x="370" y="50" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.27"/><rect x="378" y="50" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.23"/><rect x="386" y="50" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.15"/><rect x="394" y="50" width="9" height="9" fill="rgb(45,164,166)" fill-opacity="0.05"/><rect x="178" y="58" width="9" height="9" fill="rgb(48,158,180)" fill-opacity="0.16"/><rect x="186" y="58" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.37"/><rect x="194" y="58" width="9" height="9" fill="rgb(47,161,175)" fill-opacity="0.58"/><rect x="202" y="58" width="9" height="9" fill="rgb(47,162,173)" fill-opacity="0.77"/><rect x="210" y="58" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.82"/><rect x="218" y="58" width="9" height="9" fill="rgb(46,163,169)" fill-opacity="0.82"/><rect x="226" y="58" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.82"/><rect x="234" y="58" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.82"/><rect x="242" y="58" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.82"/><rect x="250" y="58" width="9" height="9" fill="rgb(46,163,169)" fill-opacity="0.79"/><rect x="258" y="58" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.68"/><rect x="266" y="58" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.53"/><rect x="274" y="58" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.35"/><rect x="282" y="58" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.16"/><rect x="322" y="58" width="9" height="9" fill="rgb(46,162,171)" fill-opacity="0.11"/><rect x="330" y="58" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.30"/><rect x="338" y="58" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.49"/><rect x="346" y="58" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.65"/><rect x="354" y="58" width="9" height="9" fill="rgb(44,168,158)" fill-opacity="0.77"/><rect x="362" y="58" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.82"/><rect x="370" y="58" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.82"/><rect x="378" y="58" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.78"/><rect x="386" y="58" width="9" height="9" fill="rgb(44,168,158)" fill-opacity="0.66"/><rect x="394" y="58" width="9" height="9" fill="rgb(44,167,160)" fill-opacity="0.51"/><rect x="402" y="58" width="9" height="9" fill="rgb(45,166,162)" fill-opacity="0.33"/><rect x="410" y="58" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.13"/><rect x="170" y="66" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.06"/><rect x="178" y="66" width="9" height="9" fill="rgb(48,157,182)" fill-opacity="0.28"/><rect x="186" y="66" width="9" height="9" fill="rgb(48,159,179)" fill-opacity="0.50"/><rect x="194" y="66" width="9" height="9" fill="rgb(47,160,175)" fill-opacity="0.74"/><rect x="202" y="66" width="9" height="9" fill="rgb(46,162,171)" fill-opacity="0.82"/><rect x="210" y="66" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.82"/><rect x="218" y="66" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.82"/><rect x="226" y="66" width="9" height="9" fill="rgb(45,165,164)" fill-opacity="0.82"/><rect x="234" y="66" width="9" height="9" fill="rgb(45,166,163)" fill-opacity="0.82"/><rect x="346" y="66" width="9" height="9" fill="rgb(44,169,155)" fill-opacity="0.82"/><rect x="354" y="66" width="9" height="9" fill="rgb(43,171,151)" fill-opacity="0.82"/><rect x="362" y="66" width="9" height="9" fill="rgb(42,173,148)" fill-opacity="0.82"/><rect x="370" y="66" width="9" height="9" fill="rgb(42,173,147)" fill-opacity="0.82"/><rect x="378" y="66" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.82"/><rect x="386" y="66" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="394" y="66" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.80"/><rect x="402" y="66" width="9" height="9" fill="rgb(44,168,159)" fill-opacity="0.57"/><rect x="410" y="66" width="9" height="9" fill="rgb(45,166,162)" fill-opacity="0.34"/><rect x="418" y="66" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.11"/><rect x="226" y="74" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.82"/><rect x="234" y="74" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.82"/><rect x="242" y="74" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.82"/><rect x="250" y="74" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.82"/><rect x="258" y="74" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.82"/><rect x="266" y="74" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.82"/><rect x="274" y="74" width="9" height="9" fill="rgb(47,160,177)" fill-opacity="0.70"/><rect x="282" y="74" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.47"/><rect x="290" y="74" width="9" height="9" fill="rgb(47,159,179)" fill-opacity="0.23"/><rect x="314" y="74" width="9" height="9" fill="rgb(47,160,175)" fill-opacity="0.04"/><rect x="322" y="74" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.27"/><rect x="330" y="74" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.50"/><rect x="338" y="74" width="9" height="9" fill="rgb(45,166,163)" fill-opacity="0.72"/><rect x="346" y="74" width="9" height="9" fill="rgb(44,168,158)" fill-opacity="0.82"/><rect x="354" y="74" width="9" height="9" fill="rgb(43,170,153)" fill-opacity="0.82"/><rect x="362" y="74" width="9" height="9" fill="rgb(43,172,150)" fill-opacity="0.82"/><rect x="370" y="74" width="9" height="9" fill="rgb(43,172,150)" fill-opacity="0.82"/><rect x="378" y="74" width="9" height="9" fill="rgb(43,171,151)" fill-opacity="0.82"/><rect x="386" y="74" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.82"/><rect x="394" y="74" width="9" height="9" fill="rgb(44,168,157)" fill-opacity="0.74"/><rect x="402" y="74" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.53"/><rect x="410" y="74" width="9" height="9" fill="rgb(45,166,164)" fill-opacity="0.30"/><rect x="418" y="74" width="9" height="9" fill="rgb(46,164,167)" fill-opacity="0.07"/><rect x="226" y="82" width="9" height="9" fill="rgb(56,137,228)" fill-opacity="0.82"/><rect x="234" y="82" width="9" height="9" fill="rgb(52,148,204)" fill-opacity="0.82"/><rect x="242" y="82" width="9" height="9" fill="rgb(50,153,193)" fill-opacity="0.82"/><rect x="250" y="82" width="9" height="9" fill="rgb(49,155,188)" fill-opacity="0.82"/><rect x="258" y="82" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.78"/><rect x="266" y="82" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.63"/><rect x="274" y="82" width="9" height="9" fill="rgb(48,157,184)" fill-opacity="0.46"/><rect x="282" y="82" width="9" height="9" fill="rgb(48,157,184)" fill-opacity="0.26"/><rect x="290" y="82" width="9" height="9" fill="rgb(48,157,183)" fill-opacity="0.06"/><rect x="330" y="82" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.19"/><rect x="338" y="82" width="9" height="9" fill="rgb(46,162,171)" fill-opacity="0.36"/><rect x="346" y="82" width="9" height="9" fill="rgb(46,164,167)" fill-opacity="0.50"/><rect x="354" y="82" width="9" height="9" fill="rgb(45,165,164)" fill-opacity="0.61"/><rect x="362" y="82" width="9" height="9" fill="rgb(45,166,162)" fill-opacity="0.67"/><rect x="370" y="82" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.67"/><rect x="378" y="82" width="9" height="9" fill="rgb(45,167,162)" fill-opacity="0.62"/><rect x="386" y="82" width="9" height="9" fill="rgb(45,166,163)" fill-opacity="0.52"/><rect x="394" y="82" width="9" height="9" fill="rgb(45,165,164)" fill-opacity="0.38"/><rect x="402" y="82" width="9" height="9" fill="rgb(45,164,166)" fill-opacity="0.22"/><rect x="410" y="82" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.03"/><rect x="218" y="90" width="9" height="9" fill="rgb(58,124,232)" fill-opacity="0.82"/><rect x="226" y="90" width="9" height="9" fill="rgb(58,130,244)" fill-opacity="0.82"/><rect x="234" y="90" width="9" height="9" fill="rgb(55,138,226)" fill-opacity="0.82"/><rect x="242" y="90" width="9" height="9" fill="rgb(53,144,213)" fill-opacity="0.75"/><rect x="250" y="90" width="9" height="9" fill="rgb(52,148,204)" fill-opacity="0.54"/><rect x="258" y="90" width="9" height="9" fill="rgb(51,150,198)" fill-opacity="0.32"/><rect x="266" y="90" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.15"/><rect x="274" y="90" width="9" height="9" fill="rgb(50,153,192)" fill-opacity="0.03"/><rect x="354" y="90" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.05"/><rect x="362" y="90" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.09"/><rect x="370" y="90" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.09"/><rect x="378" y="90" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.06"/><rect x="210" y="98" width="9" height="9" fill="rgb(54,142,218)" fill-opacity="0.79"/><rect x="218" y="98" width="9" height="9" fill="rgb(54,141,219)" fill-opacity="0.65"/><rect x="226" y="98" width="9" height="9" fill="rgb(54,142,218)" fill-opacity="0.60"/><rect x="234" y="98" width="9" height="9" fill="rgb(53,143,214)" fill-opacity="0.51"/><rect x="242" y="98" width="9" height="9" fill="rgb(53,145,210)" fill-opacity="0.37"/><rect x="250" y="98" width="9" height="9" fill="rgb(52,147,206)" fill-opacity="0.21"/><rect x="258" y="98" width="9" height="9" fill="rgb(51,148,202)" fill-opacity="0.04"/><rect x="202" y="106" width="9" height="9" fill="rgb(51,148,203)" fill-opacity="0.82"/><rect x="210" y="106" width="9" height="9" fill="rgb(52,147,207)" fill-opacity="0.82"/><rect x="218" y="106" width="9" height="9" fill="rgb(53,145,209)" fill-opacity="0.82"/><rect x="226" y="106" width="9" height="9" fill="rgb(53,145,210)" fill-opacity="0.69"/><rect x="234" y="106" width="9" height="9" fill="rgb(53,145,209)" fill-opacity="0.45"/><rect x="242" y="106" width="9" height="9" fill="rgb(52,146,208)" fill-opacity="0.22"/><rect x="202" y="114" width="9" height="9" fill="rgb(53,144,213)" fill-opacity="0.82"/><rect x="210" y="114" width="9" height="9" fill="rgb(53,143,214)" fill-opacity="0.82"/><rect x="218" y="114" width="9" height="9" fill="rgb(53,143,214)" fill-opacity="0.82"/><rect x="226" y="114" width="9" height="9" fill="rgb(53,144,212)" fill-opacity="0.67"/><rect x="234" y="114" width="9" height="9" fill="rgb(53,145,210)" fill-opacity="0.46"/><rect x="242" y="114" width="9" height="9" fill="rgb(52,146,208)" fill-opacity="0.24"/><rect x="202" y="122" width="9" height="9" fill="rgb(56,136,231)" fill-opacity="0.82"/><rect x="210" y="122" width="9" height="9" fill="rgb(56,136,230)" fill-opacity="0.82"/><rect x="218" y="122" width="9" height="9" fill="rgb(55,139,223)" fill-opacity="0.82"/><rect x="226" y="122" width="9" height="9" fill="rgb(54,143,216)" fill-opacity="0.78"/><rect x="234" y="122" width="9" height="9" fill="rgb(53,145,210)" fill-opacity="0.54"/><rect x="242" y="122" width="9" height="9" fill="rgb(52,147,206)" fill-opacity="0.31"/><rect x="250" y="122" width="9" height="9" fill="rgb(52,148,203)" fill-opacity="0.07"/><rect x="210" y="130" width="9" height="9" fill="rgb(55,138,225)" fill-opacity="0.82"/><rect x="218" y="130" width="9" height="9" fill="rgb(52,147,207)" fill-opacity="0.82"/><rect x="226" y="130" width="9" height="9" fill="rgb(51,151,198)" fill-opacity="0.77"/><rect x="234" y="130" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.64"/><rect x="242" y="130" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.47"/><rect x="250" y="130" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.28"/><rect x="258" y="130" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.08"/><rect x="210" y="138" width="9" height="9" fill="rgb(42,173,147)" fill-opacity="0.82"/><rect x="218" y="138" width="9" height="9" fill="rgb(42,173,147)" fill-opacity="0.82"/><rect x="226" y="138" width="9" height="9" fill="rgb(44,168,157)" fill-opacity="0.82"/><rect x="234" y="138" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.82"/><rect x="242" y="138" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.74"/><rect x="250" y="138" width="9" height="9" fill="rgb(48,158,182)" fill-opacity="0.51"/><rect x="258" y="138" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.27"/><rect x="266" y="138" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.04"/><rect x="218" y="146" width="9" height="9" fill="rgb(43,170,153)" fill-opacity="0.82"/><rect x="226" y="146" width="9" height="9" fill="rgb(44,168,158)" fill-opacity="0.82"/><rect x="234" y="146" width="9" height="9" fill="rgb(45,165,166)" fill-opacity="0.82"/><rect x="242" y="146" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.67"/><rect x="250" y="146" width="9" height="9" fill="rgb(48,159,180)" fill-opacity="0.45"/><rect x="258" y="146" width="9" height="9" fill="rgb(48,156,185)" fill-opacity="0.23"/><rect x="218" y="154" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.74"/><rect x="226" y="154" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.64"/><rect x="234" y="154" width="9" height="9" fill="rgb(48,158,182)" fill-opacity="0.51"/><rect x="242" y="154" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.34"/><rect x="250" y="154" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.15"/><rect x="218" y="162" width="9" height="9" fill="rgb(52,147,206)" fill-opacity="0.25"/><rect x="226" y="162" width="9" height="9" fill="rgb(52,147,207)" fill-opacity="0.23"/><rect x="234" y="162" width="9" height="9" fill="rgb(52,147,207)" fill-opacity="0.17"/><rect x="242" y="162" width="9" height="9" fill="rgb(52,147,206)" fill-opacity="0.08"/><rect x="218" y="170" width="9" height="9" fill="rgb(58,128,242)" fill-opacity="0.82"/><rect x="226" y="170" width="9" height="9" fill="rgb(58,129,244)" fill-opacity="0.80"/><rect x="234" y="170" width="9" height="9" fill="rgb(58,131,241)" fill-opacity="0.71"/><rect x="242" y="170" width="9" height="9" fill="rgb(57,135,234)" fill-opacity="0.57"/><rect x="250" y="170" width="9" height="9" fill="rgb(55,138,226)" fill-opacity="0.40"/><rect x="258" y="170" width="9" height="9" fill="rgb(54,141,220)" fill-opacity="0.21"/><rect x="226" y="178" width="9" height="9" fill="rgb(56,109,195)" fill-opacity="0.82"/><rect x="234" y="178" width="9" height="9" fill="rgb(57,117,215)" fill-opacity="0.82"/><rect x="242" y="178" width="9" height="9" fill="rgb(58,125,235)" fill-opacity="0.82"/><rect x="250" y="178" width="9" height="9" fill="rgb(58,132,239)" fill-opacity="0.67"/><rect x="258" y="178" width="9" height="9" fill="rgb(56,137,228)" fill-opacity="0.44"/><rect x="266" y="178" width="9" height="9" fill="rgb(54,141,220)" fill-opacity="0.20"/><rect x="226" y="186" width="9" height="9" fill="rgb(57,120,223)" fill-opacity="0.82"/><rect x="234" y="186" width="9" height="9" fill="rgb(58,128,242)" fill-opacity="0.82"/><rect x="242" y="186" width="9" height="9" fill="rgb(57,135,234)" fill-opacity="0.82"/><rect x="250" y="186" width="9" height="9" fill="rgb(55,139,224)" fill-opacity="0.63"/><rect x="258" y="186" width="9" height="9" fill="rgb(54,142,218)" fill-opacity="0.44"/><rect x="266" y="186" width="9" height="9" fill="rgb(53,144,213)" fill-opacity="0.25"/><rect x="274" y="186" width="9" height="9" fill="rgb(53,145,210)" fill-opacity="0.05"/><rect x="226" y="194" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.82"/><rect x="234" y="194" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.82"/><rect x="242" y="194" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.82"/><rect x="250" y="194" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.82"/><rect x="258" y="194" width="9" height="9" fill="rgb(51,150,198)" fill-opacity="0.71"/><rect x="266" y="194" width="9" height="9" fill="rgb(51,149,200)" fill-opacity="0.47"/><rect x="274" y="194" width="9" height="9" fill="rgb(51,149,201)" fill-opacity="0.24"/><rect x="226" y="202" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.82"/><rect x="234" y="202" width="9" height="9" fill="rgb(47,160,177)" fill-opacity="0.82"/><rect x="242" y="202" width="9" height="9" fill="rgb(48,158,182)" fill-opacity="0.82"/><rect x="250" y="202" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.82"/><rect x="258" y="202" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.65"/><rect x="266" y="202" width="9" height="9" fill="rgb(50,153,193)" fill-opacity="0.43"/><rect x="274" y="202" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.20"/><rect x="226" y="210" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.82"/><rect x="234" y="210" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.82"/><rect x="242" y="210" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.82"/><rect x="250" y="210" width="9" height="9" fill="rgb(49,155,188)" fill-opacity="0.65"/><rect x="258" y="210" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.46"/><rect x="266" y="210" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.25"/><rect x="274" y="210" width="9" height="9" fill="rgb(50,153,191)" fill-opacity="0.03"/><rect x="226" y="218" width="9" height="9" fill="rgb(48,157,183)" fill-opacity="0.82"/><rect x="234" y="218" width="9" height="9" fill="rgb(48,157,183)" fill-opacity="0.82"/><rect x="242" y="218" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.82"/><rect x="250" y="218" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.82"/><rect x="258" y="218" width="9" height="9" fill="rgb(49,155,188)" fill-opacity="0.64"/><rect x="266" y="218" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.40"/><rect x="274" y="218" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.16"/><rect x="226" y="226" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.82"/><rect x="234" y="226" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.82"/><rect x="242" y="226" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.82"/><rect x="250" y="226" width="9" height="9" fill="rgb(49,155,188)" fill-opacity="0.70"/><rect x="258" y="226" width="9" height="9" fill="rgb(49,155,189)" fill-opacity="0.50"/><rect x="266" y="226" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.28"/><rect x="274" y="226" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.06"/><rect x="226" y="234" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.58"/><rect x="234" y="234" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.50"/><rect x="242" y="234" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.40"/><rect x="250" y="234" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.28"/><rect x="258" y="234" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.13"/><rect x="226" y="242" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.82"/><rect x="234" y="242" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.82"/><rect x="242" y="242" width="9" height="9" fill="rgb(50,153,192)" fill-opacity="0.80"/><rect x="250" y="242" width="9" height="9" fill="rgb(50,153,193)" fill-opacity="0.59"/><rect x="258" y="242" width="9" height="9" fill="rgb(50,153,193)" fill-opacity="0.37"/><rect x="266" y="242" width="9" height="9" fill="rgb(50,153,192)" fill-opacity="0.14"/><rect x="226" y="250" width="9" height="9" fill="rgb(50,151,197)" fill-opacity="0.82"/><rect x="234" y="250" width="9" height="9" fill="rgb(51,149,201)" fill-opacity="0.82"/><rect x="242" y="250" width="9" height="9" fill="rgb(51,149,201)" fill-opacity="0.82"/><rect x="250" y="250" width="9" height="9" fill="rgb(51,150,199)" fill-opacity="0.68"/><rect x="258" y="250" width="9" height="9" fill="rgb(50,151,196)" fill-opacity="0.45"/><rect x="266" y="250" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.21"/><rect x="218" y="258" width="9" height="9" fill="rgb(56,137,229)" fill-opacity="0.82"/><rect x="226" y="258" width="9" height="9" fill="rgb(55,138,226)" fill-opacity="0.82"/><rect x="234" y="258" width="9" height="9" fill="rgb(54,143,215)" fill-opacity="0.82"/><rect x="242" y="258" width="9" height="9" fill="rgb(52,147,206)" fill-opacity="0.80"/><rect x="250" y="258" width="9" height="9" fill="rgb(51,150,200)" fill-opacity="0.57"/><rect x="258" y="258" width="9" height="9" fill="rgb(50,151,196)" fill-opacity="0.34"/><rect x="266" y="258" width="9" height="9" fill="rgb(50,153,193)" fill-opacity="0.10"/><rect x="210" y="266" width="9" height="9" fill="rgb(48,159,179)" fill-opacity="0.82"/><rect x="218" y="266" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.82"/><rect x="226" y="266" width="9" height="9" fill="rgb(49,155,189)" fill-opacity="0.82"/><rect x="234" y="266" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.73"/><rect x="242" y="266" width="9" height="9" fill="rgb(49,154,189)" fill-opacity="0.55"/><rect x="250" y="266" width="9" height="9" fill="rgb(49,155,188)" fill-opacity="0.34"/><rect x="258" y="266" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.13"/><rect x="202" y="274" width="9" height="9" fill="rgb(43,171,151)" fill-opacity="0.82"/><rect x="210" y="274" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.82"/><rect x="218" y="274" width="9" height="9" fill="rgb(45,166,164)" fill-opacity="0.82"/><rect x="226" y="274" width="9" height="9" fill="rgb(45,164,166)" fill-opacity="0.82"/><rect x="234" y="274" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.82"/><rect x="242" y="274" width="9" height="9" fill="rgb(47,162,173)" fill-opacity="0.75"/><rect x="250" y="274" width="9" height="9" fill="rgb(47,161,175)" fill-opacity="0.51"/><rect x="258" y="274" width="9" height="9" fill="rgb(47,160,177)" fill-opacity="0.27"/><rect x="266" y="274" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.03"/><rect x="186" y="282" width="9" height="9" fill="rgb(35,192,103)" fill-opacity="0.82"/><rect x="194" y="282" width="9" height="9" fill="rgb(36,189,110)" fill-opacity="0.82"/><rect x="202" y="282" width="9" height="9" fill="rgb(40,180,130)" fill-opacity="0.82"/><rect x="210" y="282" width="9" height="9" fill="rgb(42,173,146)" fill-opacity="0.82"/><rect x="218" y="282" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.82"/><rect x="226" y="282" width="9" height="9" fill="rgb(44,168,158)" fill-opacity="0.82"/><rect x="234" y="282" width="9" height="9" fill="rgb(45,166,162)" fill-opacity="0.80"/><rect x="242" y="282" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.60"/><rect x="250" y="282" width="9" height="9" fill="rgb(46,164,167)" fill-opacity="0.39"/><rect x="258" y="282" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.17"/><rect x="170" y="290" width="9" height="9" fill="rgb(40,179,134)" fill-opacity="0.82"/><rect x="178" y="290" width="9" height="9" fill="rgb(40,180,132)" fill-opacity="0.82"/><rect x="186" y="290" width="9" height="9" fill="rgb(40,180,131)" fill-opacity="0.82"/><rect x="194" y="290" width="9" height="9" fill="rgb(40,179,132)" fill-opacity="0.82"/><rect x="202" y="290" width="9" height="9" fill="rgb(41,177,138)" fill-opacity="0.82"/><rect x="210" y="290" width="9" height="9" fill="rgb(42,174,144)" fill-opacity="0.71"/><rect x="218" y="290" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.53"/><rect x="226" y="290" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.45"/><rect x="234" y="290" width="9" height="9" fill="rgb(44,168,157)" fill-opacity="0.35"/><rect x="242" y="290" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.21"/><rect x="250" y="290" width="9" height="9" fill="rgb(45,166,163)" fill-opacity="0.05"/><rect x="154" y="298" width="9" height="9" fill="rgb(39,181,128)" fill-opacity="0.82"/><rect x="162" y="298" width="9" height="9" fill="rgb(39,181,129)" fill-opacity="0.82"/><rect x="170" y="298" width="9" height="9" fill="rgb(40,178,136)" fill-opacity="0.82"/><rect x="178" y="298" width="9" height="9" fill="rgb(41,176,140)" fill-opacity="0.82"/><rect x="186" y="298" width="9" height="9" fill="rgb(42,175,142)" fill-opacity="0.80"/><rect x="194" y="298" width="9" height="9" fill="rgb(42,174,144)" fill-opacity="0.56"/><rect x="202" y="298" width="9" height="9" fill="rgb(42,173,146)" fill-opacity="0.33"/><rect x="210" y="298" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.23"/><rect x="218" y="298" width="9" height="9" fill="rgb(43,171,151)" fill-opacity="0.11"/><rect x="146" y="306" width="9" height="9" fill="rgb(42,172,148)" fill-opacity="0.82"/><rect x="154" y="306" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="162" y="306" width="9" height="9" fill="rgb(44,170,155)" fill-opacity="0.82"/><rect x="170" y="306" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="178" y="306" width="9" height="9" fill="rgb(43,172,150)" fill-opacity="0.82"/><rect x="186" y="306" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.82"/><rect x="194" y="306" width="9" height="9" fill="rgb(43,172,150)" fill-opacity="0.64"/><rect x="202" y="306" width="9" height="9" fill="rgb(43,171,151)" fill-opacity="0.40"/><rect x="210" y="306" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.16"/><rect x="138" y="314" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.65"/><rect x="146" y="314" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.80"/><rect x="154" y="314" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="162" y="314" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="170" y="314" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="178" y="314" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.77"/><rect x="186" y="314" width="9" height="9" fill="rgb(43,170,153)" fill-opacity="0.61"/><rect x="194" y="314" width="9" height="9" fill="rgb(43,170,153)" fill-opacity="0.42"/><rect x="202" y="314" width="9" height="9" fill="rgb(44,170,154)" fill-opacity="0.22"/><rect x="130" y="322" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.46"/><rect x="138" y="322" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.35"/><rect x="146" y="322" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.28"/><rect x="154" y="322" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.34"/><rect x="162" y="322" width="9" height="9" fill="rgb(44,170,154)" fill-opacity="0.35"/><rect x="170" y="322" width="9" height="9" fill="rgb(44,169,155)" fill-opacity="0.33"/><rect x="178" y="322" width="9" height="9" fill="rgb(44,169,155)" fill-opacity="0.26"/><rect x="186" y="322" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.15"/><rect x="122" y="330" width="9" height="9" fill="rgb(43,171,151)" fill-opacity="0.82"/><rect x="130" y="330" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="138" y="330" width="9" height="9" fill="rgb(43,170,153)" fill-opacity="0.79"/><rect x="146" y="330" width="9" height="9" fill="rgb(44,170,154)" fill-opacity="0.59"/><rect x="154" y="330" width="9" height="9" fill="rgb(44,169,155)" fill-opacity="0.37"/><rect x="162" y="330" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.15"/><rect x="114" y="338" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.82"/><rect x="122" y="338" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.82"/><rect x="130" y="338" width="9" height="9" fill="rgb(43,171,150)" fill-opacity="0.82"/><rect x="138" y="338" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.82"/><rect x="146" y="338" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.72"/><rect x="154" y="338" width="9" height="9" fill="rgb(44,169,156)" fill-opacity="0.48"/><rect x="162" y="338" width="9" height="9" fill="rgb(44,168,157)" fill-opacity="0.24"/><rect x="114" y="346" width="9" height="9" fill="rgb(41,177,139)" fill-opacity="0.82"/><rect x="122" y="346" width="9" height="9" fill="rgb(42,174,144)" fill-opacity="0.82"/><rect x="130" y="346" width="9" height="9" fill="rgb(43,172,149)" fill-opacity="0.82"/><rect x="138" y="346" width="9" height="9" fill="rgb(43,171,152)" fill-opacity="0.70"/><rect x="146" y="346" width="9" height="9" fill="rgb(44,169,155)" fill-opacity="0.52"/><rect x="154" y="346" width="9" height="9" fill="rgb(44,168,157)" fill-opacity="0.31"/><rect x="162" y="346" width="9" height="9" fill="rgb(44,168,159)" fill-opacity="0.10"/><rect x="106" y="354" width="9" height="9" fill="rgb(41,176,141)" fill-opacity="0.82"/><rect x="114" y="354" width="9" height="9" fill="rgb(42,175,143)" fill-opacity="0.82"/><rect x="122" y="354" width="9" height="9" fill="rgb(43,172,148)" fill-opacity="0.82"/><rect x="130" y="354" width="9" height="9" fill="rgb(43,170,153)" fill-opacity="0.82"/><rect x="138" y="354" width="9" height="9" fill="rgb(44,169,157)" fill-opacity="0.64"/><rect x="146" y="354" width="9" height="9" fill="rgb(44,168,159)" fill-opacity="0.41"/><rect x="154" y="354" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.17"/><rect x="98" y="362" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.82"/><rect x="106" y="362" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.82"/><rect x="114" y="362" width="9" height="9" fill="rgb(46,163,169)" fill-opacity="0.82"/><rect x="122" y="362" width="9" height="9" fill="rgb(46,164,167)" fill-opacity="0.82"/><rect x="130" y="362" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.64"/><rect x="138" y="362" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.42"/><rect x="146" y="362" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.19"/><rect x="98" y="370" width="9" height="9" fill="rgb(47,161,175)" fill-opacity="0.82"/><rect x="106" y="370" width="9" height="9" fill="rgb(47,161,175)" fill-opacity="0.82"/><rect x="114" y="370" width="9" height="9" fill="rgb(47,162,173)" fill-opacity="0.82"/><rect x="122" y="370" width="9" height="9" fill="rgb(46,162,171)" fill-opacity="0.82"/><rect x="130" y="370" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.74"/><rect x="138" y="370" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.50"/><rect x="146" y="370" width="9" height="9" fill="rgb(46,163,170)" fill-opacity="0.26"/><rect x="90" y="378" width="9" height="9" fill="rgb(41,177,137)" fill-opacity="0.82"/><rect x="98" y="378" width="9" height="9" fill="rgb(43,170,154)" fill-opacity="0.82"/><rect x="106" y="378" width="9" height="9" fill="rgb(45,167,161)" fill-opacity="0.82"/><rect x="114" y="378" width="9" height="9" fill="rgb(45,165,165)" fill-opacity="0.82"/><rect x="122" y="378" width="9" height="9" fill="rgb(46,164,167)" fill-opacity="0.82"/><rect x="130" y="378" width="9" height="9" fill="rgb(46,163,169)" fill-opacity="0.65"/><rect x="138" y="378" width="9" height="9" fill="rgb(46,162,171)" fill-opacity="0.41"/><rect x="146" y="378" width="9" height="9" fill="rgb(47,162,173)" fill-opacity="0.18"/><rect x="98" y="386" width="9" height="9" fill="rgb(44,168,158)" fill-opacity="0.82"/><rect x="106" y="386" width="9" height="9" fill="rgb(45,166,163)" fill-opacity="0.82"/><rect x="114" y="386" width="9" height="9" fill="rgb(46,164,168)" fill-opacity="0.80"/><rect x="122" y="386" width="9" height="9" fill="rgb(46,162,172)" fill-opacity="0.61"/><rect x="130" y="386" width="9" height="9" fill="rgb(47,161,175)" fill-opacity="0.42"/><rect x="138" y="386" width="9" height="9" fill="rgb(47,160,177)" fill-opacity="0.22"/><rect x="98" y="394" width="9" height="9" fill="rgb(52,146,209)" fill-opacity="0.73"/><rect x="106" y="394" width="9" height="9" fill="rgb(51,150,200)" fill-opacity="0.54"/><rect x="114" y="394" width="9" height="9" fill="rgb(50,152,195)" fill-opacity="0.37"/><rect x="122" y="394" width="9" height="9" fill="rgb(50,153,192)" fill-opacity="0.22"/><rect x="130" y="394" width="9" height="9" fill="rgb(50,154,191)" fill-opacity="0.05"/><rect x="98" y="402" width="9" height="9" fill="rgb(58,125,234)" fill-opacity="0.82"/><rect x="106" y="402" width="9" height="9" fill="rgb(57,134,236)" fill-opacity="0.74"/><rect x="114" y="402" width="9" height="9" fill="rgb(55,139,223)" fill-opacity="0.50"/><rect x="122" y="402" width="9" height="9" fill="rgb(53,143,215)" fill-opacity="0.25"/><rect x="106" y="410" width="9" height="9" fill="rgb(58,130,244)" fill-opacity="0.59"/><rect x="114" y="410" width="9" height="9" fill="rgb(57,134,236)" fill-opacity="0.38"/><rect x="122" y="410" width="9" height="9" fill="rgb(56,137,229)" fill-opacity="0.15"/><rect x="130" y="410" width="9" height="9" fill="rgb(55,139,223)" fill-opacity="0.07"/><rect x="106" y="418" width="9" height="9" fill="rgb(58,128,241)" fill-opacity="0.67"/><rect x="114" y="418" width="9" height="9" fill="rgb(58,128,243)" fill-opacity="0.71"/><rect x="122" y="418" width="9" height="9" fill="rgb(58,130,244)" fill-opacity="0.69"/><rect x="130" y="418" width="9" height="9" fill="rgb(57,133,237)" fill-opacity="0.62"/><rect x="138" y="418" width="9" height="9" fill="rgb(56,136,230)" fill-opacity="0.49"/><rect x="146" y="418" width="9" height="9" fill="rgb(55,139,223)" fill-opacity="0.33"/><rect x="154" y="418" width="9" height="9" fill="rgb(54,142,218)" fill-opacity="0.15"/><rect x="114" y="426" width="9" height="9" fill="rgb(56,113,204)" fill-opacity="0.82"/><rect x="122" y="426" width="9" height="9" fill="rgb(57,117,215)" fill-opacity="0.82"/><rect x="130" y="426" width="9" height="9" fill="rgb(58,127,239)" fill-opacity="0.82"/><rect x="138" y="426" width="9" height="9" fill="rgb(56,135,232)" fill-opacity="0.82"/><rect x="146" y="426" width="9" height="9" fill="rgb(54,140,221)" fill-opacity="0.65"/><rect x="154" y="426" width="9" height="9" fill="rgb(54,143,215)" fill-opacity="0.43"/><rect x="162" y="426" width="9" height="9" fill="rgb(53,144,212)" fill-opacity="0.25"/><rect x="170" y="426" width="9" height="9" fill="rgb(53,145,211)" fill-opacity="0.06"/><rect x="122" y="434" width="9" height="9" fill="rgb(55,138,225)" fill-opacity="0.82"/><rect x="130" y="434" width="9" height="9" fill="rgb(48,158,180)" fill-opacity="0.82"/><rect x="138" y="434" width="9" height="9" fill="rgb(47,159,178)" fill-opacity="0.82"/><rect x="146" y="434" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.82"/><rect x="154" y="434" width="9" height="9" fill="rgb(51,149,200)" fill-opacity="0.78"/><rect x="162" y="434" width="9" height="9" fill="rgb(52,147,206)" fill-opacity="0.55"/><rect x="170" y="434" width="9" height="9" fill="rgb(52,146,208)" fill-opacity="0.31"/><rect x="178" y="434" width="9" height="9" fill="rgb(52,146,208)" fill-opacity="0.07"/><rect x="122" y="442" width="9" height="9" fill="rgb(45,166,164)" fill-opacity="0.82"/><rect x="130" y="442" width="9" height="9" fill="rgb(44,167,159)" fill-opacity="0.82"/><rect x="138" y="442" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.82"/><rect x="146" y="442" width="9" height="9" fill="rgb(52,146,208)" fill-opacity="0.82"/><rect x="154" y="442" width="9" height="9" fill="rgb(53,143,215)" fill-opacity="0.82"/><rect x="162" y="442" width="9" height="9" fill="rgb(53,143,215)" fill-opacity="0.62"/><rect x="170" y="442" width="9" height="9" fill="rgb(53,144,212)" fill-opacity="0.41"/><rect x="178" y="442" width="9" height="9" fill="rgb(53,145,209)" fill-opacity="0.19"/><rect x="138" y="450" width="9" height="9" fill="rgb(56,105,185)" fill-opacity="0.82"/><rect x="146" y="450" width="9" height="9" fill="rgb(57,117,215)" fill-opacity="0.82"/><rect x="154" y="450" width="9" height="9" fill="rgb(58,130,244)" fill-opacity="0.82"/><rect x="162" y="450" width="9" height="9" fill="rgb(55,140,222)" fill-opacity="0.78"/><rect x="170" y="450" width="9" height="9" fill="rgb(52,146,209)" fill-opacity="0.65"/><rect x="178" y="450" width="9" height="9" fill="rgb(51,149,201)" fill-opacity="0.60"/><rect x="186" y="450" width="9" height="9" fill="rgb(51,151,198)" fill-opacity="0.50"/><rect x="194" y="450" width="9" height="9" fill="rgb(50,151,196)" fill-opacity="0.36"/><rect x="202" y="450" width="9" height="9" fill="rgb(50,151,196)" fill-opacity="0.19"/><rect x="154" y="458" width="9" height="9" fill="rgb(51,151,198)" fill-opacity="0.82"/><rect x="162" y="458" width="9" height="9" fill="rgb(47,160,177)" fill-opacity="0.82"/><rect x="170" y="458" width="9" height="9" fill="rgb(46,163,169)" fill-opacity="0.82"/><rect x="178" y="458" width="9" height="9" fill="rgb(46,162,171)" fill-opacity="0.82"/><rect x="186" y="458" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.82"/><rect x="194" y="458" width="9" height="9" fill="rgb(48,158,181)" fill-opacity="0.73"/><rect x="202" y="458" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.50"/><rect x="210" y="458" width="9" height="9" fill="rgb(49,155,189)" fill-opacity="0.27"/><rect x="218" y="458" width="9" height="9" fill="rgb(50,154,191)" fill-opacity="0.03"/><rect x="162" y="466" width="9" height="9" fill="rgb(44,169,157)" fill-opacity="0.82"/><rect x="170" y="466" width="9" height="9" fill="rgb(44,170,155)" fill-opacity="0.82"/><rect x="178" y="466" width="9" height="9" fill="rgb(44,167,160)" fill-opacity="0.82"/><rect x="186" y="466" width="9" height="9" fill="rgb(46,164,167)" fill-opacity="0.82"/><rect x="194" y="466" width="9" height="9" fill="rgb(47,161,174)" fill-opacity="0.80"/><rect x="202" y="466" width="9" height="9" fill="rgb(48,158,180)" fill-opacity="0.56"/><rect x="210" y="466" width="9" height="9" fill="rgb(48,156,184)" fill-opacity="0.32"/><rect x="218" y="466" width="9" height="9" fill="rgb(49,155,188)" fill-opacity="0.07"/><rect x="178" y="474" width="9" height="9" fill="rgb(47,161,173)" fill-opacity="0.80"/><rect x="186" y="474" width="9" height="9" fill="rgb(47,160,176)" fill-opacity="0.68"/><rect x="194" y="474" width="9" height="9" fill="rgb(48,159,179)" fill-opacity="0.51"/><rect x="202" y="474" width="9" height="9" fill="rgb(48,157,182)" fill-opacity="0.33"/><rect x="210" y="474" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.12"/><rect x="138" y="482" width="9" height="9" fill="rgb(51,151,197)" fill-opacity="0.02"/><rect x="146" y="482" width="9" height="9" fill="rgb(50,152,194)" fill-opacity="0.14"/><rect x="154" y="482" width="9" height="9" fill="rgb(49,154,190)" fill-opacity="0.23"/><rect x="162" y="482" width="9" height="9" fill="rgb(49,155,187)" fill-opacity="0.28"/><rect x="170" y="482" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.29"/><rect x="178" y="482" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.25"/><rect x="186" y="482" width="9" height="9" fill="rgb(49,156,185)" fill-opacity="0.17"/><rect x="194" y="482" width="9" height="9" fill="rgb(49,156,186)" fill-opacity="0.06"/><path d="M180.1 478.4 L125.7 447.2 L107.6 422.2 L92.5 384.8 L107.6 353.6 L146.9 306.8 L192.2 283.4 L222.4 260.0 L228.5 221.0 L222.4 182.0 L213.4 146.1 L198.3 119.6 L228.5 79.0 L240.6 69.7 L258.7 63.4 L328.2 68.1 L373.6 72.8 L26 72.8 L26 478.4 Z" fill="#14261a" stroke="#3a5a3a" stroke-width="1.5"/><circle cx="171.1" cy="467.5" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="171.1" cy="467.5" r="6" fill="rgb(43,172,148)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="131.8" cy="442.5" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="131.8" cy="442.5" r="6" fill="rgb(44,196,89)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="95.5" cy="383.2" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="95.5" cy="383.2" r="6" fill="rgb(36,191,107)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="101.6" cy="380.1" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="101.6" cy="380.1" r="6" fill="rgb(47,160,177)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="104.6" cy="372.3" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="104.6" cy="372.3" r="6" fill="rgb(51,150,199)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="110.6" cy="353.6" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="110.6" cy="353.6" r="6" fill="rgb(39,182,127)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="119.7" cy="341.1" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="119.7" cy="341.1" r="6" fill="rgb(43,172,149)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="162.0" cy="302.1" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="162.0" cy="302.1" r="6" fill="rgb(38,185,120)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="192.2" cy="285.0" r="10.5" fill="rgba(3,10,18,0.6)"/><circle cx="192.2" cy="285.0" r="8" fill="rgb(39,196,91)" stroke="#ffffff" stroke-width="3"/><circle cx="198.3" cy="275.6" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="198.3" cy="275.6" r="6" fill="rgb(42,175,143)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="216.4" cy="260.0" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="216.4" cy="260.0" r="6" fill="rgb(48,157,182)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="222.4" cy="252.2" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="222.4" cy="252.2" r="6" fill="rgb(43,172,150)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="228.5" cy="222.6" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="228.5" cy="222.6" r="6" fill="rgb(48,158,182)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="231.5" cy="200.7" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="231.5" cy="200.7" r="6" fill="rgb(45,166,163)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="213.4" cy="146.1" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="213.4" cy="146.1" r="6" fill="rgb(44,168,158)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="216.4" cy="144.6" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="216.4" cy="144.6" r="6" fill="rgb(38,185,119)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="201.3" cy="124.3" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="201.3" cy="124.3" r="6" fill="rgb(52,147,206)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="198.3" cy="111.8" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="198.3" cy="111.8" r="6" fill="rgb(51,151,198)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="222.4" cy="79.0" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="222.4" cy="79.0" r="6" fill="rgb(39,182,126)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="228.5" cy="75.9" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="228.5" cy="75.9" r="6" fill="rgb(47,160,175)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="243.6" cy="72.8" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="243.6" cy="72.8" r="6" fill="rgb(43,172,148)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="228.5" cy="69.7" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="228.5" cy="69.7" r="6" fill="rgb(45,166,162)" stroke="#eaf6ff" stroke-width="1.8"/><circle cx="80.4" cy="406.6" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="80.4" cy="406.6" r="6" fill="rgb(55,97,166)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M76.2 406.6 Q78.3 401.8 80.4 406.6 Q82.5 411.4 84.6 406.6" fill="none" stroke="#04263a" stroke-width="1.5"/><circle cx="119.7" cy="434.7" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="119.7" cy="434.7" r="6" fill="rgb(54,96,163)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M115.5 434.7 Q117.6 429.9 119.7 434.7 Q121.8 439.5 123.9 434.7" fill="none" stroke="#04263a" stroke-width="1.5"/><circle cx="137.8" cy="453.4" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="137.8" cy="453.4" r="6" fill="rgb(54,96,162)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M133.6 453.4 Q135.7 448.6 137.8 453.4 Q139.9 458.2 142.0 453.4" fill="none" stroke="#04263a" stroke-width="1.5"/><circle cx="219.4" cy="258.4" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="219.4" cy="258.4" r="6" fill="rgb(54,96,163)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M215.2 258.4 Q217.3 253.6 219.4 258.4 Q221.5 263.2 223.6 258.4" fill="none" stroke="#04263a" stroke-width="1.5"/><circle cx="222.4" cy="185.1" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="222.4" cy="185.1" r="6" fill="rgb(55,99,170)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M218.2 185.1 Q220.3 180.3 222.4 185.1 Q224.5 189.9 226.6 185.1" fill="none" stroke="#04263a" stroke-width="1.5"/><circle cx="198.3" cy="130.5" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="198.3" cy="130.5" r="6" fill="rgb(54,97,164)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M194.1 130.5 Q196.2 125.7 198.3 130.5 Q200.4 135.3 202.5 130.5" fill="none" stroke="#04263a" stroke-width="1.5"/><circle cx="219.4" cy="88.4" r="8.5" fill="rgba(3,10,18,0.6)"/><circle cx="219.4" cy="88.4" r="6" fill="rgb(54,95,160)" stroke="#eaf6ff" stroke-width="1.8"/><path d="M215.2 88.4 Q217.3 83.6 219.4 88.4 Q221.5 93.2 223.6 88.4" fill="none" stroke="#04263a" stroke-width="1.5"/><polygon points="104.57777777778395,366.44000000000034 113.57777777778395,383.44000000000034 95.57777777778395,383.44000000000034" fill="rgba(3,10,18,0.6)"/><polygon points="104.57777777778395,368.44000000000034 111.57777777778395,381.44000000000034 97.57777777778395,381.44000000000034" fill="rgb(44,168,159)" stroke="#eaf6ff" stroke-width="1.8"/><polygon points="165.0222222222252,299.36000000000035 174.0222222222252,316.36000000000035 156.0222222222252,316.36000000000035" fill="rgba(3,10,18,0.6)"/><polygon points="165.0222222222252,301.36000000000035 172.0222222222252,314.36000000000035 158.0222222222252,314.36000000000035" fill="rgb(44,167,159)" stroke="#eaf6ff" stroke-width="1.8"/><polygon points="216.39999999999944,269.7200000000007 225.39999999999944,286.7200000000007 207.39999999999944,286.7200000000007" fill="rgba(3,10,18,0.6)"/><polygon points="216.39999999999944,271.7200000000007 223.39999999999944,284.7200000000007 209.39999999999944,284.7200000000007" fill="rgb(45,165,165)" stroke="#eaf6ff" stroke-width="1.8"/><polygon points="246.62222222222866,66.92000000000004 255.62222222222866,83.92000000000004 237.62222222222866,83.92000000000004" fill="rgba(3,10,18,0.6)"/><polygon points="246.62222222222866,68.92000000000004 253.62222222222866,81.92000000000004 239.62222222222866,81.92000000000004" fill="rgb(48,159,179)" stroke="#eaf6ff" stroke-width="1.8"/><polygon points="370.53333333333927,63.800000000000665 379.53333333333927,80.80000000000067 361.53333333333927,80.80000000000067" fill="rgba(3,10,18,0.6)"/><polygon points="370.53333333333927,65.80000000000067 377.53333333333927,78.80000000000067 363.53333333333927,78.80000000000067" fill="rgb(42,174,145)" stroke="#eaf6ff" stroke-width="1.8"/><text x="30" y="65" fill="#9fc" font-size="11">宮城/仙台湾</text><text x="30" y="244" fill="#9fc" font-size="11">福島/常磐</text><text x="30" y="408" fill="#9fc" font-size="11">茨城/鹿島灘</text><text x="452" y="18" text-anchor="end" fill="#cfe" font-size="11">静止: アジ/7-26 06:00 （●港 〜サーフ ▲磯）</text><text x="452" y="34" text-anchor="end" fill="#7d97ad" font-size="10">ブラウザで開くと日時・魚種で変化</text></svg></div>
+        <canvas id="mapC" style="display:none"></canvas>
+      </div>
+      <div class="legend">
+        <span>釣れやすさ</span>
+        <div style="flex:1;min-width:150px">
+          <div class="bar"></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--sub)">
+            <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+        </div>
+        <span style="margin-left:6px">地点種別：●港／◍サーフ(波形)／▲磯</span></div>
+      <div id="flowNote"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: tide + spot detail + table -->
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card">
+      <h2>潮位カーブ（選択地点・実潮汐推算）<span id="tideTitle" class="tag"></span></h2>
+      <div id="tideStatic"><svg viewBox="0 0 460 180" width="100%" style="display:block;border-radius:8px;background:#0a1622" xmlns="http://www.w3.org/2000/svg"><line x1="24.0" y1="18" x2="24.0" y2="156" stroke="#1c3448"/><text x="15" y="174" fill="#6b8299" font-size="10">0:00</text><line x1="127.0" y1="18" x2="127.0" y2="156" stroke="#1c3448"/><text x="118" y="174" fill="#6b8299" font-size="10">6:00</text><line x1="230.0" y1="18" x2="230.0" y2="156" stroke="#1c3448"/><text x="221" y="174" fill="#6b8299" font-size="10">12:00</text><line x1="333.0" y1="18" x2="333.0" y2="156" stroke="#1c3448"/><text x="324" y="174" fill="#6b8299" font-size="10">18:00</text><line x1="436.0" y1="18" x2="436.0" y2="156" stroke="#1c3448"/><text x="427" y="174" fill="#6b8299" font-size="10">24:00</text><path d="M24.0 52.3 L26.9 52.4 L29.7 52.6 L32.6 52.9 L35.4 53.3 L38.3 53.8 L41.2 54.5 L44.0 55.3 L46.9 56.2 L49.8 57.3 L52.6 58.5 L55.5 59.8 L58.3 61.3 L61.2 63.0 L64.1 64.8 L66.9 66.7 L69.8 68.8 L72.6 71.0 L75.5 73.4 L78.4 75.9 L81.2 78.5 L84.1 81.2 L86.9 84.0 L89.8 86.9 L92.7 89.8 L95.5 92.8 L98.4 95.9 L101.3 99.0 L104.1 102.2 L107.0 105.3 L109.8 108.5 L112.7 111.6 L115.6 114.7 L118.4 117.7 L121.3 120.7 L124.1 123.5 L127.0 126.3 L129.9 128.9 L132.7 131.4 L135.6 133.8 L138.4 136.0 L141.3 138.0 L144.2 139.9 L147.0 141.5 L149.9 143.0 L152.8 144.2 L155.6 145.1 L158.5 145.9 L161.3 146.4 L164.2 146.7 L167.1 146.7 L169.9 146.4 L172.8 145.9 L175.6 145.2 L178.5 144.2 L181.4 142.9 L184.2 141.4 L187.1 139.7 L189.9 137.7 L192.8 135.5 L195.7 133.1 L198.5 130.5 L201.4 127.7 L204.3 124.8 L207.1 121.6 L210.0 118.4 L212.8 115.0 L215.7 111.5 L218.6 107.8 L221.4 104.2 L224.3 100.4 L227.1 96.6 L230.0 92.8 L232.9 89.0 L235.7 85.2 L238.6 81.4 L241.4 77.6 L244.3 74.0 L247.2 70.4 L250.0 66.9 L252.9 63.5 L255.8 60.3 L258.6 57.2 L261.5 54.2 L264.3 51.4 L267.2 48.8 L270.1 46.4 L272.9 44.2 L275.8 42.2 L278.6 40.3 L281.5 38.7 L284.4 37.3 L287.2 36.1 L290.1 35.2 L292.9 34.4 L295.8 33.8 L298.7 33.5 L301.5 33.3 L304.4 33.4 L307.3 33.6 L310.1 34.0 L313.0 34.5 L315.8 35.3 L318.7 36.1 L321.6 37.1 L324.4 38.2 L327.3 39.4 L330.1 40.6 L333.0 42.0 L335.9 43.4 L338.7 44.9 L341.6 46.3 L344.4 47.8 L347.3 49.3 L350.2 50.8 L353.0 52.2 L355.9 53.6 L358.8 55.0 L361.6 56.3 L364.5 57.5 L367.3 58.6 L370.2 59.6 L373.1 60.5 L375.9 61.4 L378.8 62.1 L381.6 62.6 L384.5 63.1 L387.4 63.4 L390.2 63.6 L393.1 63.7 L395.9 63.7 L398.8 63.5 L401.7 63.3 L404.5 62.9 L407.4 62.5 L410.3 61.9 L413.1 61.3 L416.0 60.6 L418.8 59.8 L421.7 59.0 L424.6 58.2 L427.4 57.4 L430.3 56.5 L433.1 55.7 L436.0 54.8 " fill="none" stroke="#38bdf8" stroke-width="2"/><circle cx="165.6" cy="147.0" r="3" fill="#eab308"/><text x="149.6" y="161.0" fill="#cde" font-size="10">干 08:15</text><circle cx="302.4" cy="33.8" r="3" fill="#22c55e"/><text x="286.4" y="27.8" fill="#cde" font-size="10">満 16:13</text><circle cx="393.7" cy="64.1" r="3" fill="#eab308"/><text x="377.7" y="78.1" fill="#cde" font-size="10">干 21:32</text><line x1="127.0" y1="18" x2="127.0" y2="156" stroke="#f87171" stroke-width="1.6"/><text x="454" y="14" text-anchor="end" fill="#7d97ad" font-size="10">小名浜 静止(赤=06:00)</text></svg></div>
+      <canvas id="tideC" style="display:none"></canvas>
+      <div id="tideInfo" class="src" style="margin-top:6px"></div>
+    </div>
+
+    <div class="card">
+      <h2>選択地点の詳細</h2>
+      <div id="spotinfo" class="spotinfo"><span class="tag">※ブラウザで開くと、選択地点の総合スコア・水温・潮位・各要素（季節/水温/タイプ適性/底質/地形変化/潮通し/波当たり/時合い）が表示されます。</span></div>
+    </div>
+
+    <div class="card">
+      <h2>地点別スコア（クリックで選択・列見出しで並替）</h2>
+      <div style="max-height:260px;overflow:auto">
+        <table id="tbl">
+          <thead><tr>
+            <th data-k="name">地点</th><th data-k="region">エリア</th>
+            <th data-k="temp">水温</th><th data-k="tide">潮</th>
+            <th data-k="score" style="text-align:right">スコア▼</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <div class="card">
+      <h2>データ出典・精度メモ</h2>
+      <div class="src" id="sources"></div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 14px 14px">
+  <div class="card">
+    <h2>🎯 地形ディテール＆狙い目コース（選択地点）<span id="detailTitle" class="tag"></span></h2>
+    <div id="detailStatic"><svg viewBox="0 0 600 320" width="100%" style="display:block;border-radius:8px;background:#0a1622" xmlns="http://www.w3.org/2000/svg"><rect x="34.0" y="34.0" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="34.0" width="26.6" height="12.6" fill="rgb(178,203,224)"/><rect x="87.2" y="34.0" width="26.6" height="12.6" fill="rgb(177,202,223)"/><rect x="113.8" y="34.0" width="26.6" height="12.6" fill="rgb(176,201,222)"/><rect x="140.4" y="34.0" width="26.6" height="12.6" fill="rgb(172,196,218)"/><rect x="167.0" y="34.0" width="26.6" height="12.6" fill="rgb(167,191,213)"/><rect x="193.6" y="34.0" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="34.0" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="34.0" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="34.0" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="34.0" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="34.0" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="34.0" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="34.0" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="34.0" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="34.0" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="34.0" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="34.0" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="34.0" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="34.0" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="46.6" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="46.6" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="87.2" y="46.6" width="26.6" height="12.6" fill="rgb(181,206,227)"/><rect x="113.8" y="46.6" width="26.6" height="12.6" fill="rgb(183,208,229)"/><rect x="140.4" y="46.6" width="26.6" height="12.6" fill="rgb(176,200,222)"/><rect x="167.0" y="46.6" width="26.6" height="12.6" fill="rgb(168,192,214)"/><rect x="193.6" y="46.6" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="46.6" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="46.6" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="46.6" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="46.6" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="46.6" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="46.6" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="46.6" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="46.6" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="46.6" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="46.6" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="46.6" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="46.6" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="46.6" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="59.2" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="59.2" width="26.6" height="12.6" fill="rgb(180,205,226)"/><rect x="87.2" y="59.2" width="26.6" height="12.6" fill="rgb(187,212,233)"/><rect x="113.8" y="59.2" width="26.6" height="12.6" fill="rgb(193,218,238)"/><rect x="140.4" y="59.2" width="26.6" height="12.6" fill="rgb(182,206,227)"/><rect x="167.0" y="59.2" width="26.6" height="12.6" fill="rgb(169,193,215)"/><rect x="193.6" y="59.2" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="59.2" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="59.2" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="59.2" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="59.2" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="59.2" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="59.2" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="59.2" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="59.2" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="59.2" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="59.2" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="59.2" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="59.2" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="59.2" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="71.8" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="71.8" width="26.6" height="12.6" fill="rgb(181,205,227)"/><rect x="87.2" y="71.8" width="26.6" height="12.6" fill="rgb(190,215,235)"/><rect x="113.8" y="71.8" width="26.6" height="12.6" fill="rgb(197,222,243)"/><rect x="140.4" y="71.8" width="26.6" height="12.6" fill="rgb(184,209,230)"/><rect x="167.0" y="71.8" width="26.6" height="12.6" fill="rgb(170,194,216)"/><rect x="193.6" y="71.8" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="71.8" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="71.8" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="71.8" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="71.8" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="71.8" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="71.8" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="71.8" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="71.8" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="71.8" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="71.8" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="71.8" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="71.8" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="71.8" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="84.4" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="84.4" width="26.6" height="12.6" fill="rgb(180,205,226)"/><rect x="87.2" y="84.4" width="26.6" height="12.6" fill="rgb(187,212,233)"/><rect x="113.8" y="84.4" width="26.6" height="12.6" fill="rgb(193,218,238)"/><rect x="140.4" y="84.4" width="26.6" height="12.6" fill="rgb(182,206,227)"/><rect x="167.0" y="84.4" width="26.6" height="12.6" fill="rgb(169,193,215)"/><rect x="193.6" y="84.4" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="84.4" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="84.4" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="84.4" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="84.4" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="84.4" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="84.4" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="84.4" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="84.4" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="84.4" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="84.4" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="84.4" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="84.4" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="84.4" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="97.0" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="97.0" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="87.2" y="97.0" width="26.6" height="12.6" fill="rgb(181,206,227)"/><rect x="113.8" y="97.0" width="26.6" height="12.6" fill="rgb(183,208,229)"/><rect x="140.4" y="97.0" width="26.6" height="12.6" fill="rgb(176,200,222)"/><rect x="167.0" y="97.0" width="26.6" height="12.6" fill="rgb(168,192,214)"/><rect x="193.6" y="97.0" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="97.0" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="97.0" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="97.0" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="97.0" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="97.0" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="97.0" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="97.0" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="97.0" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="97.0" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="97.0" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="97.0" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="97.0" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="97.0" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="109.6" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="109.6" width="26.6" height="12.6" fill="rgb(178,203,224)"/><rect x="87.2" y="109.6" width="26.6" height="12.6" fill="rgb(177,202,223)"/><rect x="113.8" y="109.6" width="26.6" height="12.6" fill="rgb(176,201,222)"/><rect x="140.4" y="109.6" width="26.6" height="12.6" fill="rgb(172,196,218)"/><rect x="167.0" y="109.6" width="26.6" height="12.6" fill="rgb(167,191,213)"/><rect x="193.6" y="109.6" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="109.6" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="109.6" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="109.6" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="109.6" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="109.6" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="109.6" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="109.6" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="109.6" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="109.6" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="109.6" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="109.6" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="109.6" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="109.6" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="122.2" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="122.2" width="26.6" height="12.6" fill="rgb(178,203,224)"/><rect x="87.2" y="122.2" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="113.8" y="122.2" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="140.4" y="122.2" width="26.6" height="12.6" fill="rgb(173,198,219)"/><rect x="167.0" y="122.2" width="26.6" height="12.6" fill="rgb(167,192,213)"/><rect x="193.6" y="122.2" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="122.2" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="122.2" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="122.2" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="122.2" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="122.2" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="122.2" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="122.2" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="122.2" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="122.2" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="122.2" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="122.2" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="122.2" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="122.2" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="134.8" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="134.8" width="26.6" height="12.6" fill="rgb(180,204,225)"/><rect x="87.2" y="134.8" width="26.6" height="12.6" fill="rgb(184,209,230)"/><rect x="113.8" y="134.8" width="26.6" height="12.6" fill="rgb(188,213,234)"/><rect x="140.4" y="134.8" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="167.0" y="134.8" width="26.6" height="12.6" fill="rgb(168,193,215)"/><rect x="193.6" y="134.8" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="134.8" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="134.8" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="134.8" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="134.8" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="134.8" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="134.8" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="134.8" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="134.8" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="134.8" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="134.8" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="134.8" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="134.8" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="134.8" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="147.4" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="147.4" width="26.6" height="12.6" fill="rgb(181,205,226)"/><rect x="87.2" y="147.4" width="26.6" height="12.6" fill="rgb(189,214,235)"/><rect x="113.8" y="147.4" width="26.6" height="12.6" fill="rgb(196,221,242)"/><rect x="140.4" y="147.4" width="26.6" height="12.6" fill="rgb(184,208,229)"/><rect x="167.0" y="147.4" width="26.6" height="12.6" fill="rgb(169,194,216)"/><rect x="193.6" y="147.4" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="147.4" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="147.4" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="147.4" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="147.4" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="147.4" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="147.4" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="147.4" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="147.4" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="147.4" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="147.4" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="147.4" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="147.4" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="147.4" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="160.0" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="160.0" width="26.6" height="12.6" fill="rgb(181,205,226)"/><rect x="87.2" y="160.0" width="26.6" height="12.6" fill="rgb(189,214,235)"/><rect x="113.8" y="160.0" width="26.6" height="12.6" fill="rgb(196,221,242)"/><rect x="140.4" y="160.0" width="26.6" height="12.6" fill="rgb(184,208,229)"/><rect x="167.0" y="160.0" width="26.6" height="12.6" fill="rgb(169,194,216)"/><rect x="193.6" y="160.0" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="160.0" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="160.0" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="160.0" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="160.0" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="160.0" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="160.0" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="160.0" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="160.0" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="160.0" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="160.0" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="160.0" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="160.0" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="160.0" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="172.6" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="172.6" width="26.6" height="12.6" fill="rgb(180,204,225)"/><rect x="87.2" y="172.6" width="26.6" height="12.6" fill="rgb(184,209,230)"/><rect x="113.8" y="172.6" width="26.6" height="12.6" fill="rgb(188,213,234)"/><rect x="140.4" y="172.6" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="167.0" y="172.6" width="26.6" height="12.6" fill="rgb(168,193,215)"/><rect x="193.6" y="172.6" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="172.6" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="172.6" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="172.6" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="172.6" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="172.6" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="172.6" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="172.6" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="172.6" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="172.6" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="172.6" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="172.6" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="172.6" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="172.6" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="185.2" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="185.2" width="26.6" height="12.6" fill="rgb(178,203,224)"/><rect x="87.2" y="185.2" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="113.8" y="185.2" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="140.4" y="185.2" width="26.6" height="12.6" fill="rgb(173,198,219)"/><rect x="167.0" y="185.2" width="26.6" height="12.6" fill="rgb(167,192,213)"/><rect x="193.6" y="185.2" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="185.2" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="185.2" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="185.2" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="185.2" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="185.2" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="185.2" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="185.2" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="185.2" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="185.2" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="185.2" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="185.2" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="185.2" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="185.2" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="197.8" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="197.8" width="26.6" height="12.6" fill="rgb(178,203,224)"/><rect x="87.2" y="197.8" width="26.6" height="12.6" fill="rgb(177,202,223)"/><rect x="113.8" y="197.8" width="26.6" height="12.6" fill="rgb(176,201,222)"/><rect x="140.4" y="197.8" width="26.6" height="12.6" fill="rgb(172,196,218)"/><rect x="167.0" y="197.8" width="26.6" height="12.6" fill="rgb(167,191,213)"/><rect x="193.6" y="197.8" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="197.8" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="197.8" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="197.8" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="197.8" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="197.8" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="197.8" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="197.8" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="197.8" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="197.8" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="197.8" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="197.8" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="197.8" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="197.8" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="210.4" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="210.4" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="87.2" y="210.4" width="26.6" height="12.6" fill="rgb(181,206,227)"/><rect x="113.8" y="210.4" width="26.6" height="12.6" fill="rgb(183,208,229)"/><rect x="140.4" y="210.4" width="26.6" height="12.6" fill="rgb(176,200,222)"/><rect x="167.0" y="210.4" width="26.6" height="12.6" fill="rgb(168,192,214)"/><rect x="193.6" y="210.4" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="210.4" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="210.4" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="210.4" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="210.4" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="210.4" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="210.4" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="210.4" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="210.4" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="210.4" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="210.4" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="210.4" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="210.4" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="210.4" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="223.0" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="223.0" width="26.6" height="12.6" fill="rgb(180,205,226)"/><rect x="87.2" y="223.0" width="26.6" height="12.6" fill="rgb(187,212,233)"/><rect x="113.8" y="223.0" width="26.6" height="12.6" fill="rgb(193,218,238)"/><rect x="140.4" y="223.0" width="26.6" height="12.6" fill="rgb(182,206,227)"/><rect x="167.0" y="223.0" width="26.6" height="12.6" fill="rgb(169,193,215)"/><rect x="193.6" y="223.0" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="223.0" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="223.0" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="223.0" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="223.0" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="223.0" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="223.0" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="223.0" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="223.0" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="223.0" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="223.0" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="223.0" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="223.0" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="223.0" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="235.6" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="235.6" width="26.6" height="12.6" fill="rgb(181,205,227)"/><rect x="87.2" y="235.6" width="26.6" height="12.6" fill="rgb(190,215,235)"/><rect x="113.8" y="235.6" width="26.6" height="12.6" fill="rgb(197,222,243)"/><rect x="140.4" y="235.6" width="26.6" height="12.6" fill="rgb(184,209,230)"/><rect x="167.0" y="235.6" width="26.6" height="12.6" fill="rgb(170,194,216)"/><rect x="193.6" y="235.6" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="235.6" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="235.6" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="235.6" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="235.6" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="235.6" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="235.6" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="235.6" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="235.6" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="235.6" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="235.6" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="235.6" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="235.6" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="235.6" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="248.2" width="26.6" height="12.6" fill="rgb(193,217,238)"/><rect x="60.6" y="248.2" width="26.6" height="12.6" fill="rgb(180,205,226)"/><rect x="87.2" y="248.2" width="26.6" height="12.6" fill="rgb(187,212,233)"/><rect x="113.8" y="248.2" width="26.6" height="12.6" fill="rgb(193,218,238)"/><rect x="140.4" y="248.2" width="26.6" height="12.6" fill="rgb(182,206,227)"/><rect x="167.0" y="248.2" width="26.6" height="12.6" fill="rgb(169,193,215)"/><rect x="193.6" y="248.2" width="26.6" height="12.6" fill="rgb(163,187,209)"/><rect x="220.2" y="248.2" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="248.2" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="248.2" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="248.2" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="248.2" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="248.2" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="248.2" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="248.2" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="248.2" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="248.2" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="248.2" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="248.2" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="248.2" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="260.8" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="260.8" width="26.6" height="12.6" fill="rgb(179,203,225)"/><rect x="87.2" y="260.8" width="26.6" height="12.6" fill="rgb(181,206,227)"/><rect x="113.8" y="260.8" width="26.6" height="12.6" fill="rgb(183,208,229)"/><rect x="140.4" y="260.8" width="26.6" height="12.6" fill="rgb(176,200,222)"/><rect x="167.0" y="260.8" width="26.6" height="12.6" fill="rgb(168,192,214)"/><rect x="193.6" y="260.8" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="260.8" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="260.8" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="260.8" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="260.8" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="260.8" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="260.8" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="260.8" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="260.8" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="260.8" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="260.8" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="260.8" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="260.8" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="260.8" width="26.6" height="12.6" fill="rgb(117,141,165)"/><rect x="34.0" y="273.4" width="26.6" height="12.6" fill="rgb(192,217,238)"/><rect x="60.6" y="273.4" width="26.6" height="12.6" fill="rgb(178,203,224)"/><rect x="87.2" y="273.4" width="26.6" height="12.6" fill="rgb(177,202,223)"/><rect x="113.8" y="273.4" width="26.6" height="12.6" fill="rgb(176,201,222)"/><rect x="140.4" y="273.4" width="26.6" height="12.6" fill="rgb(172,196,218)"/><rect x="167.0" y="273.4" width="26.6" height="12.6" fill="rgb(167,191,213)"/><rect x="193.6" y="273.4" width="26.6" height="12.6" fill="rgb(162,187,209)"/><rect x="220.2" y="273.4" width="26.6" height="12.6" fill="rgb(158,182,205)"/><rect x="246.8" y="273.4" width="26.6" height="12.6" fill="rgb(154,178,201)"/><rect x="273.4" y="273.4" width="26.6" height="12.6" fill="rgb(150,174,197)"/><rect x="300.0" y="273.4" width="26.6" height="12.6" fill="rgb(146,171,194)"/><rect x="326.6" y="273.4" width="26.6" height="12.6" fill="rgb(143,167,190)"/><rect x="353.2" y="273.4" width="26.6" height="12.6" fill="rgb(139,163,187)"/><rect x="379.8" y="273.4" width="26.6" height="12.6" fill="rgb(136,160,183)"/><rect x="406.4" y="273.4" width="26.6" height="12.6" fill="rgb(133,156,180)"/><rect x="433.0" y="273.4" width="26.6" height="12.6" fill="rgb(129,153,177)"/><rect x="459.6" y="273.4" width="26.6" height="12.6" fill="rgb(126,150,174)"/><rect x="486.2" y="273.4" width="26.6" height="12.6" fill="rgb(123,147,171)"/><rect x="512.8" y="273.4" width="26.6" height="12.6" fill="rgb(120,144,168)"/><rect x="539.4" y="273.4" width="26.6" height="12.6" fill="rgb(117,141,165)"/><line x1="153.9" y1="34.0" x2="153.9" y2="40.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="34.0" x2="504.2" y2="40.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="153.9" y1="40.3" x2="159.9" y2="46.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="40.3" x2="504.2" y2="46.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="159.9" y1="46.6" x2="165.9" y2="52.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="46.6" x2="504.2" y2="52.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="165.9" y1="52.9" x2="167.0" y2="54.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="59.2" x2="167.0" y2="54.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="52.9" x2="504.2" y2="59.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="59.2" x2="173.8" y2="65.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="59.2" x2="504.2" y2="65.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="173.8" y1="65.5" x2="175.4" y2="71.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="65.5" x2="504.2" y2="71.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.4" y1="71.8" x2="175.9" y2="78.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="71.8" x2="504.2" y2="78.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.9" y1="78.1" x2="175.4" y2="84.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="78.1" x2="504.2" y2="84.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.4" y1="84.4" x2="173.8" y2="90.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="84.4" x2="504.2" y2="90.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="173.8" y1="90.7" x2="170.7" y2="97.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="90.7" x2="504.2" y2="97.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="167.0" y1="101.9" x2="165.9" y2="103.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="97.0" x2="167.0" y2="101.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="97.0" x2="504.2" y2="103.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="165.9" y1="103.3" x2="159.9" y2="109.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="103.3" x2="504.2" y2="109.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="159.9" y1="109.6" x2="153.9" y2="115.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="109.6" x2="504.2" y2="115.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="153.9" y1="115.9" x2="153.9" y2="122.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="115.9" x2="504.2" y2="122.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="153.9" y1="122.2" x2="159.9" y2="128.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="122.2" x2="504.2" y2="128.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="159.9" y1="128.5" x2="165.9" y2="134.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="128.5" x2="504.2" y2="134.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="165.9" y1="134.8" x2="167.0" y2="136.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="141.1" x2="167.0" y2="136.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="134.8" x2="504.2" y2="141.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="141.1" x2="173.8" y2="147.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="141.1" x2="504.2" y2="147.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="173.8" y1="147.4" x2="175.4" y2="153.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="147.4" x2="504.2" y2="153.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.4" y1="153.7" x2="175.9" y2="160.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="153.7" x2="504.2" y2="160.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.9" y1="160.0" x2="175.4" y2="166.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="160.0" x2="504.2" y2="166.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.4" y1="166.3" x2="173.8" y2="172.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="166.3" x2="504.2" y2="172.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="173.8" y1="172.6" x2="170.7" y2="178.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="172.6" x2="504.2" y2="178.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="167.0" y1="183.8" x2="165.9" y2="185.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="178.9" x2="167.0" y2="183.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="178.9" x2="504.2" y2="185.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="165.9" y1="185.2" x2="159.9" y2="191.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="185.2" x2="504.2" y2="191.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="159.9" y1="191.5" x2="153.9" y2="197.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="191.5" x2="504.2" y2="197.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="153.9" y1="197.8" x2="153.9" y2="204.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="197.8" x2="504.2" y2="204.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="153.9" y1="204.1" x2="159.9" y2="210.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="204.1" x2="504.2" y2="210.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="159.9" y1="210.4" x2="165.9" y2="216.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="210.4" x2="504.2" y2="216.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="165.9" y1="216.7" x2="167.0" y2="218.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="223.0" x2="167.0" y2="218.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="216.7" x2="504.2" y2="223.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="223.0" x2="173.8" y2="229.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="223.0" x2="504.2" y2="229.3" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="173.8" y1="229.3" x2="175.4" y2="235.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="229.3" x2="504.2" y2="235.6" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.4" y1="235.6" x2="175.9" y2="241.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="235.6" x2="504.2" y2="241.9" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.9" y1="241.9" x2="175.4" y2="248.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="241.9" x2="504.2" y2="248.2" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="175.4" y1="248.2" x2="173.8" y2="254.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="248.2" x2="504.2" y2="254.5" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="173.8" y1="254.5" x2="170.7" y2="260.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="254.5" x2="504.2" y2="260.8" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="167.0" y1="265.7" x2="165.9" y2="267.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="170.7" y1="260.8" x2="167.0" y2="265.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="260.8" x2="504.2" y2="267.1" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="165.9" y1="267.1" x2="159.9" y2="273.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="267.1" x2="504.2" y2="273.4" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="159.9" y1="273.4" x2="153.9" y2="279.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="273.4" x2="504.2" y2="279.7" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="153.9" y1="279.7" x2="153.9" y2="286.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><line x1="504.2" y1="279.7" x2="504.2" y2="286.0" stroke="#bfe6ff" stroke-width="1" opacity="0.6"/><path d="M73.9 34.0 L73.9 40.3 L73.9 46.6 L153.7 52.9 L153.7 59.2 L153.7 65.5 L153.7 71.8 L153.7 78.1 L153.7 84.4 L153.7 90.7 L153.7 97.0 L153.7 103.3 L73.9 109.6 L73.9 115.9 L73.9 122.2 L73.9 128.5 L153.7 134.8 L153.7 141.1 L153.7 147.4 L153.7 153.7 L153.7 160.0 L153.7 166.3 L153.7 172.6 L153.7 178.9 L153.7 185.2 L73.9 191.5 L73.9 197.8 L73.9 204.1 L73.9 210.4 L153.7 216.7 L153.7 223.0 L153.7 229.3 L153.7 235.6 L153.7 241.9 L153.7 248.2 L153.7 254.5 L153.7 260.8 L153.7 267.1 L73.9 273.4 L73.9 279.7 L73.9 286.0 " fill="none" stroke="#ffffff" stroke-width="1.6" stroke-dasharray="2 3" opacity="0.7"/><circle cx="127.1" cy="34.0" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="40.3" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="115.9" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="122.2" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="197.8" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="204.1" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="279.7" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><circle cx="127.1" cy="286.0" r="4" fill="#0891b2" stroke="#a5f3fc" stroke-width="1.5"/><path d="M213.6 144.3 L167.0 160.0 L133.8 178.9 L44.6 191.5 " fill="none" stroke="#22c55e" stroke-width="3.5"/><polygon points="44.64,191.5 55.5,182.9 57.5,196.8" fill="#22c55e"/><circle cx="34.0" cy="144.3" r="6" fill="#22c55e" stroke="#fff" stroke-width="2"/><circle cx="213.6" cy="144.3" r="4" fill="#0a1622" stroke="#22c55e" stroke-width="2"/><text x="34" y="16" fill="#cfe" font-size="12">静止プレビュー：大竹海岸(サーフ)｜ヒラメの通し方＝かけ上がりを横切る</text><text x="28" y="312" fill="#9fc" font-size="11">岸</text><text x="558" y="312" fill="#9fc" font-size="11">沖→</text><text x="592" y="16" text-anchor="end" fill="#7d97ad" font-size="10">ブラウザで開くと実地図＋拡大・魚種/潮で変化</text><text x="34" y="312" fill="#7d97ad" font-size="10" text-anchor="start" transform="translate(40,0)">白破線=かけ上がり / 水色=等深線(2,5m) / 青丸=離岸流払い出し</text></svg></div>
+    <div id="leafmap" style="display:none"></div>
+    <div class="legend" style="margin-top:8px">
+      <span>三層：</span><span class="pill">面=釣れやすさ</span>
+      <span class="pill">線=等深線/かけ上がり/砂根境</span>
+      <span class="pill">狙い目ピン＋通すコース</span>
+      <span style="margin-left:6px">コース色：<span style="color:#22c55e">緑ヒラメ</span>/<span style="color:#eab308">黄キス</span>/<span style="color:#38bdf8">青アジ</span></span>
+    </div>
+    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px">
+      <a id="anglersLink" href="https://anglers.jp/areas/171" target="_blank" rel="noopener"
+         style="display:inline-block;background:#1e6fae;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700">🔗 アングラーズでこの地点の釣果を見る</a>
+      <a id="turidocoLink" href="https://turidoco.com/map?bm=osm&lat=36.94&lng=140.90&layers=%5B%22waterDepth%22%2C%22poi%22%2C%22fishingResults%22%5D&zoom=14" target="_blank" rel="noopener"
+         style="display:inline-block;background:#0891b2;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700">🔗 釣りどこで実海底地形を見る（アジア航測ALB・実測）</a>
+      <div class="tag" style="margin-top:6px">当アプリの海底地形は<b>推定</b>（Dean平衡＋砂州/根モデル）。<b>実測の詳細地形</b>は航空レーザ測深(ALB)ベースの<a href="https://turidoco.com/home/about" target="_blank" rel="noopener" style="color:var(--accent)">釣りどこ（アジア航測）</a>で確認できます。データは複製せず外部リンクで参照します。</div>
+      <div class="tag" style="margin-top:6px;color:#f0a86b">⚠ 実測校正の検証結果：無償の<b>国土数値情報C04（沿岸海域メッシュ）を取得・解析したが、収録範囲が北緯約34°以南（南西日本）に限られ、当エリア(茨城〜宮城, 36〜38.5°N)は未収録</b>のため実測校正は適用できませんでした。よって海底地形は全地点で推定です。無償の実測代替（GEBCO/JODCは約450〜500mでミクロ地形を解像不可）も本エリアには高精細版が存在しません。実測はリンク先の釣りどこ(ALB)でご確認ください。</div>
+    </div>
+    <div id="detailNote" class="src" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>⛰️ 海底断面図（岸→沖のかけ上がり）<span id="sectionTitle" class="tag"></span></h2>
+    <div id="sectionStatic"><svg viewBox="0 0 600 250" width="100%" style="display:block;border-radius:8px;background:#0a1622" xmlns="http://www.w3.org/2000/svg"><rect x="36" y="51.8" width="528" height="172.2" fill="#0e2036"/><polygon points="36.0,57.1 42.6,66.2 42.6,224 36.0,224" fill="#c9b787" opacity="0.92"/><polygon points="42.6,66.2 49.2,73.3 49.2,224 42.6,224" fill="#c9b787" opacity="0.92"/><polygon points="49.2,73.3 55.8,80.1 55.8,224 49.2,224" fill="#c9b787" opacity="0.92"/><polygon points="55.8,80.1 62.4,86.3 62.4,224 55.8,224" fill="#c9b787" opacity="0.92"/><polygon points="62.4,86.3 69.0,91.2 69.0,224 62.4,224" fill="#c9b787" opacity="0.92"/><polygon points="69.0,91.2 75.6,94.2 75.6,224 69.0,224" fill="#c9b787" opacity="0.92"/><polygon points="75.6,94.2 82.2,94.9 82.2,224 75.6,224" fill="#c9b787" opacity="0.92"/><polygon points="82.2,94.9 88.8,93.3 88.8,224 82.2,224" fill="#c9b787" opacity="0.92"/><polygon points="88.8,93.3 95.4,90.3 95.4,224 88.8,224" fill="#c9b787" opacity="0.92"/><polygon points="95.4,90.3 102.0,86.6 102.0,224 95.4,224" fill="#c9b787" opacity="0.92"/><polygon points="102.0,86.6 108.6,83.1 108.6,224 102.0,224" fill="#c9b787" opacity="0.92"/><polygon points="108.6,83.1 115.2,80.7 115.2,224 108.6,224" fill="#c9b787" opacity="0.92"/><polygon points="115.2,80.7 121.8,79.8 121.8,224 115.2,224" fill="#c9b787" opacity="0.92"/><polygon points="121.8,79.8 128.4,80.5 128.4,224 121.8,224" fill="#c9b787" opacity="0.92"/><polygon points="128.4,80.5 135.0,82.7 135.0,224 128.4,224" fill="#c9b787" opacity="0.92"/><polygon points="135.0,82.7 141.6,86.3 141.6,224 135.0,224" fill="#c9b787" opacity="0.92"/><polygon points="141.6,86.3 148.2,90.7 148.2,224 141.6,224" fill="#c9b787" opacity="0.92"/><polygon points="148.2,90.7 154.8,95.6 154.8,224 148.2,224" fill="#c9b787" opacity="0.92"/><polygon points="154.8,95.6 161.4,100.4 161.4,224 154.8,224" fill="#c9b787" opacity="0.92"/><polygon points="161.4,100.4 168.0,104.9 168.0,224 161.4,224" fill="#c9b787" opacity="0.92"/><polygon points="168.0,104.9 174.6,108.8 174.6,224 168.0,224" fill="#c9b787" opacity="0.92"/><polygon points="174.6,108.8 181.2,112.2 181.2,224 174.6,224" fill="#c9b787" opacity="0.92"/><polygon points="181.2,112.2 187.8,115.1 187.8,224 181.2,224" fill="#c9b787" opacity="0.92"/><polygon points="187.8,115.1 194.4,117.5 194.4,224 187.8,224" fill="#c9b787" opacity="0.92"/><polygon points="194.4,117.5 201.0,119.7 201.0,224 194.4,224" fill="#c9b787" opacity="0.92"/><polygon points="201.0,119.7 207.6,121.7 207.6,224 201.0,224" fill="#c9b787" opacity="0.92"/><polygon points="207.6,121.7 214.2,123.5 214.2,224 207.6,224" fill="#c9b787" opacity="0.92"/><polygon points="214.2,123.5 220.8,125.3 220.8,224 214.2,224" fill="#c9b787" opacity="0.92"/><polygon points="220.8,125.3 227.4,127.0 227.4,224 220.8,224" fill="#c9b787" opacity="0.92"/><polygon points="227.4,127.0 234.0,128.6 234.0,224 227.4,224" fill="#c9b787" opacity="0.92"/><polygon points="234.0,128.6 240.6,130.3 240.6,224 234.0,224" fill="#c9b787" opacity="0.92"/><polygon points="240.6,130.3 247.2,131.9 247.2,224 240.6,224" fill="#c9b787" opacity="0.92"/><polygon points="247.2,131.9 253.8,133.5 253.8,224 247.2,224" fill="#c9b787" opacity="0.92"/><polygon points="253.8,133.5 260.4,135.1 260.4,224 253.8,224" fill="#c9b787" opacity="0.92"/><polygon points="260.4,135.1 267.0,136.7 267.0,224 260.4,224" fill="#c9b787" opacity="0.92"/><polygon points="267.0,136.7 273.6,138.3 273.6,224 267.0,224" fill="#c9b787" opacity="0.92"/><polygon points="273.6,138.3 280.2,139.9 280.2,224 273.6,224" fill="#c9b787" opacity="0.92"/><polygon points="280.2,139.9 286.8,141.4 286.8,224 280.2,224" fill="#c9b787" opacity="0.92"/><polygon points="286.8,141.4 293.4,142.9 293.4,224 286.8,224" fill="#c9b787" opacity="0.92"/><polygon points="293.4,142.9 300.0,144.4 300.0,224 293.4,224" fill="#c9b787" opacity="0.92"/><polygon points="300.0,144.4 306.6,145.9 306.6,224 300.0,224" fill="#c9b787" opacity="0.92"/><polygon points="306.6,145.9 313.2,147.4 313.2,224 306.6,224" fill="#c9b787" opacity="0.92"/><polygon points="313.2,147.4 319.8,148.9 319.8,224 313.2,224" fill="#c9b787" opacity="0.92"/><polygon points="319.8,148.9 326.4,150.4 326.4,224 319.8,224" fill="#c9b787" opacity="0.92"/><polygon points="326.4,150.4 333.0,151.8 333.0,224 326.4,224" fill="#c9b787" opacity="0.92"/><polygon points="333.0,151.8 339.6,153.3 339.6,224 333.0,224" fill="#c9b787" opacity="0.92"/><polygon points="339.6,153.3 346.2,154.7 346.2,224 339.6,224" fill="#c9b787" opacity="0.92"/><polygon points="346.2,154.7 352.8,156.1 352.8,224 346.2,224" fill="#c9b787" opacity="0.92"/><polygon points="352.8,156.1 359.4,157.5 359.4,224 352.8,224" fill="#c9b787" opacity="0.92"/><polygon points="359.4,157.5 366.0,158.9 366.0,224 359.4,224" fill="#c9b787" opacity="0.92"/><polygon points="366.0,158.9 372.6,160.3 372.6,224 366.0,224" fill="#c9b787" opacity="0.92"/><polygon points="372.6,160.3 379.2,161.7 379.2,224 372.6,224" fill="#c9b787" opacity="0.92"/><polygon points="379.2,161.7 385.8,163.1 385.8,224 379.2,224" fill="#c9b787" opacity="0.92"/><polygon points="385.8,163.1 392.4,164.5 392.4,224 385.8,224" fill="#c9b787" opacity="0.92"/><polygon points="392.4,164.5 399.0,165.8 399.0,224 392.4,224" fill="#c9b787" opacity="0.92"/><polygon points="399.0,165.8 405.6,167.2 405.6,224 399.0,224" fill="#c9b787" opacity="0.92"/><polygon points="405.6,167.2 412.2,168.5 412.2,224 405.6,224" fill="#c9b787" opacity="0.92"/><polygon points="412.2,168.5 418.8,169.9 418.8,224 412.2,224" fill="#c9b787" opacity="0.92"/><polygon points="418.8,169.9 425.4,171.2 425.4,224 418.8,224" fill="#c9b787" opacity="0.92"/><polygon points="425.4,171.2 432.0,172.5 432.0,224 425.4,224" fill="#c9b787" opacity="0.92"/><polygon points="432.0,172.5 438.6,173.8 438.6,224 432.0,224" fill="#c9b787" opacity="0.92"/><polygon points="438.6,173.8 445.2,175.1 445.2,224 438.6,224" fill="#c9b787" opacity="0.92"/><polygon points="445.2,175.1 451.8,176.4 451.8,224 445.2,224" fill="#c9b787" opacity="0.92"/><polygon points="451.8,176.4 458.4,177.7 458.4,224 451.8,224" fill="#c9b787" opacity="0.92"/><polygon points="458.4,177.7 465.0,179.0 465.0,224 458.4,224" fill="#c9b787" opacity="0.92"/><polygon points="465.0,179.0 471.6,180.3 471.6,224 465.0,224" fill="#c9b787" opacity="0.92"/><polygon points="471.6,180.3 478.2,181.5 478.2,224 471.6,224" fill="#c9b787" opacity="0.92"/><polygon points="478.2,181.5 484.8,182.8 484.8,224 478.2,224" fill="#c9b787" opacity="0.92"/><polygon points="484.8,182.8 491.4,184.1 491.4,224 484.8,224" fill="#c9b787" opacity="0.92"/><polygon points="491.4,184.1 498.0,185.3 498.0,224 491.4,224" fill="#c9b787" opacity="0.92"/><polygon points="498.0,185.3 504.6,186.6 504.6,224 498.0,224" fill="#c9b787" opacity="0.92"/><polygon points="504.6,186.6 511.2,187.8 511.2,224 504.6,224" fill="#c9b787" opacity="0.92"/><polygon points="511.2,187.8 517.8,189.1 517.8,224 511.2,224" fill="#c9b787" opacity="0.92"/><polygon points="517.8,189.1 524.4,190.3 524.4,224 517.8,224" fill="#c9b787" opacity="0.92"/><polygon points="524.4,190.3 531.0,191.5 531.0,224 524.4,224" fill="#c9b787" opacity="0.92"/><polygon points="531.0,191.5 537.6,192.7 537.6,224 531.0,224" fill="#c9b787" opacity="0.92"/><polygon points="537.6,192.7 544.2,193.9 544.2,224 537.6,224" fill="#c9b787" opacity="0.92"/><polygon points="544.2,193.9 550.8,195.2 550.8,224 544.2,224" fill="#c9b787" opacity="0.92"/><polygon points="550.8,195.2 557.4,196.4 557.4,224 550.8,224" fill="#c9b787" opacity="0.92"/><polygon points="557.4,196.4 564.0,197.6 564.0,224 557.4,224" fill="#c9b787" opacity="0.92"/><path d="M36.0 57.1 L42.6 66.2 L49.2 73.3 L55.8 80.1 L62.4 86.3 L69.0 91.2 L75.6 94.2 L82.2 94.9 L88.8 93.3 L95.4 90.3 L102.0 86.6 L108.6 83.1 L115.2 80.7 L121.8 79.8 L128.4 80.5 L135.0 82.7 L141.6 86.3 L148.2 90.7 L154.8 95.6 L161.4 100.4 L168.0 104.9 L174.6 108.8 L181.2 112.2 L187.8 115.1 L194.4 117.5 L201.0 119.7 L207.6 121.7 L214.2 123.5 L220.8 125.3 L227.4 127.0 L234.0 128.6 L240.6 130.3 L247.2 131.9 L253.8 133.5 L260.4 135.1 L267.0 136.7 L273.6 138.3 L280.2 139.9 L286.8 141.4 L293.4 142.9 L300.0 144.4 L306.6 145.9 L313.2 147.4 L319.8 148.9 L326.4 150.4 L333.0 151.8 L339.6 153.3 L346.2 154.7 L352.8 156.1 L359.4 157.5 L366.0 158.9 L372.6 160.3 L379.2 161.7 L385.8 163.1 L392.4 164.5 L399.0 165.8 L405.6 167.2 L412.2 168.5 L418.8 169.9 L425.4 171.2 L432.0 172.5 L438.6 173.8 L445.2 175.1 L451.8 176.4 L458.4 177.7 L465.0 179.0 L471.6 180.3 L478.2 181.5 L484.8 182.8 L491.4 184.1 L498.0 185.3 L504.6 186.6 L511.2 187.8 L517.8 189.1 L524.4 190.3 L531.0 191.5 L537.6 192.7 L544.2 193.9 L550.8 195.2 L557.4 196.4 L564.0 197.6 " fill="none" stroke="#e7d9b0" stroke-width="2"/><line x1="36" y1="54.0" x2="564" y2="54.0" stroke="#1c3448" opacity="0.35"/><text x="4" y="57.0" fill="#6b8299" font-size="10">0m</text><line x1="36" y1="106.9" x2="564" y2="106.9" stroke="#1c3448" opacity="0.35"/><text x="4" y="109.9" fill="#6b8299" font-size="10">2m</text><line x1="36" y1="159.8" x2="564" y2="159.8" stroke="#1c3448" opacity="0.35"/><text x="4" y="162.8" fill="#6b8299" font-size="10">4m</text><line x1="36" y1="212.7" x2="564" y2="212.7" stroke="#1c3448" opacity="0.35"/><text x="4" y="215.7" fill="#6b8299" font-size="10">6m</text><text x="28.0" y="240" fill="#6b8299" font-size="10">0m</text><text x="160.0" y="240" fill="#6b8299" font-size="10">100m</text><text x="292.0" y="240" fill="#6b8299" font-size="10">200m</text><text x="424.0" y="240" fill="#6b8299" font-size="10">300m</text><text x="556.0" y="240" fill="#6b8299" font-size="10">400m</text><text x="34" y="240" fill="#9fc" font-size="11">岸</text><text x="548" y="240" fill="#9fc" font-size="11">沖→</text><line x1="36" y1="54" x2="564" y2="54" stroke="#3a6ea5" stroke-dasharray="5 4"/><line x1="36" y1="51.8" x2="564" y2="51.8" stroke="#7fd3ff" stroke-width="2"/><text x="468" y="47.8" fill="#7fd3ff" font-size="10">潮位60%(上げ)</text><line x1="154.8" y1="51.8" x2="154.8" y2="95.6" stroke="#ffffff" stroke-dasharray="2 2" opacity="0.7"/><text x="0" y="0" fill="#ffffff" font-size="10" transform="translate(154.8,48.8) rotate(-90)">かけ上がり</text><line x1="121.8" y1="51.8" x2="121.8" y2="79.8" stroke="#fde68a" stroke-dasharray="2 2" opacity="0.7"/><text x="0" y="0" fill="#fde68a" font-size="10" transform="translate(121.8,48.8) rotate(-90)">砂州(バー)</text><line x1="82.2" y1="51.8" x2="82.2" y2="94.9" stroke="#a5f3fc" stroke-dasharray="2 2" opacity="0.7"/><text x="0" y="0" fill="#a5f3fc" font-size="10" transform="translate(82.2,48.8) rotate(-90)">ヨブ(トラフ)</text><path d="M214.2 51.8 L154.8 95.6 L71.6 51.8" fill="none" stroke="#22c55e" stroke-width="3"/><polygon points="71.6,51.8 81.6,46.8 81.6,56.8" fill="#22c55e"/><circle cx="214.2" cy="51.8" r="4" fill="#0a1622" stroke="#22c55e" stroke-width="2"/><circle cx="154.8" cy="95.6" r="6" fill="#22c55e" stroke="#fff" stroke-width="2"/><text x="36" y="16" fill="#cfe" font-size="12">静止：大竹海岸(サーフ) 断面／ヒラメ＝かけ上がりを越えて着水→肩を舐めて手前へ</text><text x="592" y="16" text-anchor="end" fill="#7d97ad" font-size="10">ブラウザで魚種/潮位により変化</text></svg></div>
+    <canvas id="sectionC" style="height:250px;display:none"></canvas>
+    <div class="legend" style="margin-top:6px">
+      <span>横=岸からの距離／縦=水深</span>
+      <span class="pill">水面(実線=現在潮位/破線=平均)</span>
+      <span class="pill">▼ 地形ラベル</span>
+      <span class="pill">● 魚の着き場</span>
+      <span class="pill">→ 通すコース</span>
+    </div>
+    <div id="sectionNote" class="src" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   1) 気象庁 港別 調和定数（潮位表掲載地点一覧表2026より）
+      lon=東経(度), Z0=平均水面(cm, 潮位表基準面上), H=振幅(cm), g=遅角(度,現地子午線)
+      主要4分潮(M2/S2/K1/O1)は全験潮所の公表値。副次4分潮(N2/K2/P1/Q1)は
+      小名浜(60分潮公表)の比率で各港に付与（同一潮汐区で比が安定）。
+   ========================================================================= */
+const ON_RATIO = { // 小名浜60分潮 → 主要分潮に対する 振幅比 と 位相差(度)
+  N2:{r:4.03/30.31, dg:112.74-123.02, base:'M2'},
+  K2:{r:4.07/14.34, dg:150.20-155.70, base:'S2'},
+  P1:{r:7.08/21.80, dg:171.18-173.37, base:'K1'},
+  Q1:{r:3.60/17.24, dg:148.19-156.48, base:'O1'}
+};
+// 験潮所（南→北）: code,名称,lat,lon,Z0, M2,S2,K1,O1 (amp/phase)
+const RAW = [
+ ['CS','銚子漁港',35.750,140.867,90,  30.35,127.56, 14.44,160.32, 23.36,174.60, 18.93,155.41],
+ ['D3','大洗',    36.300,140.567,87,  30.16,123.91, 14.47,156.92, 22.89,169.73, 17.66,151.54],
+ ['ON','小名浜',  36.933,140.900,84,  30.31,123.02, 14.34,155.70, 21.80,173.37, 17.24,156.48],
+ ['ZM','相馬',    37.833,140.967,88,  32.84,117.06, 15.30,151.79, 24.38,171.01, 19.49,154.40],
+ ['SD','仙台新港',38.267,141.000,93,  33.12,115.16, 15.42,149.90, 24.30,169.55, 19.51,153.21],
+ ['E6','石巻',    38.400,141.267,90,  32.92,114.57, 15.37,149.44, 24.26,169.43, 19.54,152.87],
+ ['AY','鮎川',    38.300,141.500,88,  31.59,114.16, 14.71,149.35, 24.02,169.14, 19.36,152.31],
+];
+function buildStation(r){
+  const [code,name,lat,lon,Z0, m2a,m2g,s2a,s2g,k1a,k1g,o1a,o1g]=r;
+  const H={M2:m2a,S2:s2a,K1:k1a,O1:o1a}, g={M2:m2g,S2:s2g,K1:k1g,O1:o1g};
+  for(const c in ON_RATIO){const o=ON_RATIO[c]; H[c]=H[o.base]*o.r; g[c]=norm(g[o.base]+o.dg);}
+  return {code,name,lat,lon,Z0,H,g};
+}
+const STATIONS = RAW.map(buildStation);
+
+/* =========================================================================
+   2) 調和潮汐エンジン（小名浜の気象庁公表満干時刻で検証済み：満潮時刻±約15分）
+   ========================================================================= */
+const D2R=Math.PI/180;
+function norm(x){x%=360;if(x<0)x+=360;return x;}
+const NT={M2:2,S2:2,N2:2,K2:2,K1:1,O1:1,P1:1,Q1:1};
+function astro(d){const T=d/36525;return{
+  s:norm(218.3164477+481267.88123421*T),h:norm(280.4664562+36000.76982779*T),
+  p:norm(83.3532465+4069.0137287*T),N:norm(125.0445479-1934.1362891*T)};}
+function equilib(dtUTC){
+  const d=(dtUTC-Date.UTC(2000,0,1))/86400000, a=astro(d);
+  const t=15*((dtUTC/3600000)%24)+180, s=a.s,h=a.h,p=a.p;
+  return {N:a.N, V:{M2:2*t-2*s+2*h,S2:2*t,N2:2*t-3*s+2*h+p,K2:2*t+2*h,
+    K1:t+h-90,O1:t-2*s+h+90,P1:t-h-90,Q1:t-3*s+h+p+90}};
+}
+function nodal(N){
+  const c=Math.cos(N*D2R),c2=Math.cos(2*N*D2R),c3=Math.cos(3*N*D2R),
+        s=Math.sin(N*D2R),s2=Math.sin(2*N*D2R),s3=Math.sin(3*N*D2R),f={},u={};
+  f.M2=1.0004-0.0373*c+0.0002*c2;u.M2=-2.14*s;f.N2=f.M2;u.N2=u.M2;f.S2=1;u.S2=0;
+  f.K2=1.0241+0.2863*c+0.0083*c2;u.K2=-17.74*s+0.68*s2;
+  f.K1=1.0060+0.1150*c-0.0088*c2+0.0006*c3;u.K1=-8.86*s+0.68*s2-0.07*s3;
+  f.O1=1.0089+0.1871*c-0.0147*c2+0.0014*c3;u.O1=10.80*s-1.34*s2+0.19*s3;
+  f.Q1=f.O1;u.Q1=u.O1;f.P1=1;u.P1=0;return{f,u};
+}
+// site = {lon,Z0,H,g}
+function tideAt(site,dtUTC){
+  const {V,N}=equilib(dtUTC),{f,u}=nodal(N);let hh=site.Z0;
+  for(const c in site.H){const arg=(V[c]+NT[c]*site.lon+u[c]-site.g[c])*D2R;hh+=f[c]*site.H[c]*Math.cos(arg);}
+  return hh;
+}
+
+/* =========================================================================
+   3) 22地点定義（緯度で最寄2験潮所を補間 → 各地点の調和定数を生成）
+      sub=底質, str=地形変化(0-1), flow=潮通し(0-1)
+   ========================================================================= */
+const SPOTS=[
+ ['波崎新港',35.77,140.83,'鹿島灘','sand',0.5,0.8],
+ ['鹿島港魚釣園',35.93,140.70,'鹿島灘','mixed',0.7,0.85],
+ ['大洗港',36.31,140.58,'鹿島灘','mixed',0.7,0.75],
+ ['那珂湊港',36.33,140.60,'鹿島灘','sandmud',0.6,0.6],
+ ['阿字ヶ浦',36.38,140.61,'鹿島灘','sand',0.4,0.6],
+ ['日立港',36.50,140.63,'鹿島灘','mixed',0.6,0.7],
+ ['会瀬漁港',36.58,140.66,'鹿島灘','rock',0.6,0.6],
+ ['平潟港',36.83,140.80,'常磐','mixed',0.6,0.7],
+ ['小名浜港',36.94,140.90,'常磐','mixed',0.7,0.8],
+ ['江名港',37.00,140.92,'常磐','rock',0.6,0.6],
+ ['四倉港',37.10,140.98,'常磐','sand',0.5,0.6],
+ ['久之浜港',37.15,141.00,'常磐','mixed',0.5,0.6],
+ ['富岡港',37.34,141.02,'常磐','sand',0.5,0.6],
+ ['請戸港',37.48,141.03,'常磐','sand',0.5,0.7],
+ ['松川浦',37.83,140.97,'常磐','sandmud',0.7,0.6],
+ ['相馬原釜港',37.84,140.98,'常磐','mixed',0.6,0.7],
+ ['磯浜漁港(山元)',37.97,140.93,'仙台湾','sand',0.4,0.55],
+ ['荒浜漁港(亘理)',38.05,140.92,'仙台湾','sand',0.4,0.6],
+ ['仙台港',38.26,141.00,'仙台湾','mixed',0.6,0.7],
+ ['蒲生周辺',38.28,141.02,'仙台湾','sandmud',0.6,0.6],
+ ['七ヶ浜',38.30,141.07,'仙台湾','rock',0.6,0.6],
+ ['塩釜港',38.32,141.02,'仙台湾','mixed',0.6,0.5],
+].map(a=>({name:a[0],lat:a[1],lon:a[2],region:a[3],sub:a[4],str:a[5],flow:a[6],type:'port',wave:0.3}));
+
+/* Stage④ サーフ(砂浜)・磯(岩礁)の追加地点（茨城〜宮城の実在地点）
+   type: surf/rocky。wave=波当たり, str=地形変化(サーフ=離岸流/馬の背, 磯=根),
+   flow=潮通し, catchArea=アングラーズ実エリアID(なければ地域代表にフォールバック) */
+const EXTRA_SPOTS=[
+ // name,lat,lon,region,type,sub,str,flow,wave,catchArea
+ ['大竹海岸',36.16,140.53,'鹿島灘','surf','sand',0.60,0.50,0.80,3855],
+ ['下津海岸',35.98,140.66,'鹿島灘','surf','sand',0.50,0.50,0.75,3855],
+ ['日川浜海岸',35.86,140.72,'鹿島灘','surf','sand',0.45,0.50,0.70,3855],
+ ['四倉海岸',37.11,140.99,'常磐','surf','sand',0.50,0.45,0.65,null],
+ ['北泉海岸',37.58,141.00,'常磐','surf','sand',0.60,0.50,0.75,null],
+ ['仙南サーフ(山元)',37.93,140.92,'仙台湾','surf','sand',0.55,0.50,0.80,3987],
+ ['深沼海岸(仙台)',38.20,140.99,'仙台湾','surf','sand',0.50,0.45,0.70,3987],
+ ['磯崎/酒列',36.36,140.61,'鹿島灘','rocky','rock',0.75,0.75,0.75,null],
+ ['五浦海岸',36.79,140.81,'常磐','rocky','rock',0.80,0.70,0.80,null],
+ ['塩屋崎地磯',36.98,140.98,'常磐','rocky','rock',0.70,0.70,0.75,null],
+ ['七ヶ浜(吉田浜磯)',38.28,141.08,'仙台湾','rocky','rock',0.70,0.60,0.65,null],
+ ['鮎川地磯(牡鹿)',38.30,141.49,'仙台湾','rocky','rock',0.80,0.80,0.70,null],
+].map(a=>({name:a[0],lat:a[1],lon:a[2],region:a[3],type:a[4],sub:a[5],str:a[6],flow:a[7],wave:a[8],catchArea:a[9]}));
+SPOTS.push(...EXTRA_SPOTS);
+
+// 最寄2験潮所を距離加重で補間（沿岸地形の屈曲に対応するため緯度でなく距離基準）
+function interpAngle(a,b,w){const d=((b-a+540)%360)-180;return norm(a+d*w);} // w=hi側の重み
+function distKm(la1,lo1,la2,lo2){const k=Math.cos((la1+la2)/2*D2R);
+  return Math.hypot((la1-la2)*111,(lo1-lo2)*111*k);}
+function siteFor(spot){
+  const st=STATIONS.map(s=>({s,d:distKm(spot.lat,spot.lon,s.lat,s.lon)})).sort((a,b)=>a.d-b.d);
+  const lo=st[0].s, hi=st[1].s, d0=st[0].d, d1=st[1].d;
+  // 最寄が十分近ければ単独、そうでなければ距離で加重（近いほど重い）
+  let w = (d0+d1===0)?0 : d0/(d0+d1);           // hi(=2番目)側の重み
+  if(d0 < 4) w = 0;                              // 験潮所至近(4km未満)はその港を採用
+  const H={},g={};for(const c in lo.H){H[c]=lo.H[c]*(1-w)+hi.H[c]*w;g[c]=interpAngle(lo.g[c],hi.g[c],w);}
+  const Z0=lo.Z0*(1-w)+hi.Z0*w;
+  const ref = (w<0.08)?lo.name : `${lo.name}${((1-w)*100).toFixed(0)}:${hi.name}${(w*100).toFixed(0)}`;
+  return {lon:spot.lon,Z0,H,g,ref};
+}
+SPOTS.forEach(s=>s.site=siteFor(s));
+
+/* =========================================================================
+   公開安全版：アングラーズの埋め込みデータは撤去。
+   各地点は該当エリアページへの「リンクのみ」（データ複製なし）。
+   ========================================================================= */
+const REGION_AREA={'鹿島灘':171,'常磐':464,'仙台湾':4170}; // 地域代表エリアID（リンク用）
+// 地点→アングラーズ該当エリアURL（地点固有catchAreaがあれば優先）。データは埋め込まない。
+function anglersUrl(spot){ const id=spot.catchArea||REGION_AREA[spot.region]||171;
+  return 'https://anglers.jp/areas/'+id; }
+
+/* =========================================================================
+   4) 月別 海面水温クライマトロジー（℃）＝ 気象庁沿岸SST/福島県水温データに整合
+      3海域: 鹿島灘 / 常磐 / 仙台湾（南ほど暖・北ほど寒）
+   ========================================================================= */
+const SST={
+ '鹿島灘':[13,12,13,15,18,20,22,25,24,21,18,15],
+ '常磐'  :[12,10,11,13,16,18,21,24,23,20,17,14],
+ '仙台湾':[ 9, 7, 8,11,14,17,20,23,22,18,14,11],
+};
+function waterTemp(region,month,dayFrac){ // 月中央基準に線形補間で滑らかに
+  const a=SST[region];const x=month-1+ (dayFrac-0.5); // 0..12
+  const i0=Math.floor(x), t=x-i0;
+  const p=(k)=>a[((k%12)+12)%12];
+  return p(i0)*(1-t)+p(i0+1)*t;
+}
+
+/* =========================================================================
+   5) 魚種プロファイル（5要素モデル：季節/水温/底質/地形変化/潮通し + 時合い）
+   ========================================================================= */
+const SUB=['sand','sandmud','gravel','rock','mixed'];
+const FISH={
+ aji:{label:'アジ',
+   season:[.2,.2,.3,.5,.7,.85,.95,1,1,.9,.7,.4],
+   topt:22,tsig:5,
+   subFit:{sand:.5,sandmud:.5,gravel:.7,rock:.8,mixed:.85},
+   wSub:.8,wStr:1.0,wFlow:1.6,          // 潮通し重視
+   wCurr:.5,wMazume:.35,                 // 時合い：潮動く＋朝夕マズメ
+   typeFit:{port:1.0,rocky:0.85,surf:0.40}, // 港/磯の潮通し・回遊。開けたサーフは低
+   waveOpt:0.45,waveSig:0.30,wWave:0.15,
+ },
+ kisu:{label:'キス',
+   season:[.1,.1,.15,.35,.65,.9,1,1,.85,.6,.3,.15],
+   topt:22,tsig:4,
+   subFit:{sand:1,sandmud:.8,gravel:.5,rock:.2,mixed:.55},
+   wSub:1.6,wStr:.5,wFlow:.8,            // 砂地重視
+   wCurr:.4,wMazume:.3,
+   typeFit:{port:0.6,rocky:0.20,surf:1.0},  // 遠浅砂サーフ本命。磯は不適
+   waveOpt:0.40,waveSig:0.22,wWave:0.22,     // 荒れすぎは苦手
+ },
+ hirame:{label:'ヒラメ',
+   season:[.55,.5,.55,.65,.6,.5,.45,.45,.7,.9,1,.85], // 秋〜春有利, 盛夏低
+   topt:18,tsig:5,
+   subFit:{sand:.85,sandmud:.8,gravel:.6,rock:.5,mixed:.95}, // 砂＋変化
+   wSub:1.0,wStr:1.4,wFlow:1.1,
+   wCurr:.5,wMazume:.45,
+   typeFit:{port:0.7,rocky:0.55,surf:1.0},  // サーフ本命。港湾口/磯際も可
+   waveOpt:0.60,waveSig:0.35,wWave:0.20,     // 適度な波・離岸流でベイト寄る
+ }
+};
+const TYPE_JP={port:'港',surf:'サーフ',rocky:'磯'};
+
+/* =========================================================================
+   6) スコアリング
+   ========================================================================= */
+function gauss(x,mu,sig){return Math.exp(-((x-mu)**2)/(2*sig*sig));}
+// 潮流（流速）: dH/dt を数値微分（cm/hr）→正規化
+function currentSpeed(site,dtUTC){
+  const dh=(tideAt(site,dtUTC+1800000)-tideAt(site,dtUTC-1800000)); // ±30分, cm/hr
+  return {raw:dh, spd:Math.min(1,Math.abs(dh)/40)}; // 40cm/hr で飽和
+}
+function mazume(minOfDay){ // 朝夕マズメ（日出/日没±90分を強め）＋昼夜
+  const dawn=4.7*60, dusk=18.5*60; // 概略（東北夏〜通年平均）
+  const g1=gauss(minOfDay,dawn,70), g2=gauss(minOfDay,dusk,70);
+  return Math.min(1,g1+g2)*0.85 + 0.15;
+}
+function scoreSpot(spot,fishKey,dtUTC,month,dayFrac,minOfDay){
+  const F=FISH[fishKey];
+  const seas=F.season[month-1];
+  const wt=waterTemp(spot.region,month,dayFrac);
+  const tf=gauss(wt,F.topt,F.tsig);
+  const sub=F.subFit[spot.sub];
+  const base=(F.wSub*sub+F.wStr*spot.str+F.wFlow*spot.flow)/(F.wSub+F.wStr+F.wFlow);
+  const tfit=F.typeFit[spot.type];                                   // 地形タイプ生息適性
+  const waveFit=gauss(spot.wave,F.waveOpt,F.waveSig);                // 波当たり適性
+  const waveAdj=1+F.wWave*(waveFit-0.5);                             // ±の小補正
+  const spotBase=seas*tf*base*tfit*waveAdj;
+  const cur=currentSpeed(spot.site,dtUTC);
+  const maz=mazume(minOfDay);
+  const timeFac=(F.wCurr*cur.spd+F.wMazume*maz)/(F.wCurr+F.wMazume);
+  const score=Math.max(0,spotBase)*(0.35+0.65*timeFac);
+  return {score:score*100, seas,tf,sub,base,tfit,waveFit,spotBase,cur,maz,timeFac,wt};
+}
+
+/* =========================================================================
+   7) UI / 描画
+   ========================================================================= */
+// JS有効→静的フォールバックを隠しライブcanvasへ（存在チェック付き・防御的）
+['nojs','mapStatic','tideStatic','sectionStatic'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+['mapC','tideC','sectionC'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='block';});
+const YEAR=2026;
+let fishKey='aji', selIdx=8; // 初期=小名浜
+const dateR=document.getElementById('dateR'),timeR=document.getElementById('timeR');
+const dateV=document.getElementById('dateV'),timeV=document.getElementById('timeV'),moonV=document.getElementById('moonV');
+let sortKey='score', sortDir=-1;
+
+function curDateParts(){
+  const base=Date.UTC(YEAR,0,1), d=new Date(base+ (+dateR.value)*86400000);
+  const month=d.getUTCMonth()+1, day=d.getUTCDate();
+  const min=+timeR.value, dayFrac=day/ new Date(YEAR,month,0).getDate();
+  // JST壁時計 → UTC
+  const dtUTC=Date.UTC(YEAR,month-1,day,0,0,0)-9*3600000+min*60000;
+  return {d,month,day,min,dayFrac,dtUTC};
+}
+function fmtDate(d){const w=['日','月','火','水','木','金','土'][d.getUTCDay()];
+  return `${d.getUTCMonth()+1}/${d.getUTCDate()}(${w})`;}
+function fmtMin(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+function moonPhase(dtUTC){ // 月齢近似
+  const syn=29.530588853, ref=Date.UTC(2000,0,6,18,14); //既知新月
+  let age=(((dtUTC-ref)/86400000)%syn+syn)%syn;
+  if(age<1.8||age>27.7)return '大潮(新月)';if(Math.abs(age-14.77)<1.8)return '大潮(満月)';
+  if(Math.abs(age-7.4)<2||Math.abs(age-22.1)<2)return '小潮';
+  return (age<7.4||age>22.1)?'中潮寄り':'中潮';
+}
+
+// --- 地図 ---
+const COAST=[[35.70,140.86],[35.90,140.68],[36.06,140.62],[36.30,140.57],[36.50,140.62],
+ [36.80,140.75],[36.95,140.90],[37.10,141.00],[37.35,141.02],[37.60,141.00],[37.83,140.97],
+ [38.00,140.92],[38.26,141.02],[38.32,141.06],[38.36,141.12],[38.33,141.35],[38.30,141.50]];
+const LAT0=35.6,LAT1=38.6,LON0=140.35,LON1=141.7;
+function proj(lat,lon,W,H,pad){
+  const x=pad+ (lon-LON0)/(LON1-LON0)*(W-2*pad);
+  const y=pad+ (LAT1-lat)/(LAT1-LAT0)*(H-2*pad);
+  return [x,y];
+}
+function heatColor(v,alpha){ // 0..1 → 段階カラー
+  const stops=[[51,65,85],[59,130,246],[34,197,94],[234,179,8],[239,68,68]];
+  v=Math.max(0,Math.min(1,v));const s=v*(stops.length-1),i=Math.floor(s),t=s-i;
+  const a=stops[i],b=stops[Math.min(i+1,stops.length-1)];
+  const r=a[0]+(b[0]-a[0])*t|0,gg=a[1]+(b[1]-a[1])*t|0,bl=a[2]+(b[2]-a[2])*t|0;
+  return alpha==null?`rgb(${r},${gg},${bl})`:`rgba(${r},${gg},${bl},${alpha})`;
+}
+// 陸地ポリゴン(lat,lon)＝海岸線＋西端。海マスク判定に使用
+const LANDPOLY=(()=>{const p=COAST.slice();
+  p.push([COAST[COAST.length-1][0],LON0]);p.push([COAST[0][0],LON0]);return p;})();
+function inLand(lat,lon){ // ray casting (x=lon,y=lat)
+  let inside=false;for(let i=0,j=LANDPOLY.length-1;i<LANDPOLY.length;j=i++){
+    const yi=LANDPOLY[i][0],xi=LANDPOLY[i][1],yj=LANDPOLY[j][0],xj=LANDPOLY[j][1];
+    if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;}
+  return inside;
+}
+function nearestKm(lat,lon){let m=1e9;for(const s of SPOTS){const d=distKm(lat,lon,s.lat,s.lon);if(d<m)m=d;}return m;}
+// IDW面的補間（power2, 距離km）＋沿岸バンドのalphaフェード
+function fieldValue(lat,lon,scores){
+  let num=0,den=0;for(let i=0;i<SPOTS.length;i++){const d=distKm(lat,lon,SPOTS[i].lat,SPOTS[i].lon);
+    const w=1/(d*d+4);num+=w*scores[i].score;den+=w;}
+  const v=num/den/100;
+  const dmin=nearestKm(lat,lon);
+  const alpha=Math.max(0,Math.min(1,(16-dmin)/8))*0.82; // 8km内=最大, 16kmで0
+  return {v,alpha,dmin};
+}
+// 逆投影
+function latOf(y,H,pad){return LAT1-(y-pad)/(H-2*pad)*(LAT1-LAT0);}
+function lonOf(x,W,pad){return LON0+(x-pad)/(W-2*pad)*(LON1-LON0);}
+
+// 種別マーカー：港=●, サーフ=●＋白波形, 磯=▲
+function drawMarker(g,x,y,type,fill,sel){
+  const r=sel?8:6;
+  // 暗いハロー（ヒートマップ上でも視認できるように）
+  g.fillStyle='rgba(3,10,18,0.6)';
+  if(type==='rocky'){g.beginPath();g.moveTo(x,y-r-3);g.lineTo(x+r+3,y+r+2);g.lineTo(x-r-3,y+r+2);g.closePath();g.fill();}
+  else{g.beginPath();g.arc(x,y,r+2.5,0,7);g.fill();}
+  g.lineWidth=sel?3:1.8;g.strokeStyle=sel?'#ffffff':'#eaf6ff';
+  if(type==='rocky'){
+    g.beginPath();g.moveTo(x,y-r-1);g.lineTo(x+r+1,y+r);g.lineTo(x-r-1,y+r);g.closePath();
+    g.fillStyle=fill;g.fill();g.stroke();
+  }else{
+    g.beginPath();g.arc(x,y,r,0,7);g.fillStyle=fill;g.fill();g.stroke();
+    if(type==='surf'){g.strokeStyle='#04263a';g.lineWidth=1.5;g.beginPath();
+      g.moveTo(x-r*0.7,y);g.quadraticCurveTo(x-r*0.35,y-r*0.8,x,y);
+      g.quadraticCurveTo(x+r*0.35,y+r*0.8,x+r*0.7,y);g.stroke();}
+  }
+}
+function drawMap(scores){
+  const c=document.getElementById('mapC'),W=c.width=c.clientWidth||460,H=c.height=520,pad=26;
+  const g=c.getContext('2d');g.clearRect(0,0,W,H);
+  g.fillStyle='#0a1622';g.fillRect(0,0,W,H);
+  // ヒートマップ（面的補間）
+  const step=7;
+  for(let y=pad;y<H-pad;y+=step)for(let x=pad;x<W-pad;x+=step){
+    const lat=latOf(y+step/2,H,pad),lon=lonOf(x+step/2,W,pad);
+    if(inLand(lat,lon))continue;
+    const f=fieldValue(lat,lon,scores);if(f.alpha<=0.02)continue;
+    g.fillStyle=heatColor(f.v,f.alpha);g.fillRect(x,y,step+1,step+1);
+  }
+  // 陸
+  g.beginPath();COAST.forEach((p,i)=>{const[x,y]=proj(p[0],p[1],W,H,pad);i?g.lineTo(x,y):g.moveTo(x,y);});
+  const last=proj(COAST[COAST.length-1][0],COAST[COAST.length-1][1],W,H,pad);
+  const first=proj(COAST[0][0],COAST[0][1],W,H,pad);
+  g.lineTo(pad,last[1]);g.lineTo(pad,first[1]);g.closePath();
+  g.fillStyle='#14261a';g.fill();
+  g.strokeStyle='#3a5a3a';g.lineWidth=1.5;
+  g.beginPath();COAST.forEach((p,i)=>{const[x,y]=proj(p[0],p[1],W,H,pad);i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();
+  // 潮流ベクトル
+  const {dtUTC}=curDateParts();
+  SPOTS.forEach(s=>{
+    const cs=currentSpeed(s.site,dtUTC);const[x,y]=proj(s.lat,s.lon,W,H,pad);
+    const len=6+cs.spd*22, up=cs.raw>=0;
+    g.strokeStyle='rgba(200,230,255,.6)';g.lineWidth=1.4;
+    g.beginPath();g.moveTo(x+9,y+(up?len/2:-len/2));g.lineTo(x+9,y+(up?-len/2:len/2));g.stroke();
+    g.fillStyle='rgba(200,230,255,.85)';const ty=y+(up?-len/2:len/2);
+    g.beginPath();g.moveTo(x+9,ty+(up?-4:4));g.lineTo(x+6,ty);g.lineTo(x+12,ty);g.closePath();g.fill();
+  });
+  // 地点マーカー（種別で形状：港=●, サーフ=波形, 磯=▲）
+  SPOTS.forEach((s,i)=>{
+    const v=scores[i].score/100;const[x,y]=proj(s.lat,s.lon,W,H,pad);
+    drawMarker(g,x,y,s.type,heatColor(v),i===selIdx);
+  });
+  const s=SPOTS[selIdx];const[x,y]=proj(s.lat,s.lon,W,H,pad);
+  g.fillStyle='#fff';g.font='bold 12px sans-serif';
+  g.strokeStyle='rgba(0,0,0,.7)';g.lineWidth=3;g.strokeText(s.name,x+12,y+4);g.fillText(s.name,x+12,y+4);
+  g.fillStyle='#9fc';g.font='11px sans-serif';
+  g.fillText('宮城/仙台湾',pad+4,proj(38.35,0,W,H,pad)[1]);
+  g.fillText('福島/常磐',pad+4,proj(37.2,0,W,H,pad)[1]);
+  g.fillText('茨城/鹿島灘',pad+4,proj(36.15,0,W,H,pad)[1]);
+  drawMap._pts=SPOTS.map((s,i)=>{const[px,py]=proj(s.lat,s.lon,W,H,pad);return{i,px,py};});
+}
+document.getElementById('mapC').addEventListener('click',e=>{
+  const r=e.target.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  let best=-1,bd=1e9;(drawMap._pts||[]).forEach(p=>{const d=(p.px-mx)**2+(p.py-my)**2;if(d<bd){bd=d;best=p.i;}});
+  if(best>=0&&bd<400){selIdx=best;render();}
+});
+
+// --- 潮位カーブ ---
+function drawTide(){
+  const c=document.getElementById('tideC'),W=c.width=c.clientWidth,H=c.height=180,pad=24;
+  const g=c.getContext('2d');g.clearRect(0,0,W,H);g.fillStyle='#0a1622';g.fillRect(0,0,W,H);
+  const {month,day,min}=curDateParts();const site=SPOTS[selIdx].site;
+  const pts=[];let mn=1e9,mx=-1e9;
+  for(let m=0;m<=1440;m+=10){const dt=Date.UTC(YEAR,month-1,day)-9*3600000+m*60000;const h=tideAt(site,dt);pts.push([m,h]);mn=Math.min(mn,h);mx=Math.max(mx,h);}
+  mn-=8;mx+=8;const X=m=>pad+m/1440*(W-2*pad),Y=h=>H-pad-(h-mn)/(mx-mn)*(H-2*pad);
+  // グリッド時刻
+  g.strokeStyle='#1c3448';g.fillStyle='#6b8299';g.font='10px sans-serif';g.lineWidth=1;
+  for(let hh=0;hh<=24;hh+=6){const x=X(hh*60);g.beginPath();g.moveTo(x,pad-6);g.lineTo(x,H-pad);g.stroke();g.fillText(hh+':00',x-9,H-6);}
+  // 曲線
+  g.beginPath();pts.forEach((p,i)=>{const x=X(p[0]),y=Y(p[1]);i?g.lineTo(x,y):g.moveTo(x,y);});
+  g.strokeStyle='#38bdf8';g.lineWidth=2;g.stroke();
+  g.lineTo(X(1440),H-pad);g.lineTo(X(0),H-pad);g.closePath();g.fillStyle='rgba(56,189,248,.12)';g.fill();
+  // 満干マーカー
+  const ext=findExtrema(site,month,day);
+  g.font='10px sans-serif';
+  ext.forEach(e=>{const x=X(e.min),y=Y(e.cm);g.fillStyle=e.type==='H'?'#22c55e':'#eab308';
+    g.beginPath();g.arc(x,y,3,0,7);g.fill();
+    g.fillStyle='#cde';g.fillText((e.type==='H'?'満 ':'干 ')+fmtMin(e.min),x-16,e.type==='H'?y-6:y+14);});
+  // 現在時刻マーカー
+  const cx=X(min);g.strokeStyle='#f87171';g.lineWidth=1.6;g.beginPath();g.moveTo(cx,pad-6);g.lineTo(cx,H-pad);g.stroke();
+  g.fillStyle='#f87171';g.beginPath();g.moveTo(cx,pad-6);g.lineTo(cx-4,pad-12);g.lineTo(cx+4,pad-12);g.closePath();g.fill();
+}
+function findExtrema(site,month,day){
+  const out=[];let p2=null,p1=null,t1=null;
+  for(let m=-30;m<=1470;m++){const dt=Date.UTC(YEAR,month-1,day)-9*3600000+m*60000;const h=tideAt(site,dt);
+    if(p1!=null&&p2!=null){if((p1>=p2&&p1>=h)||(p1<=p2&&p1<=h)){const type=(p1>=p2&&p1>=h)?'H':'L';
+      if(t1>=0&&t1<=1440)out.push({type,min:t1,cm:Math.round(p1)});}}
+    p2=p1;p1=h;t1=m;}
+  const f=[];for(const e of out){if(f.length&&f[f.length-1].type===e.type&&(e.min-f[f.length-1].min)<120)continue;f.push(e);}return f;
+}
+
+// --- テーブル & 詳細 ---
+function computeAll(){
+  const {month,day,dayFrac,min,dtUTC}=curDateParts();
+  return SPOTS.map(s=>({s,...scoreSpot(s,fishKey,dtUTC,month,dayFrac,min),
+    tideNow:tideAt(s.site,dtUTC)}));
+}
+/* ===== Stage⑤/⑥ 地形モデル（埋め込み）===== */
+/* ============================================================
+   地形ディテール・モデル（Stage⑤/⑥ コア, ブラウザ/Node共用）
+   海底地形＝Dean平衡海浜プロファイル h=A·d^(2/3) を地形タイプで校正
+   ＋サーフの砂州(ブレイク)/離岸流チャネル、磯の根、底質(砂/根)境界。
+   座標：a=沿岸方向(m, +で地図右/南), d=沖方向(m)。offBearing=沖向き方位(度)。
+   ============================================================ */
+const TERR = {
+  AMIN:-200, AMAX:200, ASTEP:10,   // 沿岸
+  DMIN:0,   DMAX:400, DSTEP:10,    // 沖
+};
+// 地形タイプ別パラメータ（代表値：surf=遠浅~1/50, rocky=急斜~1/12, port=中間）
+function terrainParams(spot){
+  if(spot.type==='surf') return {A:0.10, bar:true, barD:70, barAmp:1.3, barSig:28, rip:130, rockEdge:0, off:90};
+  if(spot.type==='rocky')return {A:0.30, bar:false, ne:true, rockEdge:120, off:95};
+  return {A:0.17, bar:false, channel:true, rockEdge:20, off:90}; // port
+}
+function deanDepth(d,P){ return P.A*Math.pow(Math.max(d,0.1),2/3); }
+// 砂州による起伏（沿岸aで離岸流チャネル変調）: 正=浅くなる
+function barMod(a,d,P){
+  if(!P.bar) return 0;
+  const gate = 0.5+0.5*Math.cos(2*Math.PI*a/P.rip);   // 0(チャネル)～1(砂州)
+  const shallow = P.barAmp*gate*Math.exp(-(((d-P.barD)/P.barSig)**2));      // 砂州で浅く
+  const trough  = 0.5*P.barAmp*Math.exp(-(((d-(P.barD-P.barSig*1.4))/(P.barSig*0.8))**2)); // 岸側にヨブ(深)
+  return shallow - trough;
+}
+function neMod(a,d,P){ // 磯の沖の根（浅い岩の盛り上がり）
+  if(!P.ne) return 0;
+  let s=0; const roots=[[-90,150],[40,210],[120,110]];
+  for(const [ra,rd] of roots){ s += 1.1*Math.exp(-(((a-ra)/35)**2+((d-rd)/30)**2)); }
+  return s;
+}
+function depthAt(a,d,P){ return Math.max(0.05, deanDepth(d,P) - barMod(a,d,P) - neMod(a,d,P)); }
+// 底質：rockは岸近く/根の上、それ以外は砂
+function substrateAt(a,d,P){
+  if(P.ne){ if(neMod(a,d,P)>0.5) return 'rock'; return d<P.rockEdge? 'rock':'sand'; }
+  if(P.rockEdge>0 && d<P.rockEdge) return 'rock';
+  return 'sand';
+}
+function buildTerrain(spot){
+  const P=terrainParams(spot);
+  const off = spot.offBearing!=null?spot.offBearing:P.off;
+  const As=[],Ds=[];
+  for(let a=TERR.AMIN;a<=TERR.AMAX;a+=TERR.ASTEP)As.push(a);
+  for(let d=TERR.DMIN;d<=TERR.DMAX;d+=TERR.DSTEP)Ds.push(d);
+  const depth=As.map(a=>Ds.map(d=>depthAt(a,d,P)));
+  const slope=As.map((a,i)=>Ds.map((d,j)=>{
+    const d1=depthAt(a,d-TERR.DSTEP,P),d2=depthAt(a,d+TERR.DSTEP,P);
+    return Math.abs(d2-d1)/(2*TERR.DSTEP); // m/m
+  }));
+  const sub=As.map(a=>Ds.map(d=>substrateAt(a,d,P)));
+  return {P,off,As,Ds,depth,slope,sub,spot};
+}
+// (a,d)→ lat/lon
+function toLatLon(T,a,d){
+  const th=T.off*Math.PI/180, lat0=T.spot.lat, lon0=T.spot.lon;
+  const Eoff=Math.sin(th),Noff=Math.cos(th), Eal=Math.cos(th),Nal=-Math.sin(th);
+  const E=d*Eoff+a*Eal, N=d*Noff+a*Nal;
+  return [lat0 + N/111320, lon0 + E/(111320*Math.cos(lat0*Math.PI/180))];
+}
+
+/* ---- 狙い目 特徴検出 ---- */
+function sectionAt(T,aSec){
+  const {P}=T; const prof=[];
+  for(let d=TERR.DMIN;d<=TERR.DMAX;d+=5){ prof.push({d, depth:depthAt(aSec,d,P), sub:substrateAt(aSec,d,P),
+      slope:Math.abs(depthAt(aSec,d+5,P)-depthAt(aSec,d-5,P))/10}); }
+  let brk=prof.find(p=>p.d>=30)||prof[1]; prof.forEach(p=>{if(p.d>=30&&p.slope>brk.slope)brk=p;});
+  let bar=null; if(P.bar){for(let i=2;i<prof.length-2;i++){if(prof[i].d>30&&prof[i].depth<prof[i-1].depth&&prof[i].depth<=prof[i+1].depth){bar=prof[i];break;}}}
+  let trough=null; if(bar){for(let i=1;i<prof.length-1;i++){if(prof[i].d<bar.d&&prof[i].depth>prof[i-1].depth&&prof[i].depth>=prof[i+1].depth)trough=prof[i];}}
+  let roots=[]; if(P.ne){for(let i=2;i<prof.length-2;i++){if(prof[i].d>60&&prof[i].depth<prof[i-1].depth&&prof[i].depth<prof[i+1].depth)roots.push(prof[i]);}}
+  let sr=null; for(let i=1;i<prof.length;i++){if(prof[i-1].sub==='rock'&&prof[i].sub==='sand'){sr=prof[i];break;}}
+  return {aSec,prof,brk,bar,trough,roots,sr,maxDepth:Math.max(...prof.map(p=>p.depth))};
+}
+function sectionHold(S,fishKey){
+  if(fishKey==='hirame'){const b=S.sr||S.brk;return{d:b.d,depth:b.depth,label:'ヒラメ：かけ上がりの肩／砂根境'};}
+  if(fishKey==='kisu'){let t=S.prof.find(p=>p.depth>=1.2&&p.sub==='sand')||S.prof[3];return{d:t.d,depth:t.depth,label:'キス：遠浅の緩斜面'};}
+  const f=S.trough||S.roots[0]||S.bar||S.brk;return{d:f.d,depth:f.depth,label:'アジ：地形変化・潮のヨレ'};
+}
+function detectFeatures(T){
+  const {As,Ds,slope,sub,P}=T;
+  // ブレイク稜線：各aで傾斜最大のd（岸から少し沖）
+  const breakline=[];
+  As.forEach((a,i)=>{ let bj=1,bv=-1; for(let j=2;j<Ds.length-1;j++){ if(Ds[j]>25&&slope[i][j]>bv){bv=slope[i][j];bj=j;} } breakline.push([a,Ds[bj],bv]); });
+  // 砂と根の境目：aごとにrock→sandに変わるd
+  const sandRock=[];
+  As.forEach((a,i)=>{ for(let j=1;j<Ds.length;j++){ if(sub[i][j-1]==='rock'&&sub[i][j]==='sand'){ sandRock.push([a,(Ds[j-1]+Ds[j])/2]); break; } } });
+  // 離岸流チャネル：砂州が最も浅くならない沿岸位置（gate極小）
+  const rips=[];
+  if(P.bar){ for(let a=TERR.AMIN;a<=TERR.AMAX;a+=TERR.ASTEP){ const gate=0.5+0.5*Math.cos(2*Math.PI*a/P.rip);
+    if(gate<0.06) rips.push([a,P.barD]); } }
+  // 沖の根：局所的な浅所（深さ極小）
+  const near=[];
+  if(P.ne){ const roots=[[-90,150],[40,210],[120,110]]; roots.forEach(r=>near.push([r[0],r[1]])); }
+  return {breakline,sandRock,rips,ne:near};
+}
+
+/* ---- トレースライン生成（魚種×潮）---- */
+// tideDir: +1=上げ, -1=下げ；tideNorm: 0..1（高いほど満potio）
+function genTraces(T,F,fishKey,tideDir,tideNorm){
+  const P=T.P, out=[];
+  const clampA=a=>Math.max(TERR.AMIN+10,Math.min(TERR.AMAX-10,a));
+  if(fishKey==='hirame'){
+    // かけ上がりを横切る：中央付近のブレイクを選び、沖→斜めに肩を舐めて引く
+    const mid=F.breakline[Math.floor(F.breakline.length/2)]; const a0=mid?mid[0]:0, db=mid?mid[1]:(P.bar?P.barD:80);
+    const dLand=db+45+ (P.bar?0:20); const shift=25*tideDir;
+    out.push({fish:'hirame',label:'かけ上がりを横切る／肩を舐める',color:'#22c55e',
+      stand:[a0-shift,0], land:[a0-shift,dLand],
+      pts:[[a0-shift,dLand],[a0,db+10],[clampA(a0+30),db-15],[clampA(a0+50),8]]});
+  }else if(fishKey==='kisu'){
+    // 遠浅の砂を沖から手前へ、緩斜面をまっすぐ引く
+    const a0=20; const dLand=Math.min(TERR.DMAX-20, 210 - 30*(1-tideNorm)); // 干潮ほど近く
+    out.push({fish:'kisu',label:'遠浅の砂地を沖から手前へ直線的に引く',color:'#eab308',
+      stand:[a0,0], land:[a0,dLand], pts:[[a0,dLand],[a0,10]]});
+  }else{ // aji
+    // 潮のヨレ・地形変化の潮上から潮下へ流す（中央に近いrip/根/ブレイク肩を起点）
+    const cand=F.rips.concat(F.ne); const mid=F.breakline[Math.floor(F.breakline.length/2)];
+    let feat = cand.length? cand.slice().sort((p,q)=>Math.abs(p[0])-Math.abs(q[0]))[0] : mid;
+    const fa=feat?feat[0]:0, fd=feat?(feat[1]||80):80;
+    const up = -40*tideDir; // 潮上
+    out.push({fish:'aji',label:'潮上から潮下へ地形変化・ヨレを通す',color:'#38bdf8',
+      stand:[clampA(fa+up*0.3),Math.max(5,fd-40)], land:[clampA(fa+up),fd+10],
+      pts:[[clampA(fa+up),fd+10],[fa,fd],[clampA(fa-up*0.8),Math.max(8,fd-15)]]});
+  }
+  return out;
+}
+
+/* ---- 等深線（marching squares, セグメント列）---- */
+function contours(T,levels){
+  const {As,Ds,depth}=T; const segs=[];
+  for(let i=0;i<As.length-1;i++)for(let j=0;j<Ds.length-1;j++){
+    const cor=[[As[i],Ds[j]],[As[i],Ds[j+1]],[As[i+1],Ds[j+1]],[As[i+1],Ds[j]]];
+    const z=[depth[i][j],depth[i][j+1],depth[i+1][j+1],depth[i+1][j]];
+    for(const lv of levels){ const pts=[];
+      for(let k=0;k<4;k++){ const kk=(k+1)%4, za=z[k], zb=z[kk];
+        if((za<lv)!==(zb<lv)){ const t=(lv-za)/(zb-za);
+          pts.push([cor[k][0]+(cor[kk][0]-cor[k][0])*t, cor[k][1]+(cor[kk][1]-cor[k][1])*t]); } }
+      if(pts.length>=2) segs.push({lv,pts:[pts[0],pts[1]]});
+    }
+  }
+  return segs;
+}
+
+/* ===== Stage⑤/⑥ 地形ディテール（Leaflet 三層：面＋線＋狙い目/コース）===== */
+let LMAP=null,LGRP=null,LmapIdx=null;
+function detailScore(T,fk,scalar){
+  const {As,Ds,depth,slope,sub}=T;
+  return As.map((a,i)=>Ds.map((d,j)=>{
+    const dep=depth[i][j],sl=slope[i][j],sb=sub[i][j];
+    const slopeN=Math.min(1,sl/0.08);
+    const band=(mu,sig)=>Math.exp(-((dep-mu)*(dep-mu))/(2*sig*sig));
+    let g;
+    if(fk==='hirame') g=(0.35+0.65*slopeN)*band(2.5,2.2)*(sb==='sand'?1:0.7);
+    else if(fk==='kisu') g=(0.75-0.45*slopeN)*band(1.8,1.7)*(sb==='sand'?1:0.25);
+    else g=(0.3+0.7*slopeN)*band(4,3)*(sb==='rock'?1:0.85);
+    if(d<8)g*=0.5;
+    return Math.max(0,Math.min(1,g))*scalar;
+  }));
+}
+function tideNormNow(spot){
+  const {month,day,dtUTC}=curDateParts();let mn=1e9,mx=-1e9;
+  for(let m=0;m<=1440;m+=20){const dt=Date.UTC(YEAR,month-1,day)-9*3600000+m*60000;const h=tideAt(spot.site,dt);mn=Math.min(mn,h);mx=Math.max(mx,h);}
+  const now=tideAt(spot.site,dtUTC);return mx>mn?(now-mn)/(mx-mn):0.5;
+}
+function ensureLMap(spot){
+  if(LMAP)return true;
+  if(typeof L==='undefined')return false;
+  LMAP=L.map('leafmap',{zoomControl:true}).setView([spot.lat,spot.lon],15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(LMAP);
+  LGRP=L.layerGroup().addTo(LMAP);
+  return true;
+}
+function arrowPts(p1,p2){ // (a,d) meters → arrowhead barbs at p2
+  const dx=p2[0]-p1[0],dy=p2[1]-p1[1],L2=Math.hypot(dx,dy)||1,ux=dx/L2,uy=dy/L2,px=-uy,py=ux,s=13,w=8;
+  return [[p2[0]-ux*s+px*w,p2[1]-uy*s+py*w],p2,[p2[0]-ux*s-px*w,p2[1]-uy*s-py*w]];
+}
+function renderDetail(){
+  if(typeof L==='undefined')return;          // Leaflet未ロード→静的フォールバックのまま
+  const spot=SPOTS[selIdx];
+  document.getElementById('detailTitle').textContent=` … ${spot.name}（${TYPE_JP[spot.type]}）/ ${FISH[fishKey].label}`;
+  document.getElementById('detailStatic').style.display='none';
+  document.getElementById('leafmap').style.display='block';
+  if(!ensureLMap(spot))return;
+  LMAP.invalidateSize();
+  const {month,day,dayFrac,min,dtUTC}=curDateParts();
+  const sc0=scoreSpot(spot,fishKey,dtUTC,month,dayFrac,min);
+  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac);
+  const T=buildTerrain(spot),Fe=detectFeatures(T);
+  LGRP.clearLayers();
+  if(LmapIdx!==selIdx){LMAP.setView([spot.lat,spot.lon],15);LmapIdx=selIdx;}
+  const c=[toLatLon(T,TERR.AMIN,TERR.DMIN),toLatLon(T,TERR.AMIN,TERR.DMAX),toLatLon(T,TERR.AMAX,TERR.DMIN),toLatLon(T,TERR.AMAX,TERR.DMAX)];
+  const lats=c.map(p=>p[0]),lons=c.map(p=>p[1]);
+  const bounds=[[Math.min(...lats),Math.min(...lons)],[Math.max(...lats),Math.max(...lons)]];
+  // 面: ヒートマップ
+  const sc=detailScore(T,fishKey,scalar),nA=T.As.length,nD=T.Ds.length;
+  const cv=document.createElement('canvas');cv.width=nD;cv.height=nA;const g=cv.getContext('2d');
+  for(let i=0;i<nA;i++)for(let j=0;j<nD;j++){g.fillStyle=heatColor(sc[i][j]);g.globalAlpha=Math.min(0.85,sc[i][j]*1.3+0.12);g.fillRect(j,i,1,1);}
+  L.imageOverlay(cv.toDataURL(),bounds,{opacity:0.55}).addTo(LGRP);
+  // 線: 等深線
+  contours(T,[2,5,10,15]).forEach(s=>L.polyline(s.pts.map(p=>toLatLon(T,p[0],p[1])),{color:'#7fd3ff',weight:s.lv>=10?2:1,opacity:.5}).addTo(LGRP));
+  // 線: かけ上がり
+  L.polyline(Fe.breakline.map(p=>toLatLon(T,p[0],p[1])),{color:'#ffffff',weight:1.6,dashArray:'2 3',opacity:.65}).addTo(LGRP).bindTooltip('かけ上がり(ブレイク)');
+  // 線: 砂と根の境
+  if(Fe.sandRock.length>3)L.polyline(Fe.sandRock.map(p=>toLatLon(T,p[0],p[1])),{color:'#ff5aa8',weight:2,dashArray:'5 4',opacity:.75}).addTo(LGRP).bindTooltip('砂と根の境目');
+  // 点: 離岸流払い出し / 沖の根
+  Fe.rips.forEach(p=>L.circleMarker(toLatLon(T,p[0],p[1]),{radius:5,color:'#a5f3fc',weight:2,fillColor:'#0891b2',fillOpacity:.7}).addTo(LGRP).bindTooltip('離岸流の払い出し'));
+  Fe.ne.forEach(p=>L.circleMarker(toLatLon(T,p[0],p[1]),{radius:6,color:'#fde68a',weight:2,fillColor:'#b45309',fillOpacity:.7}).addTo(LGRP).bindTooltip('沖の根'));
+  // 線: トレースライン（狙い目コース）
+  const cs=currentSpeed(spot.site,dtUTC),dir=cs.raw>=0?1:-1,tn=tideNormNow(spot);
+  genTraces(T,Fe,fishKey,dir,tn).forEach(tr=>{
+    const line=tr.pts.map(p=>toLatLon(T,p[0],p[1]));
+    L.polyline(line,{color:tr.color,weight:3.5,opacity:.95}).addTo(LGRP).bindTooltip(tr.label,{sticky:true});
+    const ah=arrowPts(tr.pts[tr.pts.length-2],tr.pts[tr.pts.length-1]).map(p=>toLatLon(T,p[0],p[1]));
+    L.polyline(ah,{color:tr.color,weight:3.5,opacity:.95}).addTo(LGRP);
+    L.circleMarker(toLatLon(T,tr.stand[0],tr.stand[1]),{radius:6,color:'#fff',weight:2,fillColor:tr.color,fillOpacity:.9}).addTo(LGRP).bindTooltip('立ち位置(キャスト)');
+    L.circleMarker(toLatLon(T,tr.land[0],tr.land[1]),{radius:4,color:tr.color,weight:2,fillColor:'#0a1622',fillOpacity:1}).addTo(LGRP).bindTooltip('着水点');
+  });
+  const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ(キス仕掛け)', aji:'ジグヘッド＋ワーム/サビキ'}[fishKey];
+  const trc=genTraces(T,Fe,fishKey,dir,tn)[0];
+  document.getElementById('detailNote').innerHTML=
+   `海底地形は<b>Dean平衡海浜プロファイル＋砂州/根モデル（地形タイプで校正）の推定</b>。等深線・かけ上がり・砂根境・離岸流・沖の根は本モデル由来（サーフのミクロ地形は実測でなく推定）。`
+   +`潮流の向き=<b>${dir>0?'上げ':'下げ'}</b>・潮位=${(tn*100).toFixed(0)}%でコースが変化。`
+   +`<br><b>${FISH[fishKey].label}の通し方</b>：${trc.label}。参考タックル：${lure}。地図はドラッグ/ホイールで拡大縮小できます。`;
+}
+
+/* ===== Stage⑦ 釣りどこ(アジア航測ALB) ディープリンク ===== */
+function updateTuridocoLink(){
+  const a=document.getElementById('turidocoLink'); if(!a)return;
+  const s=SPOTS[selIdx];
+  const layers=encodeURIComponent('["waterDepth","poi","fishingResults"]');
+  a.href=`https://turidoco.com/map?bm=osm&lat=${s.lat}&lng=${s.lon}&layers=${layers}&zoom=14`;
+  a.textContent=`🔗 釣りどこで「${s.name}」の実海底地形を見る（アジア航測ALB・実測）`;
+}
+/* ===== アングラーズ（実釣果は埋め込まずリンクのみ）===== */
+function updateAnglersLink(){
+  const a=document.getElementById('anglersLink'); if(!a)return;
+  const s=SPOTS[selIdx];
+  a.href=anglersUrl(s);
+  a.textContent=`🔗 アングラーズで「${s.name}」周辺の釣果を見る`;
+}
+/* ===== Stage⑥ 海底断面図（かけ上がり横断面）===== */
+function drawSection(){
+  const cvs=document.getElementById('sectionC'); if(!cvs)return;
+  const spot=SPOTS[selIdx];
+  document.getElementById('sectionTitle').textContent=` … ${spot.name}（${TYPE_JP[spot.type]}）/ ${FISH[fishKey].label}`;
+  const W=cvs.width=cvs.clientWidth||600, H=cvs.height=250, pad=36;
+  const g=cvs.getContext('2d'); g.clearRect(0,0,W,H); g.fillStyle='#0a1622'; g.fillRect(0,0,W,H);
+  const T=buildTerrain(spot), Fe=detectFeatures(T);
+  const {dtUTC}=curDateParts(); const cs=currentSpeed(spot.site,dtUTC), dir=cs.raw>=0?1:-1, tn=tideNormNow(spot);
+  const trc=genTraces(T,Fe,fishKey,dir,tn)[0];
+  const asort=trc.pts.map(p=>p[0]).sort((x,y)=>x-y);
+  const aSec=Math.round(asort[Math.floor(asort.length/2)]);
+  const S=sectionAt(T,aSec), hold=sectionHold(S,fishKey);
+  const DMAX=TERR.DMAX, maxDep=Math.max(6,S.maxDepth+1);
+  const Xd=d=>pad + d/DMAX*(W-2*pad);
+  const y0=54, depthScale=(H-y0-26)/maxDep, Yd=dep=>y0+dep*depthScale;
+  const ySurf=y0-(tn-0.5)*22;
+  const depAtD=d=>{const p=S.prof.find(q=>q.d>=d)||S.prof[S.prof.length-1];return p.depth;};
+  g.fillStyle='#0e2036'; g.fillRect(pad,ySurf,W-2*pad,H-26-ySurf);
+  // 海底(底質色)
+  for(let i=1;i<S.prof.length;i++){const p0=S.prof[i-1],p=S.prof[i];
+    g.beginPath();g.moveTo(Xd(p0.d),Yd(p0.depth));g.lineTo(Xd(p.d),Yd(p.depth));g.lineTo(Xd(p.d),H-26);g.lineTo(Xd(p0.d),H-26);g.closePath();
+    g.fillStyle=(p.sub==='rock')?'#4b3a2a':'#c9b787';g.globalAlpha=.92;g.fill();g.globalAlpha=1;}
+  g.beginPath();S.prof.forEach((p,i)=>{const x=Xd(p.d),y=Yd(p.depth);i?g.lineTo(x,y):g.moveTo(x,y);});
+  g.strokeStyle='#e7d9b0';g.lineWidth=2;g.stroke();
+  // 深さ/距離グリッド
+  g.font='10px sans-serif';
+  for(let dm=0;dm<=maxDep;dm+=(maxDep>10?5:2)){const y=Yd(dm);g.strokeStyle='#1c3448';g.globalAlpha=.35;g.beginPath();g.moveTo(pad,y);g.lineTo(W-pad,y);g.stroke();g.globalAlpha=1;g.fillStyle='#6b8299';g.fillText(dm+'m',4,y+3);}
+  for(let dd=0;dd<=DMAX;dd+=100){g.fillStyle='#6b8299';g.fillText(dd+'m',Xd(dd)-8,H-10);}
+  g.fillStyle='#9fc';g.fillText('岸',pad-2,H-10);g.fillText('沖→',W-pad-16,H-10);
+  // 水面（平均破線/現在実線）
+  g.strokeStyle='#3a6ea5';g.setLineDash([5,4]);g.beginPath();g.moveTo(pad,y0);g.lineTo(W-pad,y0);g.stroke();g.setLineDash([]);
+  g.strokeStyle='#7fd3ff';g.lineWidth=2;g.beginPath();g.moveTo(pad,ySurf);g.lineTo(W-pad,ySurf);g.stroke();
+  g.fillStyle='#7fd3ff';g.fillText(`潮位${(tn*100).toFixed(0)}%(${dir>0?'上げ':'下げ'})`,W-pad-96,ySurf-4);
+  // 地形ラベル
+  function lab(d,txt,color){ if(d==null)return; const x=Xd(d);
+    g.strokeStyle=color;g.setLineDash([2,2]);g.globalAlpha=.7;g.beginPath();g.moveTo(x,ySurf);g.lineTo(x,Yd(depAtD(d)));g.stroke();g.setLineDash([]);g.globalAlpha=1;
+    g.fillStyle=color;g.save();g.translate(x,ySurf-3);g.rotate(-Math.PI/2);g.fillText(txt,4,4);g.restore(); }
+  lab(S.brk.d,'かけ上がり','#ffffff');
+  if(S.bar)lab(S.bar.d,'砂州(バー)','#fde68a');
+  if(S.trough)lab(S.trough.d,'ヨブ(トラフ)','#a5f3fc');
+  if(S.sr)lab(S.sr.d,'砂と根の境','#ff5aa8');
+  S.roots.forEach(r=>lab(r.d,'沖の根','#fdba74'));
+  // 通すコース（着水→着き場→岸）
+  const hx=Xd(hold.d),hy=Yd(hold.depth),landX=Xd(trc.land[1]),ex=Xd(Math.max(10,hold.d*0.3));
+  g.strokeStyle=trc.color;g.lineWidth=3;g.beginPath();g.moveTo(landX,ySurf);g.lineTo(hx,hy);g.lineTo(ex,ySurf);g.stroke();
+  g.fillStyle=trc.color;g.beginPath();g.moveTo(ex,ySurf);g.lineTo(ex+10,ySurf-5);g.lineTo(ex+10,ySurf+5);g.closePath();g.fill();
+  g.fillStyle='#0a1622';g.strokeStyle=trc.color;g.lineWidth=2;g.beginPath();g.arc(landX,ySurf,4,0,7);g.fill();g.stroke();
+  // 魚の着き場
+  g.fillStyle=trc.color;g.beginPath();g.arc(hx,hy,6,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=2;g.stroke();
+  document.getElementById('sectionNote').innerHTML=
+    `断面測線：沿岸 ${aSec>=0?'+':''}${aSec}m（平面のコースに対応）。<b>${hold.label}</b>。`
+    +`<b>通し方</b>：${trc.label}（着水→着き場を通して岸へ）。`
+    +`海底形状はDean平衡＋砂州/根モデルの<b>推定</b>（サーフのミクロ地形は実測でなく推定）。`;
+}
+function safe(fn,label){try{fn();}catch(e){console.error('[layer:'+label+']',e);}}
+function render(){
+  const cp=curDateParts();
+  let data=[];
+  safe(()=>{dateV.textContent=fmtDate(cp.d)+`  ${YEAR}`;timeV.textContent=fmtMin(cp.min);
+    moonV.textContent=moonPhase(cp.dtUTC);
+    document.getElementById('mapClock').textContent=` … ${FISH[fishKey].label} / ${fmtDate(cp.d)} ${fmtMin(cp.min)}`;},'header');
+  safe(()=>{data=computeAll();},'compute');
+  safe(()=>drawMap(data),'map');
+  safe(drawTide,'tide');
+  safe(renderDetail,'detail');
+  safe(drawSection,'section');
+  safe(updateTuridocoLink,'turidoco');
+  safe(updateAnglersLink,'anglers');
+  safe(()=>renderTableDetail(data,cp),'table/detail');
+}
+function renderTableDetail(data,cp){
+  // テーブル
+  const rows=data.map((r,i)=>({...r,i}));
+  rows.sort((a,b)=>{
+    let va,vb;
+    if(sortKey==='score'){va=a.score;vb=b.score;}
+    else if(sortKey==='temp'){va=a.wt;vb=b.wt;}
+    else if(sortKey==='tide'){va=a.tideNow;vb=b.tideNow;}
+    else if(sortKey==='region'){va=a.s.region;vb=b.s.region;}
+    else{va=a.s.name;vb=b.s.name;}
+    return (va<vb?-1:va>vb?1:0)*sortDir;
+  });
+  const tb=document.querySelector('#tbl tbody');tb.innerHTML='';
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');if(r.i===selIdx)tr.className='sel';
+    const ty={port:'●',surf:'〜',rocky:'▲'}[r.s.type];
+    tr.innerHTML=`<td><span title="${TYPE_JP[r.s.type]}" style="color:var(--sub)">${ty}</span> ${r.s.name}</td><td>${r.s.region}</td>
+      <td>${r.wt.toFixed(1)}℃</td><td>${Math.round(r.tideNow)}</td>
+      <td class="sc" style="color:${heatColor(r.score/100)}">${r.score.toFixed(0)}</td>`;
+    tr.onclick=()=>{selIdx=r.i;render();};tb.appendChild(tr);
+  });
+  // 詳細
+  const d=data[selIdx],s=SPOTS[selIdx];
+  const subJ={sand:'砂地',sandmud:'砂泥',gravel:'砂利',rock:'岩礁',mixed:'砂＋変化'}[s.sub];
+  document.getElementById('tideTitle').textContent=' … '+s.name;
+  const bar=(lb,v)=>`<div class="b"><span>${lb}</span><div class="track"><div class="fill" style="width:${(v*100).toFixed(0)}%"></div></div><span style="width:34px;text-align:right">${(v*100).toFixed(0)}</span></div>`;
+  document.getElementById('spotinfo').innerHTML=
+   `<b>${s.name}</b>（${s.region}） <span class="pill">${TYPE_JP[s.type]}</span><span class="pill">${subJ}</span>
+    <span class="pill">${FISH[fishKey].label}</span><br>
+    総合スコア <b style="font-size:18px;color:${heatColor(d.score/100)}">${d.score.toFixed(0)}</b> /100<br>
+    水温 <b>${d.wt.toFixed(1)}℃</b>（適水温${FISH[fishKey].topt}℃）｜
+    現在潮位 <b>${Math.round(d.tideNow)}cm</b>｜
+    流速 <b>${Math.abs(d.cur.raw).toFixed(0)}cm/h</b>（${d.cur.raw>=0?'上げ':'下げ'}）
+    <div class="bars">
+      ${bar('季節',d.seas)}${bar('水温適性',d.tf)}${bar('タイプ適性',d.tfit)}
+      ${bar('底質適性',d.sub)}${bar('地形変化',s.str)}${bar('潮通し',s.flow)}
+      ${bar('波当たり適性',d.waveFit)}${bar('時合い',d.timeFac)}
+    </div>
+    <div class="tag" style="margin-top:6px">潮汐参照験潮所：${s.site.ref}（距離補間）</div>`;
+  // 潮位テキスト
+  const ext=findExtrema(s.site,cp.month,cp.day);
+  document.getElementById('tideInfo').innerHTML=
+   '本日の満干（推算・JST）： '+ext.map(e=>`${e.type==='H'?'満潮':'干潮'} ${fmtMin(e.min)}(${e.cm}cm)`).join(' ／ ');
+}
+
+// コントロール
+document.getElementById('fishSel').addEventListener('click',e=>{
+  if(e.target.dataset.f){fishKey=e.target.dataset.f;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b.dataset.f===fishKey));render();}});
+dateR.oninput=render;timeR.oninput=render;
+document.querySelectorAll('#tbl th').forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=(k==='name'||k==='region')?1:-1;}
+  document.querySelectorAll('#tbl th').forEach(h=>h.textContent=h.textContent.replace(/[▼▲]/g,''));
+  th.textContent+=sortDir<0?'▼':'▲';render();});
+window.addEventListener('resize',render);
+// 初期日付＝7/26(今日相当)
+dateR.value=Math.round((Date.UTC(2026,6,26)-Date.UTC(2026,0,1))/86400000);
+
+// 出典
+document.getElementById('sources').innerHTML=`
+ <b>潮汐</b>：気象庁 潮位表 掲載地点一覧表（調和定数, 2026）
+ <a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank">station.php</a>
+ ／ 小名浜60分潮 <a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/harms60.php?stn=ON&year=2026" target="_blank">harms60(ON)</a>
+ ／ 検証：小名浜 潮位表 <a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/suisan.php?stn=ON" target="_blank">suisan.php(ON)</a><br>
+ <b>水温</b>：気象庁 日本沿岸域の海面水温情報
+ <a href="https://www.data.jma.go.jp/kaiyou/data/db/kaikyo/series/engan/engan.html" target="_blank">engan</a>
+ ／ 福島県水産海洋研究センター 沿岸水温
+ <a href="https://www.pref.fukushima.lg.jp/sec/37380b/suion.html" target="_blank">定地水温</a><br>
+ <b>精度メモ</b>：潮位は主要4分潮＋副次4分潮の調和推算。小名浜の気象庁公表満干時刻と突合し
+ <b>満潮時刻±約15分・大潮小潮の潮位差を再現</b>（干潮側の一部で±10〜20cm程度の高さ誤差）。
+ 各地点は最寄験潮所を距離補間した推定値のため、港内位置・河口・湾奥では実潮と差が出ます。
+ 水温は月別クライマトロジー（海域代表値）で、日々の実測とは差があります。<br>
+ <b>実釣果</b>：本アプリは実釣果データを<b>保持しません</b>。各地点から
+ <a href="https://anglers.jp/" target="_blank">アングラーズ（anglers.jp）</a>の該当エリアページへ<b>リンクのみ</b>で誘導します（データは各サービスに帰属）。<br>
+ <b>海底地形（実測校正の検証）</b>：国土数値情報 沿岸海域メッシュ
+ <a href="https://nlftp.mlit.go.jp/ksj/gmlold/datalist/gmlold_KsjTmplt-C04.html" target="_blank">C04</a>
+ を取得・解析（出典：国土数値情報（沿岸海域メッシュ）国土交通省）したが、<b>収録範囲が北緯約34°以南で当エリア(茨城〜宮城)は未収録</b>のため実測校正は不可。海底地形はDean平衡＋砂州/根モデルの<b>推定</b>（実測はALBの<a href="https://turidoco.com/home/about" target="_blank">釣りどこ</a>で確認）。無償の全球代替[GEBCO/JODC/SRTM15+]は約450〜500mで沿岸ミクロ地形を解像不可、米NOAA CUDEM(3m)・欧EMODnet(115m)は日本域外。`;
+
+// 初回描画（DOM準備後・防御的に）。レイヤーはrender内で個別try/catch。
+function boot(){ safe(render,'initial-render'); }
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+else boot();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(r){ console.log('SW registered', r.scope); })
+      .catch(function(e){ console.warn('SW registration failed', e); });
+  });
+}
+</script>
+</body>
+</html>
