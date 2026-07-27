@@ -309,7 +309,7 @@ const EXTRA_SPOTS=[
  ['七ヶ浜(吉田浜磯)',38.288,141.075,'仙台湾','rocky','rock',0.70,0.60,0.65,null,120],
  ['鮎川地磯(牡鹿)',38.2975,141.5110,'仙台湾','rocky','rock',0.80,0.80,0.70,null,140],
  ['阿字ヶ浦海岸',36.394,140.611,'鹿島灘','surf','sand',0.50,0.55,0.72,3855,90],
- ['大津港',36.8291,140.7911,'常磐','port','mixed',0.60,0.70,0.35,null,110],
+ ['大津港',36.8286,140.7916,'常磐','port','mixed',0.60,0.70,0.35,null,150],
 ].map(a=>({name:a[0],lat:a[1],lon:a[2],region:a[3],type:a[4],sub:a[5],str:a[6],flow:a[7],wave:a[8],catchArea:a[9],offBearing:a[10]}));
 SPOTS.push(...EXTRA_SPOTS);
 
@@ -543,7 +543,7 @@ const SHORE_ANCHOR={
   '阿字ヶ浦海岸':{lat:36.394500,lon:140.611500,b:90},
   '鹿島港魚釣園':{lat:35.9378,lon:140.7007,b:120},
   '平潟港':{lat:36.8574,lon:140.7942,b:100},
-  '大津港':{lat:36.8291,lon:140.7911,b:110},
+  '大津港':{lat:36.8286,lon:140.7916,b:150},  // 2026-07-28 基準点=中央突堤南先端(構造物上)。沖=南南東(港口→開洋)。狙い所はSTRUCT_OVERRIDEで実測
   '松川浦':{lat:37.830613,lon:140.972033,b:95},
   '仙台港':{lat:38.261314,lon:141.020424,b:110},
   '会瀬漁港':{lat:36.5787,lon:140.6612,b:90},
@@ -951,7 +951,25 @@ function arrowPts(p1,p2){ // (a,d) meters → arrowhead barbs at p2
 }
 /* ===== 狙い所（名前付き構造）＝写真上に候補ピンで明示 ===== */
 const RIVER_SPOTS={'那珂湊港':1,'荒浜漁港(亘理)':1,'蒲生周辺':1,'松川浦':1,'請戸港':1,'富岡港':1,'深沼海岸(仙台)':1};
+// 実写(GSI航空写真)照合で狙い所の“絶対緯度経度”を確定した地点。genStructuresの機械配置を上書きし、
+// 逆投影で(a,d)へ変換してピンを実構造物へ確実に乗せる。順序＝配列先頭が第一候補(スコア最上位)。
+const STRUCT_OVERRIDE={
+  '大津港':[
+    {lat:36.8275,lon:140.7904,label:'新堤防(テトラ側)',reason:'港口の外洋向きテトラ堤防。ヒラメ・青物の本命（航空写真で確認）',fish:{aji:0.95,kisu:0.65,hirame:0.95}},
+    {lat:36.8280,lon:140.7931,label:'東の船溜まり・波返し',reason:'係留船まわりの岸壁・波返し。足元の潮通し（航空写真で確認）',fish:{aji:0.85,kisu:0.60,hirame:0.60}}
+  ]
+};
+function invAD(spot,lat,lon){ // 絶対緯度経度 → (a=沿岸m, d=沖m)。toLatLonの逆変換（同一原点・offBearing）
+  const th=(spot.offBearing!=null?spot.offBearing:90)*Math.PI/180;
+  const oLa=(spot.oLat!=null?spot.oLat:spot.lat), oLo=(spot.oLon!=null?spot.oLon:spot.lon);
+  const E=(lon-oLo)*111320*Math.cos(oLa*Math.PI/180), N=(lat-oLa)*111320;
+  return [E*Math.cos(th)-N*Math.sin(th), E*Math.sin(th)+N*Math.cos(th)];
+}
 function genStructures(spot){ // (a=沿岸m, d=沖m)。offBearingで写真上の緯度経度へ変換
+  if(STRUCT_OVERRIDE[spot.name]){ // 実測確定分は絶対座標→(a,d)へ逆変換して返す（機械配置より優先）
+    return STRUCT_OVERRIDE[spot.name].map(o=>{const ad=invAD(spot,o.lat,o.lon);
+      return {a:ad[0],d:ad[1],label:o.label,reason:o.reason,fish:o.fish};});
+  }
   const t=spot.type,S=[];
   const add=(a,d,label,reason,aji,kisu,hirame)=>S.push({a,d,label,reason,fish:{aji,kisu,hirame}});
   // 方針：テトラ/常夜灯/港口などの“具体名”は実在確認(OSMタグ/視認)できる時だけ。
@@ -979,10 +997,105 @@ function pinScore(st,fk,min,tn,cur){
   if(/流れ込み|河口/.test(st.label)) s*= (0.85+0.3*tn);
   return s;
 }
+/* ===== 静的 航空写真2Dビュー（Leaflet置換）：seamlessphoto <img>＋同一Webメルカトル変換の重畳 ===== */
+function renderPhotoStatic(spot){
+  const T=buildTerrain(spot); const DFOCUS=200; const TS=256;
+  const {month,day,dayFrac,min,dtUTC}=curDateParts();
+  const sc0=scoreSpot(spot,fishKey,dtUTC,month,dayFrac,min);
+  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac);
+  const cs=currentSpeed(spot.site,dtUTC),dir=cs.raw>=0?1:-1,tn=tideNormNow(spot);
+  // 表示範囲＝近岸帯(a:-200..200, d:-30..220)の4隅
+  const corners=[toLatLon(T,TERR.AMIN,-30),toLatLon(T,TERR.AMIN,DFOCUS+20),toLatLon(T,TERR.AMAX,-30),toLatLon(T,TERR.AMAX,DFOCUS+20)];
+  let miLa=1e9,maLa=-1e9,miLo=1e9,maLo=-1e9;
+  corners.forEach(c=>{miLa=Math.min(miLa,c[0]);maLa=Math.max(maLa,c[0]);miLo=Math.min(miLo,c[1]);maLo=Math.max(maLo,c[1]);});
+  const box=document.getElementById('leafmap');
+  const W=Math.max(320,Math.min(760,(box.clientWidth||box.parentElement.clientWidth||600)));
+  const H=Math.round(W*0.62);
+  const wpx=(lon,Z)=>(lon+180)/360*TS*Math.pow(2,Z);
+  const wpy=(lat,Z)=>{const s=Math.sin(lat*Math.PI/180);return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*TS*Math.pow(2,Z);};
+  let Z=18; for(;Z>=10;Z--){const pw=wpx(maLo,Z)-wpx(miLo,Z),ph=wpy(miLa,Z)-wpy(maLa,Z); if(pw<=W*0.94&&ph<=H*0.94)break;}
+  const cLon=(miLo+maLo)/2,cLat=(miLa+maLa)/2, left=wpx(cLon,Z)-W/2, top=wpy(cLat,Z)-H/2;
+  const xy=(lat,lon)=>[wpx(lon,Z)-left, wpy(lat,Z)-top];
+  const mpp=156543.03392*Math.cos(cLat*Math.PI/180)/Math.pow(2,Z);
+  const bR=(spot.offBearing!=null?spot.offBearing:90)*Math.PI/180, seaV=[Math.sin(bR),-Math.cos(bR)];
+  const f1=n=>Math.round(n*10)/10;
+  // 写真タイル
+  let tiles='';
+  const ax=Math.floor(left/TS),bx=Math.floor((left+W)/TS),ay=Math.floor(top/TS),by=Math.floor((top+H)/TS);
+  for(let tx=ax;tx<=bx;tx++)for(let ty=ay;ty<=by;ty++){const px=tx*TS-left,py=ty*TS-top;
+    tiles+='<img src="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/'+Z+'/'+tx+'/'+ty+'.jpg" style="position:absolute;left:'+f1(px)+'px;top:'+f1(py)+'px;width:256px;height:256px;pointer-events:none" onerror="this.style.opacity=0">';}
+  // 近岸ヒートマップ（(d,a)空間の小canvas→アフィンで写真に整合配置）
+  const HW=150,HH=120;
+  const hc=document.createElement('canvas');hc.width=HW;hc.height=HH;const hg=hc.getContext('2d');
+  for(let yi=0;yi<HH;yi++){const a=TERR.AMIN+(yi+0.5)/HH*(TERR.AMAX-TERR.AMIN);
+    for(let xj=0;xj<HW;xj++){const d=TERR.DMIN+(xj+0.5)/HW*(DFOCUS-TERR.DMIN);
+      hg.fillStyle=detailHeat(localScoreAt(T,a,d,fishKey,scalar));hg.fillRect(xj,yi,1,1);}}
+  // canvas (x=d:0→HW, y=a:AMIN→AMAX bottom) を pixel quad へ写す affine
+  const P00=xy(...toLatLon(T,TERR.AMIN,TERR.DMIN)), P10=xy(...toLatLon(T,TERR.AMIN,DFOCUS)), P01=xy(...toLatLon(T,TERR.AMAX,TERR.DMIN));
+  const m11=(P10[0]-P00[0])/HW, m12=(P10[1]-P00[1])/HW, m21=(P01[0]-P00[0])/HH, m22=(P01[1]-P00[1])/HH;
+  const heatCanvas='<canvas id="_phc" width="'+HW+'" height="'+HH+'" style="position:absolute;left:0;top:0;transform-origin:0 0;opacity:.72;pointer-events:none;transform:matrix('+f1(m11*100)/100+','+f1(m12*100)/100+','+f1(m21*100)/100+','+f1(m22*100)/100+','+f1(P00[0])+','+f1(P00[1])+')"></canvas>';
+  // ---- SVG オーバーレイ ----
+  let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="position:absolute;left:0;top:0;pointer-events:none" font-family="system-ui,sans-serif">';
+  const o=[spot.oLat!=null?spot.oLat:spot.lat, spot.oLon!=null?spot.oLon:spot.lon];
+  const [ox,oy]=xy(o[0],o[1]);
+  // 100/200m キャスト弧（基準点中心）
+  s+='<circle cx="'+f1(ox)+'" cy="'+f1(oy)+'" r="'+f1(100/mpp)+'" fill="none" stroke="#ffe14d" stroke-width="1.4" stroke-dasharray="2 5" opacity=".85"/>';
+  s+='<circle cx="'+f1(ox)+'" cy="'+f1(oy)+'" r="'+f1(200/mpp)+'" fill="none" stroke="#ff8c3a" stroke-width="1.4" stroke-dasharray="6 5" opacity=".85"/>';
+  // 断面測線（沖方向）
+  const secB=xy(...toLatLon(T,0,270));
+  s+='<line x1="'+f1(ox)+'" y1="'+f1(oy)+'" x2="'+f1(secB[0])+'" y2="'+f1(secB[1])+'" stroke="#c060ff" stroke-width="2" stroke-dasharray="5 4"/><text x="'+f1(secB[0]+4)+'" y="'+f1(secB[1])+'" font-size="12" fill="#fff" stroke="#000" stroke-width=".4">断面(沖)</text>';
+  let firstLabel='—', sts=[];
+  if(spot.banned){
+    s+='<rect x="'+f1(ox-60)+'" y="'+f1(oy-14)+'" width="120" height="24" rx="5" fill="#b91c1c"/><text x="'+f1(ox)+'" y="'+f1(oy+3)+'" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">🚫 釣り禁止</text>';
+  } else {
+    sts=genStructures(spot).map(st=>({st,sc:pinScore(st,fishKey,min,tn,cs.raw)})).sort((x,y)=>y.sc-x.sc);
+    const topN=Math.min(3,sts.length); firstLabel=sts.length?sts[0].st.label:'—';
+    // 通し方の一例（第一候補）
+    if(sts.length){const b=sts[0].st; const line=[[b.a,Math.min(DFOCUS-5,b.d+15)],[b.a,b.d],[Math.max(TERR.AMIN+10,b.a-25),Math.max(8,b.d*0.4)]].map(p=>xy(...toLatLon(T,p[0],p[1])));
+      s+='<path d="M'+line.map(p=>f1(p[0])+' '+f1(p[1])).join(' L')+'" fill="none" stroke="#38bdf8" stroke-width="3" opacity=".9"/>';}
+    // 候補ピン
+    sts.forEach((oo,idx)=>{const st=oo.st,ll=xy(...toLatLon(T,st.a,st.d)),topp=idx<topN;
+      const col=idx===0?'#f59e0b':(topp?'#22c55e':'#94a3b8');
+      s+='<circle cx="'+f1(ll[0])+'" cy="'+f1(ll[1])+'" r="'+(topp?7:4)+'" fill="'+col+'" stroke="#fff" stroke-width="'+(topp?2:1)+'"/>';
+      if(topp){s+='<text x="'+f1(ll[0]+10)+'" y="'+f1(ll[1]-6)+'" font-size="11" font-weight="700" fill="#fff" stroke="#000" stroke-width=".5">'+(idx+1)+'.'+st.label+'</text>';}
+    });
+  }
+  // 実防波堤先端
+  if(spot.bwTip){const t=xy(spot.bwTip[0],spot.bwTip[1]); s+='<circle cx="'+f1(t[0])+'" cy="'+f1(t[1])+'" r="7" fill="#f59e0b" stroke="#fff" stroke-width="2"/><text x="'+f1(t[0]+10)+'" y="'+f1(t[1]+3)+'" font-size="11" fill="#fff" stroke="#000" stroke-width=".5">堤防先端</text>';}
+  // 基準点
+  s+='<circle cx="'+f1(ox)+'" cy="'+f1(oy)+'" r="4" fill="#111" stroke="#fff" stroke-width="1.4"/>';
+  // 沖方位
+  s+='<g transform="translate('+(W-42)+',36)"><circle r="22" fill="#fff" opacity=".85" stroke="#666"/><line x1="0" y1="0" x2="'+f1(seaV[0]*17)+'" y2="'+f1(seaV[1]*17)+'" stroke="#06c" stroke-width="2.5"/><text x="0" y="-25" font-size="10" text-anchor="middle">沖</text></g>';
+  // スケール
+  const bar=200/mpp; s+='<g transform="translate(14,'+(H-16)+')"><rect x="-5" y="-14" width="'+(Math.round(bar)+130)+'" height="20" rx="3" fill="#000" opacity=".45"/><line x1="0" y1="0" x2="'+Math.round(bar)+'" y2="0" stroke="#fff" stroke-width="3"/><text x="0" y="-4" font-size="11" fill="#fff">200m ｜破線=100/200mキャスト</text></g>';
+  // 出典＋暫定
+  s+='<text x="'+(W-6)+'" y="'+(H-5)+'" font-size="10" fill="#fff" stroke="#000" stroke-width=".4" text-anchor="end">出典:国土地理院(航空写真)</text>';
+  if(spot.provisional) s+='<rect x="'+(W-118)+'" y="6" width="112" height="20" rx="4" fill="#ffcf33" opacity=".92"/><text x="'+(W-62)+'" y="20" font-size="11" font-weight="700" fill="#5a4a00" text-anchor="middle">暫定・座標要確認</text>';
+  s+='</svg>';
+  box.style.display='block'; box.style.position='relative'; box.style.height=H+'px'; box.style.width='100%'; box.style.overflow='hidden'; box.style.background='#0a1622'; box.style.borderRadius='8px';
+  box.innerHTML='<div style="position:relative;width:'+W+'px;height:'+H+'px">'+tiles+heatCanvas+s+'</div>';
+  // ヒートcanvasへ描画
+  const dst=document.getElementById('_phc'); if(dst){const dg=dst.getContext('2d'); dg.drawImage(hc,0,0);}
+  return {sts,cs,tn,dir,firstLabel};
+}
 function renderDetail(){
-  if(typeof L==='undefined')return;          // Leaflet未ロード→静的フォールバックのまま
   const spot=SPOTS[selIdx];
   document.getElementById('detailTitle').textContent=` … ${spot.name}（${TYPE_JP[spot.type]}）/ ${FISH[fishKey].label}`;
+  // ===== 静的 航空写真2Dビュー =====
+  const _ds=document.getElementById('detailStatic'); if(_ds)_ds.style.display='none';
+  const r=renderPhotoStatic(spot);
+  if(spot.banned){
+    document.getElementById('detailNote').innerHTML='<b style="color:#f87171">🚫 '+spot.name+'は釣り禁止区域の指定あり</b>（'+(spot.banReason||'')+'）。候補は表示しません。近隣の釣り可能な地点をご利用ください。';
+  } else {
+    const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ'}[fishKey];
+    const acc = spot.provisional?'この地点は<b style="color:#a06000">暫定座標（要ユーザー確認）</b>＝位置は目安。' : (spot.anchored?'この地点は<b>航空写真で位置確認済み</b>。':'この地点は座標が目安です。');
+    document.getElementById('detailNote').innerHTML=
+      `<b>下地＝航空写真(実物・国土地理院)／面＝釣れやすさヒートマップ(相対候補・モデル推定)</b>。${acc}`
+      +`ピンは“根拠のある候補(目印)”で釣れる保証ではありません。`
+      +`いま(${r.dir>0?'上げ':'下げ'}潮/潮位${(r.tn*100).toFixed(0)}%)の${FISH[fishKey].label}の第一候補＝<b>${r.firstLabel}</b>。参考タックル：${lure}。実水深は「釣りどこ(ALB)」で確認を。`;
+  }
+  return; // 以降の旧Leaflet実装は不使用（静的写真ビューへ置換）
+  /* eslint-disable */
   document.getElementById('detailStatic').style.display='none';
   document.getElementById('leafmap').style.display='block';
   if(!ensureLMap(spot))return;
