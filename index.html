@@ -989,12 +989,22 @@ function genStructures(spot){ // (a=沿岸m, d=沖m)。offBearingで写真上の
   if(RIVER_SPOTS[spot.name]) add(20,60,'流れ込み・河口(目安)','汽水・ベイト（位置は目安／要確認）',0.9,0.6,0.9);
   return S;
 }
-function pinScore(st,fk,min,tn,cur){
+function pinScore(st,fk,min,tn,cur,bi){
   let s=st.fish[fk]||0.1;
   const night=(min<300||min>1080);
   if(fk==='aji'&&/常夜灯/.test(st.label)) s*= night?1.3:0.7;
   if(/離岸流|払い出し/.test(st.label)) s*= (0.7+0.6*Math.min(1,Math.abs(cur)/30));
   if(/流れ込み|河口/.test(st.label)) s*= (0.85+0.3*tn);
+  // ベイト反映(フィッシュイーターのみ)：ベイト集積地形ほど高ベイトで加点/低ベイトで減点＝近接候補の決定打。
+  // biは地点レベルのベイト指数0..1(未指定は0.5=中立)。魚種別baitWで強さ一貫、キス(baitW=0)は無反映。
+  const bw=(typeof FISH!=='undefined'&&FISH[fk])?(FISH[fk].baitW||0):0;
+  if(bw>0){ const b=(bi==null?0.5:bi);
+    let aggr=0.35; // 既定(汎地形)
+    if(/河口|流れ込み/.test(st.label)) aggr=1.0;                                       // 汽水＝最強のベイト集積
+    else if(/離岸流|払い出し|港口|港内|堤防際|常夜灯|船溜まり|波返し|テトラ|堤防/.test(st.label)) aggr=0.7; // 潮通し構造
+    else if(/駆け上がり|かけ上がり|砂/.test(st.label)) aggr=0.4;                         // 開けた地形＝集積弱
+    s *= 1 + bw*0.6*aggr*(b-0.5);
+  }
   return s;
 }
 /* ===== 静的 航空写真2Dビュー（Leaflet置換）：seamlessphoto <img>＋同一Webメルカトル変換の重畳 ===== */
@@ -1002,7 +1012,7 @@ function renderPhotoStatic(spot){
   const T=buildTerrain(spot); const DFOCUS=200; const TS=256;
   const {month,day,dayFrac,min,dtUTC}=curDateParts();
   const sc0=scoreSpot(spot,fishKey,dtUTC,month,dayFrac,min);
-  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac);
+  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac)*sc0.baitMult; // ×baitMult＝詳細ヒートもベイトに反応(魚種別baitW込み/キスは1.0)
   const cs=currentSpeed(spot.site,dtUTC),dir=cs.raw>=0?1:-1,tn=tideNormNow(spot);
   // 表示範囲＝近岸帯(a:-200..200, d:-30..220)の4隅
   const corners=[toLatLon(T,TERR.AMIN,-30),toLatLon(T,TERR.AMIN,DFOCUS+20),toLatLon(T,TERR.AMAX,-30),toLatLon(T,TERR.AMAX,DFOCUS+20)];
@@ -1048,7 +1058,9 @@ function renderPhotoStatic(spot){
   if(spot.banned){
     s+='<rect x="'+f1(ox-60)+'" y="'+f1(oy-14)+'" width="120" height="24" rx="5" fill="#b91c1c"/><text x="'+f1(ox)+'" y="'+f1(oy+3)+'" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">🚫 釣り禁止</text>';
   } else {
-    sts=genStructures(spot).map(st=>({st,sc:pinScore(st,fishKey,min,tn,cs.raw)})).sort((x,y)=>y.sc-x.sc);
+    // STRUCT_OVERRIDE地点は定義配列順を固定（baitで順位を動かさない＝大津:新堤防=第一を保護）。非override地点のみbaitで並び替え。
+    const _fixed=!!STRUCT_OVERRIDE[spot.name], _list=genStructures(spot), _bi=sc0.bait?sc0.bait.index:0.5;
+    sts=_list.map((st,i)=>({st, sc:_fixed?(_list.length-i):pinScore(st,fishKey,min,tn,cs.raw,_bi)})).sort((x,y)=>y.sc-x.sc);
     const topN=Math.min(3,sts.length); firstLabel=sts.length?sts[0].st.label:'—';
     // 通し方の一例（第一候補）
     if(sts.length){const b=sts[0].st; const line=[[b.a,Math.min(DFOCUS-5,b.d+15)],[b.a,b.d],[Math.max(TERR.AMIN+10,b.a-25),Math.max(8,b.d*0.4)]].map(p=>xy(...toLatLon(T,p[0],p[1])));
@@ -1102,7 +1114,7 @@ function renderDetail(){
   LMAP.invalidateSize();
   const {month,day,dayFrac,min,dtUTC}=curDateParts();
   const sc0=scoreSpot(spot,fishKey,dtUTC,month,dayFrac,min);
-  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac);
+  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac)*sc0.baitMult; // ×baitMult＝詳細ヒートもベイトに反応(魚種別baitW込み/キスは1.0)
   const T=buildTerrain(spot),Fe=detectFeatures(T);
   LGRP.clearLayers();
   const DFOCUS=200; // キャスト到達帯：汀線〜沖200mに解像度を集中
@@ -1287,7 +1299,7 @@ function renderTableDetail(data,cp){
     </div>
     <div class="tag" style="margin-top:4px">
       ベイト指数=イワシ/シラス等の“居そうな度合い”（季節${(d.bait.S*100).toFixed(0)}/水温${(d.bait.T*100).toFixed(0)}/地形${(d.bait.G*100).toFixed(0)}を0.4:0.3:0.3で合成）。
-      ${d.baitW>0?`本魚種はフィッシュイーターのため総合スコアへ×${d.baitMult.toFixed(2)}で反映`:'本魚種は非フィッシュイーターのため未反映'}。
+      ${d.baitW>0?`本魚種はフィッシュイーターのため<b>総合スコア・詳細ヒートマップ（×${d.baitMult.toFixed(2)}）・狙い所の優先順位</b>に反映`:'本魚種は非フィッシュイーター（ベイト無反映）'}。
       <b>実測CPUEでなく季節・水温・地形からの推定</b>です。
     </div>
     <div class="tag" style="margin-top:4px">潮汐参照験潮所：${s.site.ref}（距離補間）</div>`;
