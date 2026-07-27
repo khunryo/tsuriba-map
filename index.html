@@ -274,7 +274,7 @@ const SPOTS=[
  ['阿字ヶ浦',36.397,140.611,'鹿島灘','sand',0.4,0.6,90],
  ['日立港',36.4920,140.6480,'鹿島灘','mixed',0.6,0.7,90],
  ['会瀬漁港',36.5787,140.6612,'鹿島灘','rock',0.6,0.6,90],
- ['平潟港',36.837,140.807,'常磐','mixed',0.6,0.7,100],
+ ['平潟港',36.8574,140.7942,'常磐','mixed',0.6,0.7,100],
  ['小名浜港',36.933,140.902,'常磐','mixed',0.7,0.8,120],
  ['江名港',36.995,140.918,'常磐','rock',0.6,0.6,100],
  ['四倉港',37.101,140.993,'常磐','sand',0.5,0.6,95],
@@ -309,7 +309,7 @@ const EXTRA_SPOTS=[
  ['七ヶ浜(吉田浜磯)',38.288,141.075,'仙台湾','rocky','rock',0.70,0.60,0.65,null,120],
  ['鮎川地磯(牡鹿)',38.2975,141.5110,'仙台湾','rocky','rock',0.80,0.80,0.70,null,140],
  ['阿字ヶ浦海岸',36.394,140.611,'鹿島灘','surf','sand',0.50,0.55,0.72,3855,90],
- ['大津港',36.8586,140.7960,'常磐','port','mixed',0.60,0.70,0.35,null,95],
+ ['大津港',36.8291,140.7911,'常磐','port','mixed',0.60,0.70,0.35,null,110],
 ].map(a=>({name:a[0],lat:a[1],lon:a[2],region:a[3],type:a[4],sub:a[5],str:a[6],flow:a[7],wave:a[8],catchArea:a[9],offBearing:a[10]}));
 SPOTS.push(...EXTRA_SPOTS);
 
@@ -356,6 +356,47 @@ function waterTemp(region,month,dayFrac){ // 月中央基準に線形補間で�
 }
 
 /* =========================================================================
+   4b) ベイト指数 v1（内蔵データで完結・外部ライブ取得なし）
+   イワシ/シラス等の小魚ベイトの「居そうな度合い」を、季節性・水温適性・地形集積から推定。
+   出典：季節性＝各県水産試験場/資源評価の来遊傾向、水温＝気象庁沿岸SST。
+   ※実測CPUEではなく推定。フィッシュイーター(ヒラメ等)のスコアに乗算的に効かせる。
+   ========================================================================= */
+// 月別(1-12) 0..1 イワシ/シラス来遊の濃さ（茨城〜宮城 太平洋岸の概況）：
+//   4〜11月に濃く、晩春(5-6)と秋(9-10)の二山、盛夏(7-8)は北上索餌群でやや低、真冬(12-3)薄い
+const BAIT_SEASON_BASE=[0.15,0.12,0.18,0.45,0.78,0.85,0.68,0.70,0.90,0.85,0.55,0.25];
+// 海域(県)補正：仙台湾(宮城)は夏〜秋厚め、鹿島灘は春が早く盛夏やや薄
+const BAIT_REGION_ADJ={
+ '鹿島灘':[0,0,0.03,0.06,0.06,0.02,-0.06,-0.05,0.00,0.04,0.05,0.02],
+ '常磐'  :[0,0,0.00,0.02,0.04,0.03,0.00,0.03,0.05,0.05,0.02,0.00],
+ '仙台湾':[0,0,-0.02,-0.03,0.00,0.03,0.08,0.10,0.08,0.05,0.00,-0.02],
+};
+function baitSeason(region,month,dayFrac){
+  const adj=BAIT_REGION_ADJ[region]||[]; const x=month-1+(dayFrac-0.5), i0=Math.floor(x), t=x-i0;
+  const v=(k)=>{const m=((k%12)+12)%12; return Math.max(0,Math.min(1,BAIT_SEASON_BASE[m]+(adj[m]||0)));};
+  return v(i0)*(1-t)+v(i0+1)*t;
+}
+function baitTempFit(wt){ // ベイトが乗りやすい帯 概ね16〜23℃を高、極端な冷/高水温を減点（台形）
+  if(wt>=16&&wt<=23) return 1;
+  if(wt<16) return Math.max(0,1-(16-wt)/9);   // 7℃で0
+  return Math.max(0,1-(wt-23)/6);             // 29℃で0
+}
+function baitGeo(spot){ // 河口・港・潮通しからのベイト集積（0..1）
+  let g=0.30;
+  if(typeof RIVER_SPOTS!=='undefined'&&RIVER_SPOTS[spot.name]) g+=0.35; // 河口＝プランクトン/ベイト集積
+  if(spot.type==='port') g+=0.12;                                       // 港内外の潮・常夜灯
+  g+=0.25*(spot.flow||0);                                               // 潮通し
+  return Math.max(0,Math.min(1,g));
+}
+const BAIT_W={wS:0.4,wT:0.3,wG:0.3};
+function baitIndex(spot,month,dayFrac){
+  const S=baitSeason(spot.region,month,dayFrac);
+  const T=baitTempFit(waterTemp(spot.region,month,dayFrac));
+  const G=baitGeo(spot);
+  const index=Math.max(0,Math.min(1, BAIT_W.wS*S+BAIT_W.wT*T+BAIT_W.wG*G));
+  return {index,S,T,G};
+}
+
+/* =========================================================================
    5) 魚種プロファイル（5要素モデル：季節/水温/底質/地形変化/潮通し + 時合い）
    ========================================================================= */
 const SUB=['sand','sandmud','gravel','rock','mixed'];
@@ -368,6 +409,7 @@ const FISH={
    wCurr:.5,wMazume:.35,                 // 時合い：潮動く＋朝夕マズメ
    typeFit:{port:1.0,rocky:0.85,surf:0.40}, // 港/磯の潮通し・回遊。開けたサーフは低
    waveOpt:0.45,waveSig:0.30,wWave:0.15,
+   baitW:0.30, // アジもシラス等を捕食＝弱めにベイト指数を反映
  },
  kisu:{label:'キス',
    season:[.1,.1,.15,.35,.65,.9,1,1,.85,.6,.3,.15],
@@ -377,6 +419,7 @@ const FISH={
    wCurr:.4,wMazume:.3,
    typeFit:{port:0.6,rocky:0.20,surf:1.0},  // 遠浅砂サーフ本命。磯は不適
    waveOpt:0.40,waveSig:0.22,wWave:0.22,     // 荒れすぎは苦手
+   baitW:0.0,  // キスは非フィッシュイーター（ゴカイ類食）＝ベイト指数を掛けない
  },
  hirame:{label:'ヒラメ',
    season:[.55,.5,.55,.65,.6,.5,.45,.45,.7,.9,1,.85], // 秋〜春有利, 盛夏低
@@ -386,6 +429,7 @@ const FISH={
    wCurr:.5,wMazume:.45,
    typeFit:{port:0.7,rocky:0.55,surf:1.0},  // サーフ本命。港湾口/磯際も可
    waveOpt:0.60,waveSig:0.35,wWave:0.20,     // 適度な波・離岸流でベイト寄る
+   baitW:1.0,  // フィッシュイーター＝ベイト指数をしっかり反映
  }
 };
 const TYPE_JP={port:'港',surf:'サーフ',rocky:'磯'};
@@ -414,12 +458,16 @@ function scoreSpot(spot,fishKey,dtUTC,month,dayFrac,minOfDay){
   const tfit=F.typeFit[spot.type];                                   // 地形タイプ生息適性
   const waveFit=gauss(spot.wave,F.waveOpt,F.waveSig);                // 波当たり適性
   const waveAdj=1+F.wWave*(waveFit-0.5);                             // ±の小補正
-  const spotBase=seas*tf*base*tfit*waveAdj;
+  // ベイト指数v1をフィッシュイーターに乗算的に反映（baitW=反映の強さ）
+  const bait=baitIndex(spot,month,dayFrac);
+  const baitW=F.baitW||0;
+  const baitMult=1 - baitW*0.6*(1-bait.index);                       // BI=1→1.0, BI=0→(1-0.6*baitW)
+  const spotBase=seas*tf*base*tfit*waveAdj*baitMult;
   const cur=currentSpeed(spot.site,dtUTC);
   const maz=mazume(minOfDay);
   const timeFac=(F.wCurr*cur.spd+F.wMazume*maz)/(F.wCurr+F.wMazume);
   const score=Math.max(0,spotBase)*(0.35+0.65*timeFac);
-  return {score:score*100, seas,tf,sub,base,tfit,waveFit,spotBase,cur,maz,timeFac,wt};
+  return {score:score*100, seas,tf,sub,base,tfit,waveFit,spotBase,cur,maz,timeFac,wt, bait,baitMult,baitW};
 }
 
 /* =========================================================================
@@ -489,36 +537,52 @@ const LAT0=35.6,LAT1=38.6,LON0=140.35,LON1=141.7;
 // 実座標＝OSMの実水際(natural=coastline)最近傍点。方位は当海岸の外洋側＝東(90〜110°)で固定
 // （OSM法線は港/潟で不安定=南向き等になるため、位置はOSM実測・向きは東で確定）
 const SHORE_ANCHOR={
-  // 2026-07-27 ユーザー座標照合(ランドマーク基準＋海岸線幾何補間)で17地点を更新。既存ANCHOR含め上書き。
-  '大洗港':{lat:36.3100,lon:140.5970,b:90},
-  '那珂湊港':{lat:36.3270,lon:140.6080,b:100},
+  // 2026-07-28 全36地点 航空写真(GSI seamlessphoto)＋海岸線スナップで再照合。確定分を反映。
+  // --- OKで据置/微修正 ---
   '阿字ヶ浦':{lat:36.397602,lon:140.612040,b:90},
   '阿字ヶ浦海岸':{lat:36.394500,lon:140.611500,b:90},
   '鹿島港魚釣園':{lat:35.9378,lon:140.7007,b:120},
-  '平潟港':{lat:36.836074,lon:140.804422,b:100},
-  '大津港':{lat:36.8586,lon:140.7960,b:95},
-  '日立港':{lat:36.4920,lon:140.6480,b:90},
+  '平潟港':{lat:36.8574,lon:140.7942,b:100},
+  '大津港':{lat:36.8291,lon:140.7911,b:110},
   '松川浦':{lat:37.830613,lon:140.972033,b:95},
   '仙台港':{lat:38.261314,lon:141.020424,b:110},
-  // 以下は今回新規にANCHOR化（生配列も同値に更新済み）
   '会瀬漁港':{lat:36.5787,lon:140.6612,b:90},
-  '相馬原釜港':{lat:37.8365,lon:140.9850,b:90},
-  '磯浜漁港(山元)':{lat:37.9655,lon:140.9325,b:90},
   '蒲生周辺':{lat:38.2540,lon:141.0150,b:90},
-  '塩釜港':{lat:38.3155,lon:141.0230,b:130},
-  '大竹海岸':{lat:36.1550,lon:140.6380,b:100},
-  '日川浜海岸':{lat:35.8600,lon:140.7750,b:100},
-  '下津海岸':{lat:35.9800,lon:140.6880,b:100},
-  '四倉海岸':{lat:37.1080,lon:140.9980,b:110},
-  '仙南サーフ(山元)':{lat:37.9300,lon:140.9280,b:90},
   '磯崎/酒列':{lat:36.3835,lon:140.6255,b:85},
-  '塩屋崎地磯':{lat:36.9735,lon:140.9795,b:120},
-  '鮎川地磯(牡鹿)':{lat:38.2975,lon:141.5110,b:140}
+  // --- 航空写真照合で確定修正（旧値は海上/内陸にズレていた）---
+  '大洗港':{lat:36.30525,lon:140.57826,b:100},
+  '那珂湊港':{lat:36.33872,lon:140.60064,b:100},
+  '日立港':{lat:36.49111,lon:140.62171,b:100},
+  '四倉港':{lat:37.10249,lon:140.99102,b:95},
+  '富岡港':{lat:37.33819,lon:141.02731,b:100},
+  '相馬原釜港':{lat:37.83720,lon:140.97669,b:95},
+  '磯浜漁港(山元)':{lat:37.96520,lon:140.91689,b:95},
+  '荒浜漁港(亘理)':{lat:38.03728,lon:140.91541,b:95},
+  '七ヶ浜':{lat:38.30660,lon:141.08321,b:110},
+  '塩釜港':{lat:38.31918,lon:141.06339,b:120},
+  '仙南サーフ(山元)':{lat:37.92967,lon:140.92186,b:95},
+  '塩屋崎地磯':{lat:36.97246,lon:140.97246,b:110},
+  '七ヶ浜(吉田浜磯)':{lat:38.29098,lon:141.06818,b:120},
+  '鮎川地磯(牡鹿)':{lat:38.29671,lon:141.50902,b:120},
+  // --- サーフ汀線寄せ（waterareaスナップ。代表点・暫定）---
+  '日川浜海岸':{lat:35.85833,lon:140.77500,b:100},
+  '下津海岸':{lat:35.97809,lon:140.68553,b:100},
+  '北泉海岸':{lat:37.58040,lon:141.00101,b:95},
+  '深沼海岸(仙台)':{lat:38.2000,lon:141.0000,b:95},  // 暫定(汀線一致弱)
+  '大竹海岸':{lat:36.1550,lon:140.6380,b:100},        // 暫定(GSI海岸線なし)
+  '五浦海岸':{lat:36.79100,lon:140.81100,b:95},       // 六角堂付近
+  // --- 暫定・要ユーザー確認（航空写真で港に一致せず/GSI無。地元知識で要確定。差し替え前提）---
+  '波崎新港':{lat:35.79060,lon:140.83550,b:90},   // 暫定：利根川河口の新港と推定
+  '江名港':{lat:36.99650,lon:140.91950,b:100},    // 暫定
+  '請戸港':{lat:37.47830,lon:141.03850,b:95},     // 暫定：震災後再建
+  '荒浜漁港(亘理)':{lat:38.03728,lon:140.91541,b:95} // 暫定：鳥の海。港口/波返しへ要調整
 };
+// 暫定（要ユーザー確認）＝UIに「暫定」バッジ表示。ユーザー座標受領後に差し替え。
+const PROVISIONAL={'波崎新港':1,'江名港':1,'請戸港':1,'荒浜漁港(亘理)':1,'大竹海岸':1,'深沼海岸(仙台)':1};
 const BW_TIP={ // 実防波堤の先端（絶対座標）※各地点の原点から概ね400m以内の物のみ有効
   '那珂湊港':[36.338166,140.605233],
-  '仙台港':[38.272638,141.025256],
-  '大津港':[36.8595,140.7985]
+  '仙台港':[38.272638,141.025256]
+  // '大津港':[36.8595,140.7985] ← 旧ANCHOR(平潟港を誤指)に付随。大津漁港の実座標(36.8291,140.7911)へ修正したため削除。
   // '阿字ヶ浦':[36.386828,140.618878] ← 原点の約1.2km南(磯崎側)で取り違え。GSI目視により削除。
 };
 const BANNED={'小名浜港':'港内は釣り禁止区域指定あり'}; // 釣り禁止（判明分）
@@ -540,6 +604,7 @@ SPOTS.forEach(s=>{const a=SHORE_ANCHOR[s.name];
     else { console.warn('構造物ピン除外(400m超):'+s.name+' 距離='+Math.round(d)+'m'); }
   }
   if(BANNED[s.name]){s.banned=true;s.banReason=BANNED[s.name];}
+  if(typeof PROVISIONAL!=='undefined'&&PROVISIONAL[s.name]){s.provisional=true;}
 });
 function proj(lat,lon,W,H,pad){
   const x=pad+ (lon-LON0)/(LON1-LON0)*(W-2*pad);
@@ -1095,7 +1160,7 @@ function renderTableDetail(data,cp){
   document.getElementById('tideTitle').textContent=' … '+s.name;
   const bar=(lb,v)=>`<div class="b"><span>${lb}</span><div class="track"><div class="fill" style="width:${(v*100).toFixed(0)}%"></div></div><span style="width:34px;text-align:right">${(v*100).toFixed(0)}</span></div>`;
   document.getElementById('spotinfo').innerHTML=
-   `<b>${s.name}</b>（${s.region}） <span class="pill">${TYPE_JP[s.type]}</span><span class="pill">${subJ}</span>
+   `<b>${s.name}</b>（${s.region}） <span class="pill">${TYPE_JP[s.type]}</span><span class="pill">${subJ}</span>${s.provisional?'<span class="pill" style="background:#ffe0a0;color:#7a4a00;border-color:#e0a040">暫定・座標要確認</span>':''}
     <span class="pill">${FISH[fishKey].label}</span><br>
     総合スコア <b style="font-size:18px;color:${heatColor(d.score/100)}">${d.score.toFixed(0)}</b> /100<br>
     水温 <b>${d.wt.toFixed(1)}℃</b>（適水温${FISH[fishKey].topt}℃）｜
@@ -1105,8 +1170,14 @@ function renderTableDetail(data,cp){
       ${bar('季節',d.seas)}${bar('水温適性',d.tf)}${bar('タイプ適性',d.tfit)}
       ${bar('底質適性',d.sub)}${bar('地形変化',s.str)}${bar('潮通し',s.flow)}
       ${bar('波当たり適性',d.waveFit)}${bar('時合い',d.timeFac)}
+      ${bar('ベイト指数',d.bait.index)}
     </div>
-    <div class="tag" style="margin-top:6px">潮汐参照験潮所：${s.site.ref}（距離補間）</div>`;
+    <div class="tag" style="margin-top:4px">
+      ベイト指数=イワシ/シラス等の“居そうな度合い”（季節${(d.bait.S*100).toFixed(0)}/水温${(d.bait.T*100).toFixed(0)}/地形${(d.bait.G*100).toFixed(0)}を0.4:0.3:0.3で合成）。
+      ${d.baitW>0?`本魚種はフィッシュイーターのため総合スコアへ×${d.baitMult.toFixed(2)}で反映`:'本魚種は非フィッシュイーターのため未反映'}。
+      <b>実測CPUEでなく季節・水温・地形からの推定</b>です。
+    </div>
+    <div class="tag" style="margin-top:4px">潮汐参照験潮所：${s.site.ref}（距離補間）</div>`;
   // 潮位テキスト
   const ext=findExtrema(s.site,cp.month,cp.day);
   document.getElementById('tideInfo').innerHTML=
@@ -1139,6 +1210,7 @@ document.getElementById('sources').innerHTML=`
  <a href="https://www.data.jma.go.jp/kaiyou/data/db/kaikyo/series/engan/engan.html" target="_blank">engan</a>
  ／ 福島県水産海洋研究センター 沿岸水温
  <a href="https://www.pref.fukushima.lg.jp/sec/37380b/suion.html" target="_blank">定地水温</a><br>
+ <b>ベイト指数（推定）</b>：イワシ/シラス等の来遊季節性＝各県水産試験場・資源評価の傾向（茨城県<a href="https://www.pref.ibaraki.jp/nourinsuisan/gyoshin/index.html" target="_blank">漁業情報</a>、水産研究・教育機構 <a href="https://www.fra.affrc.go.jp/" target="_blank">資源評価</a>）＋水温（気象庁沿岸SST）＋河口/港/潮通しの地形集積から合成。<b>実測CPUEではなく推定値</b>（日次シラスCPUE等のライブ取込は今後）。<br>
  <b>精度メモ</b>：潮位は主要4分潮＋副次4分潮の調和推算。小名浜の気象庁公表満干時刻と突合し
  <b>満潮時刻±約15分・大潮小潮の潮位差を再現</b>（干潮側の一部で±10〜20cm程度の高さ誤差）。
  各地点は最寄験潮所を距離補間した推定値のため、港内位置・河口・湾奥では実潮と差が出ます。
