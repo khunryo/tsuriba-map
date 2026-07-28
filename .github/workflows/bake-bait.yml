@@ -1,0 +1,29 @@
+name: bake-bait
+# 気象庁沿岸SST + 茨城船曳シラスCPUE を取得し bait_live.json を日次更新
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run bake_bait.js
+        run: node bake_bait.js
+      - name: Commit bait_live.json if changed
+        run: |
+          if ! git diff --quiet -- bait_live.json; then
+            git config user.name "bake-bot"
+            git config user.email "bake@users.noreply.github.com"
+            git add bait_live.json
+            git commit -m "chore(bake): update bait_live.json"
+            git push
+          else
+            echo "no change"
+          fi
