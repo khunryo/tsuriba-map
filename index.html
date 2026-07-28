@@ -91,6 +91,7 @@
         <button data-f="aji" class="on">アジ</button>
         <button data-f="kisu">キス</button>
         <button data-f="hirame">ヒラメ</button>
+        <button data-f="iwashi">イワシ</button>
       </div>
       <div class="row"><label class="lbl">日付</label>
         <input type="date" id="dateD" style="background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:14px;color-scheme:dark">
@@ -461,6 +462,17 @@ const FISH={
    typeFit:{port:0.7,rocky:0.55,surf:1.0},  // サーフ本命。港湾口/磯際も可
    waveOpt:0.60,waveSig:0.35,wWave:0.20,     // 適度な波・離岸流でベイト寄る
    baitW:1.0,  // フィッシュイーター＝ベイト指数をしっかり反映
+ },
+ iwashi:{label:'イワシ',
+   season:[.2,.2,.25,.4,.7,.85,.9,.9,.95,.85,.6,.3], // 晩春〜秋（シラス回遊に同調）
+   topt:20,tsig:6,                                    // 広温性
+   subFit:{sand:.6,sandmud:.6,gravel:.6,rock:.65,mixed:.7}, // 中層回遊＝底質依存低
+   wSub:.5,wStr:.7,wFlow:1.8,                         // 群れ・潮通し最重視
+   wCurr:.5,wMazume:.4,                               // 時合い：潮・朝夕
+   typeFit:{port:1.0,rocky:0.6,surf:0.5},             // 港/堤防サビキ本命
+   waveOpt:0.40,waveSig:0.28,wWave:0.15,              // 穏やか選好
+   baitW:0.0,        // イワシは捕食者でない＝ベイト指数(捕食圧)は掛けない
+   baitfish:true,    // ベイトフィッシュ自身＝シラス船曳CPUEを“現況(abundMult)”として直接反映
  }
 };
 const TYPE_JP={port:'港',surf:'サーフ',rocky:'磯'};
@@ -493,12 +505,14 @@ function scoreSpot(spot,fishKey,dtUTC,month,dayFrac,minOfDay){
   const bait=baitIndex(spot,month,dayFrac);
   const baitW=F.baitW||0;
   const baitMult=1 - baitW*0.6*(1-bait.index);                       // BI=1→1.0, BI=0→(1-0.6*baitW)
-  const spotBase=seas*tf*base*tfit*waveAdj*baitMult;
+  // イワシ＝ベイトフィッシュ自身。シラス船曳CPUEを季節と鮮度ブレンドしたbait.Sを“現況”として直接反映（非イワシは1.0＝完全不変）
+  const abundMult = F.baitfish ? (0.4 + 0.6*bait.S) : 1;
+  const spotBase=seas*tf*base*tfit*waveAdj*baitMult*abundMult;
   const cur=currentSpeed(spot.site,dtUTC);
   const maz=mazume(minOfDay);
   const timeFac=(F.wCurr*cur.spd+F.wMazume*maz)/(F.wCurr+F.wMazume);
   const score=Math.max(0,spotBase)*(0.35+0.65*timeFac);
-  return {score:score*100, seas,tf,sub,base,tfit,waveFit,spotBase,cur,maz,timeFac,wt, bait,baitMult,baitW};
+  return {score:score*100, seas,tf,sub,base,tfit,waveFit,spotBase,cur,maz,timeFac,wt, bait,baitMult,baitW, abundMult, baitfish:!!F.baitfish};
 }
 
 /* =========================================================================
@@ -1024,7 +1038,7 @@ function genStructures(spot){ // (a=沿岸m, d=沖m)。offBearingで写真上の
   return S;
 }
 function pinScore(st,fk,min,tn,cur,bi){
-  let s=st.fish[fk]||0.1;
+  let s=st.fish[fk]|| (fk==='iwashi'?(st.fish.aji||0.1):0.1); // イワシはアジ親和度を代理（港/潮通しのサビキ想定）
   const night=(min<300||min>1080);
   if(fk==='aji'&&/常夜灯/.test(st.label)) s*= night?1.3:0.7;
   if(/離岸流|払い出し/.test(st.label)) s*= (0.7+0.6*Math.min(1,Math.abs(cur)/30));
@@ -1046,7 +1060,7 @@ function renderPhotoStatic(spot){
   const T=buildTerrain(spot); const DFOCUS=200; const TS=256;
   const {month,day,dayFrac,min,dtUTC}=curDateParts();
   const sc0=scoreSpot(spot,fishKey,dtUTC,month,dayFrac,min);
-  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac)*sc0.baitMult; // ×baitMult＝詳細ヒートもベイトに反応(魚種別baitW込み/キスは1.0)
+  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac)*sc0.baitMult*sc0.abundMult; // ×baitMult＝詳細ヒートもベイトに反応(魚種別baitW込み/キスは1.0)
   const cs=currentSpeed(spot.site,dtUTC),dir=cs.raw>=0?1:-1,tn=tideNormNow(spot);
   // 表示範囲＝近岸帯(a:-200..200, d:-30..220)の4隅
   const corners=[toLatLon(T,TERR.AMIN,-30),toLatLon(T,TERR.AMIN,DFOCUS+20),toLatLon(T,TERR.AMAX,-30),toLatLon(T,TERR.AMAX,DFOCUS+20)];
@@ -1133,7 +1147,7 @@ function renderDetail(){
   if(spot.banned){
     document.getElementById('detailNote').innerHTML='<b style="color:#f87171">🚫 '+spot.name+'は釣り禁止区域の指定あり</b>（'+(spot.banReason||'')+'）。候補は表示しません。近隣の釣り可能な地点をご利用ください。';
   } else {
-    const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ'}[fishKey];
+    const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ', iwashi:'サビキ（アミコマセ）'}[fishKey];
     const acc = spot.provisional?'この地点は<b style="color:#a06000">暫定座標（要ユーザー確認）</b>＝位置は目安。' : (spot.anchored?'この地点は<b>航空写真で位置確認済み</b>。':'この地点は座標が目安です。');
     document.getElementById('detailNote').innerHTML=
       `<b>下地＝航空写真(実物・国土地理院)／面＝釣れやすさヒートマップ(相対候補・モデル推定)</b>。${acc}`
@@ -1148,7 +1162,7 @@ function renderDetail(){
   LMAP.invalidateSize();
   const {month,day,dayFrac,min,dtUTC}=curDateParts();
   const sc0=scoreSpot(spot,fishKey,dtUTC,month,dayFrac,min);
-  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac)*sc0.baitMult; // ×baitMult＝詳細ヒートもベイトに反応(魚種別baitW込み/キスは1.0)
+  const scalar=sc0.seas*sc0.tf*(0.4+0.6*sc0.timeFac)*sc0.baitMult*sc0.abundMult; // ×baitMult＝詳細ヒートもベイトに反応(魚種別baitW込み/キスは1.0)
   const T=buildTerrain(spot),Fe=detectFeatures(T);
   LGRP.clearLayers();
   const DFOCUS=200; // キャスト到達帯：汀線〜沖200mに解像度を集中
@@ -1188,7 +1202,7 @@ function renderDetail(){
       const ah=arrowPts([mid[0],mid[1]],[sh[0],sh[1]]).map(p=>toLatLon(T,p[0],p[1]));
       L.polyline(ah,{color:'#38bdf8',weight:3,opacity:.9}).addTo(LGRP);
     }
-    const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ'}[fishKey];
+    const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ', iwashi:'サビキ（アミコマセ）'}[fishKey];
     const acc=spot.anchored?'この地点は<b>実海岸線(OSM)に位置合わせ済み</b>＝近岸帯は本物の水際から開始。':(spot.approxAnchor?'この地点は<b>推定座標に手当て（OSM未確認・要目視）</b>。':'この地点は海岸線が簡易近似（位置は目安）。');
     document.getElementById('detailNote').innerHTML=
      `<b>下地＝航空写真(実物)／面＝釣れやすさヒートマップ(相対候補・モデル推定)</b>。${acc}`
@@ -1333,7 +1347,7 @@ function renderTableDetail(data,cp){
     </div>
     <div class="tag" style="margin-top:4px">
       ベイト指数=イワシ/シラス等の“居そうな度合い”（季節${(d.bait.S*100).toFixed(0)}/水温${(d.bait.T*100).toFixed(0)}/地形${(d.bait.G*100).toFixed(0)}を0.4:0.3:0.3で合成）。
-      ${d.baitW>0?`本魚種はフィッシュイーターのため<b>総合スコア・詳細ヒートマップ（×${d.baitMult.toFixed(2)}）・狙い所の優先順位</b>に反映`:'本魚種は非フィッシュイーター（ベイト無反映）'}。
+      ${d.baitfish?`本魚種は<b>ベイトフィッシュ自身</b>＝シラス船曳CPUEを<b>現況（釣果指数×${(d.abundMult||1).toFixed(2)}）</b>として総合スコア・詳細ヒートに直接反映`:(d.baitW>0?`本魚種はフィッシュイーターのため<b>総合スコア・詳細ヒートマップ（×${d.baitMult.toFixed(2)}）・狙い所の優先順位</b>に反映`:'本魚種は非フィッシュイーター（ベイト無反映）')}。
       ${(()=>{const L=(d.bait&&d.bait.live)||{};const p=[];
         p.push(L.sst?`水温=気象庁 ${L.sst.area} ${L.sst.date.slice(5)}<b>実測</b>`:'水温=平年推定');
         p.push(L.cpue?`ベイト=茨城県船曳 ${L.cpue.dist} ${L.cpue.date.slice(5)} CPUE${L.cpue.cpue}kg/隻→<b>実測反映</b>`:'ベイト現況=季節推定');
