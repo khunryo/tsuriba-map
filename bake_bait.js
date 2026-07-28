@@ -51,6 +51,7 @@ function parseFunabiki(html) {
   const out = {};
   // セルは同一行に連結、<tr>/見出しで改行。タグ除去後に走査。
   let s = html
+    .replace(/[\r\n]+/g, ' ').replace(/<br\s*\/?>/gi, ' ')  // ★真因対策：先に改行/brを除去（整形HTMLでセルが別行に分断→地区名と数値が別行になるのを防ぐ）
     .replace(/<\/?(td|th)[^>]*>/gi, '  ')          // セル区切り（同一行）
     .replace(/<tr[\s>]/gi, '\n')                          // 行＝改行
     .replace(/<\/?(h1|h2|h3|caption)[^>]*>/gi, '\n')      // 見出し＝改行
