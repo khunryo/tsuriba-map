@@ -353,7 +353,28 @@ const SST={
  '常磐'  :[12,10,11,13,16,18,21,24,23,20,17,14],
  '仙台湾':[ 9, 7, 8,11,14,17,20,23,22,18,14,11],
 };
-function waterTemp(region,month,dayFrac){ // 月中央基準に線形補間で滑らかに
+// ===== 実データ（水温・ベイト現況）＝bait_live.json をランタイム読込。無ければ静的にフォールバック =====
+// 出典：水温＝気象庁 日本沿岸域の海面水温／ベイト＝茨城県 船曳漁況速報（数値のみ引用・原表非転載）
+let LIVE=null;
+function sstAreaFor(lat){ // 緯度から最寄りJMA海域(135宮城/136福島/137茨城北/138茨城南)
+  const reps=[['138',36.0],['137',36.85],['136',37.4],['135',38.3]];
+  let b=reps[0]; for(const r of reps) if(Math.abs(lat-r[1])<Math.abs(lat-b[1]))b=r; return b[0];
+}
+function _daysOld(dateStr){ const d=Date.parse(dateStr+'T00:00:00+09:00'); if(isNaN(d))return 1e9; return Math.floor((Date.now()-d)/86400000); }
+function liveSST(lat){ // 実測日値(≤7日)なら{temp,date,area,age}、無ければnull
+  if(!LIVE||!LIVE.sst||lat==null)return null; const e=LIVE.sst[sstAreaFor(lat)];
+  if(!e||e.temp==null)return null; const age=_daysOld(e.date); if(age>7)return null;
+  return {temp:e.temp,date:e.date,area:e.area,age};
+}
+function cpueDistFor(lat){ // 緯度→茨城船曳の地区（福島以北はnull＝静的）
+  if(lat==null)return null;
+  if(lat<35.9)return 'はさき'; if(lat<36.25)return '鹿島灘'; if(lat<36.45)return '大洗町';
+  if(lat<36.72)return '久慈町'; if(lat<37.0)return '大津'; return null;
+}
+function liveCPUE(lat){ if(!LIVE||!LIVE.cpue)return null; const d=cpueDistFor(lat); if(!d)return null;
+  const e=LIVE.cpue[d]; if(!e||e.cpue==null)return null; return {cpue:e.cpue,date:e.date,dist:d,age:_daysOld(e.date)}; }
+function waterTemp(region,month,dayFrac,lat){ // 実測SST(気象庁沿岸)があれば実測、無ければ月別クライマトロジー
+  if(lat!=null){const ls=liveSST(lat); if(ls)return ls.temp;}
   const a=SST[region];const x=month-1+ (dayFrac-0.5); // 0..12
   const i0=Math.floor(x), t=x-i0;
   const p=(k)=>a[((k%12)+12)%12];
@@ -394,11 +415,16 @@ function baitGeo(spot){ // 河口・港・潮通しからのベイト集積（0.
 }
 const BAIT_W={wS:0.4,wT:0.3,wG:0.3};
 function baitIndex(spot,month,dayFrac){
-  const S=baitSeason(spot.region,month,dayFrac);
-  const T=baitTempFit(waterTemp(spot.region,month,dayFrac));
+  const S_stat=baitSeason(spot.region,month,dayFrac);
+  const T=baitTempFit(waterTemp(spot.region,month,dayFrac,spot.lat)); // 実測SST優先
   const G=baitGeo(spot);
+  let S=S_stat, cInfo=null; // S＝季節静的値。実測シラスCPUEがあれば鮮度加重で対数正規化値へブレンド
+  const lc=liveCPUE(spot.lat);
+  if(lc){ const CAP=400; const Sl=Math.max(0,Math.min(1, Math.log(1+lc.cpue)/Math.log(1+CAP)));
+    const w= lc.age<=3?1 : Math.max(0,(14-lc.age)/11); // 鮮度: ≤3日=1.0 → 14日で0
+    S=(1-w)*S_stat + w*Sl; cInfo={dist:lc.dist,date:lc.date,cpue:lc.cpue,age:lc.age,Slive:Sl,w}; }
   const index=Math.max(0,Math.min(1, BAIT_W.wS*S+BAIT_W.wT*T+BAIT_W.wG*G));
-  return {index,S,T,G};
+  return {index,S,T,G, Sstat:S_stat, live:{sst:(spot.lat!=null?liveSST(spot.lat):null), cpue:cInfo}};
 }
 
 /* =========================================================================
@@ -456,7 +482,7 @@ function mazume(minOfDay){ // 朝夕マズメ（日出/日没±90分を強め）
 function scoreSpot(spot,fishKey,dtUTC,month,dayFrac,minOfDay){
   const F=FISH[fishKey];
   const seas=F.season[month-1];
-  const wt=waterTemp(spot.region,month,dayFrac);
+  const wt=waterTemp(spot.region,month,dayFrac,spot.lat); // 実測SST優先（無ければ平年）
   const tf=gauss(wt,F.topt,F.tsig);
   const sub=F.subFit[spot.sub];
   const base=(F.wSub*sub+F.wStr*spot.str+F.wFlow*spot.flow)/(F.wSub+F.wStr+F.wFlow);
@@ -1308,7 +1334,10 @@ function renderTableDetail(data,cp){
     <div class="tag" style="margin-top:4px">
       ベイト指数=イワシ/シラス等の“居そうな度合い”（季節${(d.bait.S*100).toFixed(0)}/水温${(d.bait.T*100).toFixed(0)}/地形${(d.bait.G*100).toFixed(0)}を0.4:0.3:0.3で合成）。
       ${d.baitW>0?`本魚種はフィッシュイーターのため<b>総合スコア・詳細ヒートマップ（×${d.baitMult.toFixed(2)}）・狙い所の優先順位</b>に反映`:'本魚種は非フィッシュイーター（ベイト無反映）'}。
-      <b>実測CPUEでなく季節・水温・地形からの推定</b>です。
+      ${(()=>{const L=(d.bait&&d.bait.live)||{};const p=[];
+        p.push(L.sst?`水温=気象庁 ${L.sst.area} ${L.sst.date.slice(5)}<b>実測</b>`:'水温=平年推定');
+        p.push(L.cpue?`ベイト=茨城県船曳 ${L.cpue.dist} ${L.cpue.date.slice(5)} CPUE${L.cpue.cpue}kg/隻→<b>実測反映</b>`:'ベイト現況=季節推定');
+        return `<b>${(L.sst||L.cpue)?'一部実測反映':'推定'}</b>：${p.join(' ／ ')}。数値は出典から引用（原表非転載）。`;})()}
     </div>
     <div class="tag" style="margin-top:4px">潮汐参照験潮所：${s.site.ref}（距離補間）</div>`;
   // 潮位テキスト
@@ -1325,8 +1354,14 @@ document.getElementById('fishSel').addEventListener('click',e=>{
 function updateMapLegend(){
   const lab=document.getElementById('mapLegLabel'),note=document.getElementById('mapLegNote');
   if(!lab)return;
-  if(MAPMODE==='bait'){lab.textContent='ベイト指数(推定)';
-    note.textContent='※イワシ/シラス等ベイトの“居そうな度合い”。季節・水温・地形からの静的推定（実測CPUE非使用）。低=薄い→高=濃い。0〜100はBI%（魚種非依存）';}
+  if(MAPMODE==='bait'){
+    let src='※季節・水温・地形からの推定';
+    if(LIVE){const cd=LIVE.cpue&&Object.values(LIVE.cpue).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+      const hasS=LIVE.sst&&Object.keys(LIVE.sst).length>0;
+      const bits=[]; if(hasS)bits.push('水温=気象庁'); if(cd)bits.push('シラス=茨城県船曳'+(cd.date?(' '+cd.date.slice(5)):''));
+      if(bits.length)src='実測反映：'+bits.join('・')+'（茨城）。他海域・欠測は推定';}
+    lab.textContent='ベイト指数';
+    note.textContent=src+'。低=薄い→高=濃い（0〜100はBI%,魚種非依存）。数値のみ引用・原表非転載';}
   else{lab.textContent='釣れやすさ';note.textContent='';}
 }
 document.getElementById('mapModeSel').addEventListener('click',e=>{
@@ -1342,6 +1377,10 @@ document.querySelectorAll('#tbl th').forEach(th=>th.onclick=()=>{
 window.addEventListener('resize',render);
 // 初期日付＝7/26(今日相当)
 dateD.value='2026-07-26'; // 初期日付（カレンダーで変更可）
+// 実データ（水温・シラスCPUE）を同一オリジンから読込。成功で再描画、失敗/未配置は静的のまま（現行挙動）。
+try{ fetch('bait_live.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
+  if(j&&(j.sst||j.cpue)){ LIVE=j; if(typeof updateMapLegend==='function')updateMapLegend(); if(typeof render==='function')safe(render,'live'); }
+}).catch(()=>{}); }catch(e){}
 
 // 出典
 document.getElementById('sources').innerHTML=`
@@ -1355,12 +1394,16 @@ document.getElementById('sources').innerHTML=`
  <b>水温</b>：気象庁 日本沿岸域の海面水温情報
  <a href="https://www.data.jma.go.jp/kaiyou/data/db/kaikyo/series/engan/engan.html" target="_blank">engan</a>
  ／ 福島県水産海洋研究センター 沿岸水温
- <a href="https://www.pref.fukushima.lg.jp/sec/37380b/suion.html" target="_blank">定地水温</a><br>
+ <a href="https://www.pref.fukushima.lg.jp/sec/37380b/suion.html" target="_blank">定地水温</a>
+ ／ 沿岸SST日値（速報）を実測反映（無ければ平年値）<br>
+ <b>ベイト現況</b>：茨城県水産試験場 船曳漁況速報（シラスCPUE・地区別）を指数化
+ <a href="https://www.pref.ibaraki.jp/nourinsuisan/suishi/kaiyu/funabiki/funabiki-toppage.html" target="_blank">船曳漁況速報</a>
+ ／ <b>数値のみ引用・原表/図は非転載</b>。茨城沿岸のみ実測、他海域・欠測は季節推定<br>
  <b>ベイト指数（推定）</b>：イワシ/シラス等の来遊季節性＝各県水産試験場・資源評価の傾向（茨城県<a href="https://www.pref.ibaraki.jp/nourinsuisan/gyoshin/index.html" target="_blank">漁業情報</a>、水産研究・教育機構 <a href="https://www.fra.affrc.go.jp/" target="_blank">資源評価</a>）＋水温（気象庁沿岸SST）＋河口/港/潮通しの地形集積から合成。<b>実測CPUEではなく推定値</b>（日次シラスCPUE等のライブ取込は今後）。<br>
  <b>精度メモ</b>：潮位は主要4分潮＋副次4分潮の調和推算。小名浜の気象庁公表満干時刻と突合し
  <b>満潮時刻±約15分・大潮小潮の潮位差を再現</b>（干潮側の一部で±10〜20cm程度の高さ誤差）。
  各地点は最寄験潮所を距離補間した推定値のため、港内位置・河口・湾奥では実潮と差が出ます。
- 水温は月別クライマトロジー（海域代表値）で、日々の実測とは差があります。<br>
+ 水温は<b>気象庁 沿岸SST日値（速報）を実測反映</b>、取得できない海域・日は月別クライマトロジー（海域代表値）にフォールバックします。<br>
  <b>実釣果</b>：本アプリは実釣果データを<b>保持しません</b>。各地点から
  <a href="https://anglers.jp/" target="_blank">アングラーズ（anglers.jp）</a>の該当エリアページへ<b>リンクのみ</b>で誘導します（データは各サービスに帰属）。<br>
  <b>海底地形（実測校正の検証）</b>：国土数値情報 沿岸海域メッシュ
