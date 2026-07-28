@@ -197,6 +197,8 @@
       <span class="pill">→ 通すコース</span>
     </div>
     <div id="sectionNote" class="src" style="margin-top:6px"></div>
+    <canvas id="sectionOffC" style="height:170px;display:none;margin-top:8px"></canvas>
+    <div id="sectionOffNote" class="src" style="margin-top:6px"></div>
   </div>
 
   <div class="card" style="margin-top:14px">
@@ -388,9 +390,9 @@ function waterTemp(region,month,dayFrac,lat){ // 実測SST(気象庁沿岸)が�
    出典：季節性＝各県水産試験場/資源評価の来遊傾向、水温＝気象庁沿岸SST。
    ※実測CPUEではなく推定。フィッシュイーター(ヒラメ等)のスコアに乗算的に効かせる。
    ========================================================================= */
-// 月別(1-12) 0..1 イワシ/シラス来遊の濃さ（茨城〜宮城 太平洋岸の概況）：
-//   4〜11月に濃く、晩春(5-6)と秋(9-10)の二山、盛夏(7-8)は北上索餌群でやや低、真冬(12-3)薄い
-const BAIT_SEASON_BASE=[0.15,0.12,0.18,0.45,0.78,0.85,0.68,0.70,0.90,0.85,0.55,0.25];
+// 月別(1-12) 0..1 イワシ/シラス来遊の濃さ。2026-07実データ校正：茨城県 月別シラス水揚量 過去5年平均(2021-25,主要5港)に一致化。
+//   7月ピーク・5-9月濃く・10-11月急減・冬春薄い（旧カーブは秋過大/7月過小だったため実漁期へ修正。相関 0.70→0.997）
+const BAIT_SEASON_BASE=[0.05,0.08,0.07,0.07,0.36,0.63,1.0,0.71,0.77,0.23,0.20,0.20];
 // 海域(県)補正：仙台湾(宮城)は夏〜秋厚め、鹿島灘は春が早く盛夏やや薄
 const BAIT_REGION_ADJ={
  '鹿島灘':[0,0,0.03,0.06,0.06,0.02,-0.06,-0.05,0.00,0.04,0.05,0.02],
@@ -464,7 +466,7 @@ const FISH={
    baitW:1.0,  // フィッシュイーター＝ベイト指数をしっかり反映
  },
  iwashi:{label:'イワシ',
-   season:[.2,.2,.25,.4,.7,.85,.9,.9,.95,.85,.6,.3], // 晩春〜秋（シラス回遊に同調）
+   season:[.1,.1,.12,.2,.45,.7,1.0,.85,.9,.4,.3,.2], // 実データ校正(茨城シラス実漁期,相関0.98)：7月ピーク・秋急減
    topt:20,tsig:6,                                    // 広温性
    subFit:{sand:.6,sandmud:.6,gravel:.6,rock:.65,mixed:.7}, // 中層回遊＝底質依存低
    wSub:.5,wStr:.7,wFlow:1.8,                         // 群れ・潮通し最重視
@@ -1227,6 +1229,39 @@ function updateAnglersLink(){
   a.textContent=`🔗 アングラーズで「${s.name}」周辺の釣果を見る`;
 }
 /* ===== Stage⑥ 海底断面図（かけ上がり横断面）===== */
+// ===== 沖側の海底断面（GEBCO実測＋近岸=自作モデル）。bathy.jsonをランタイム読込、無ければ非表示 =====
+let BATHY=null;
+function drawSectionOffshore(){
+  const cvs=document.getElementById('sectionOffC'); if(!cvs)return;
+  const spot=SPOTS[selIdx], note=document.getElementById('sectionOffNote');
+  const b=(BATHY&&BATHY.depth)?BATHY.depth[spot.name]:null, dist=BATHY?BATHY.dist_m:null;
+  if(!b||!dist){ cvs.style.display='none'; if(note)note.innerHTML='沖側の実測海底断面（GEBCO）は本地点は未取得です（近岸=自作モデルのみ表示）。'; return; }
+  cvs.style.display='block';
+  const W=cvs.width=cvs.clientWidth||600, H=cvs.height=170, padL=40,padR=14,padT=22,padB=24;
+  const g=cvs.getContext('2d'); g.clearRect(0,0,W,H); g.fillStyle='#0a1622'; g.fillRect(0,0,W,H);
+  const P=terrainParams(spot);
+  const maxD=Math.max(Math.max(...b), P.A*Math.pow(dist[0],2/3))+4;
+  const innerW=W-padL-padR;
+  const Xd=d=>padL+Math.sqrt(Math.min(d,8000)/8000)*innerW;
+  const Yd=dep=>padT+dep/maxD*(H-padT-padB);
+  g.fillStyle='#0e2036'; g.fillRect(padL,padT,innerW,H-padT-padB);
+  // 近岸=自作モデル(Dean) 0..dist[0]（破線）
+  g.strokeStyle='#c9b787'; g.setLineDash([4,3]); g.lineWidth=2; g.beginPath();
+  for(let d=0,first=1;d<=dist[0];d+=Math.max(20,dist[0]/12)){const x=Xd(d),y=Yd(P.A*Math.pow(Math.max(d,1),2/3)); first?(g.moveTo(x,y),first=0):g.lineTo(x,y);} g.stroke(); g.setLineDash([]);
+  // 沖=GEBCO実測（実線＋点）
+  g.strokeStyle='#38e0ff'; g.lineWidth=2.5; g.beginPath(); g.moveTo(Xd(dist[0]),Yd(P.A*Math.pow(dist[0],2/3)));
+  dist.forEach((d,i)=>g.lineTo(Xd(d),Yd(b[i]))); g.stroke();
+  dist.forEach((d,i)=>{const x=Xd(d),y=Yd(b[i]); g.fillStyle='#38e0ff'; g.beginPath();g.arc(x,y,3,0,7);g.fill();
+    g.fillStyle='#bde9ff'; g.font='10px sans-serif'; g.fillText('-'+b[i], x-9, y-6);});
+  g.font='10px sans-serif';
+  for(let dm=0;dm<=maxD;dm+=(maxD>40?20:10)){const y=Yd(dm);g.strokeStyle='#1c3448';g.globalAlpha=.4;g.beginPath();g.moveTo(padL,y);g.lineTo(W-padR,y);g.stroke();g.globalAlpha=1;g.fillStyle='#6b8299';g.fillText(dm+'m',4,y+3);}
+  [0.3,1,2,4,8].forEach(km=>{const x=Xd(km*1000);g.fillStyle='#6b8299';g.fillText(km+'k',x-6,H-8);});
+  const bx=Xd(dist[0]); g.strokeStyle='rgba(148,163,184,.6)';g.setLineDash([3,3]);g.beginPath();g.moveTo(bx,padT);g.lineTo(bx,H-padB);g.stroke();g.setLineDash([]);
+  g.fillStyle='#c9b787';g.fillText('←近岸=自作モデル',padL+2,padT-7);
+  g.fillStyle='#38e0ff';g.fillText('GEBCO実測（沖）→',bx+4,padT-7);
+  g.fillStyle='#9fc';g.fillText('岸',padL-4,H-8);
+  if(note)note.innerHTML='<b>沖の海底断面</b>：近岸0〜'+dist[0]+'m＝自作モデル（Dean平衡）推定／沖'+dist[0]+'m〜8km＝<b>GEBCO実測</b>。出典: GEBCO Compilation Group (GEBCO_2020 Grid)。釣りどこ/ALB等の限定データは不使用。';
+}
 function drawSection(){
   const cvs=document.getElementById('sectionC'); if(!cvs)return;
   const spot=SPOTS[selIdx];
@@ -1302,6 +1337,7 @@ function render(){
   safe(drawTide,'tide');
   safe(renderDetail,'detail');
   safe(drawSection,'section');
+  safe(drawSectionOffshore,'section-offshore');
   safe(updateTuridocoLink,'turidoco');
   safe(updateAnglersLink,'anglers');
   safe(()=>renderTableDetail(data,cp),'table/detail');
@@ -1395,6 +1431,8 @@ dateD.value='2026-07-26'; // 初期日付（カレンダーで変更可）
 try{ fetch('bait_live.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
   if(j&&(j.sst||j.cpue)){ LIVE=j; if(typeof updateMapLegend==='function')updateMapLegend(); if(typeof render==='function')safe(render,'live'); }
 }).catch(()=>{}); }catch(e){}
+// 海底断面（GEBCO実測 沖側）を同一オリジンから読込。無ければ近岸モデルのみ（現行挙動）。
+try{ fetch('bathy.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.depth){ BATHY=j; if(typeof render==='function')safe(render,'bathy'); } }).catch(()=>{}); }catch(e){}
 
 // 出典
 document.getElementById('sources').innerHTML=`
