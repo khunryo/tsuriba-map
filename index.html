@@ -197,7 +197,7 @@
       <span class="pill">→ 通すコース</span>
     </div>
     <div id="sectionNote" class="src" style="margin-top:6px"></div>
-    <canvas id="sectionOffC" style="height:170px;display:none;margin-top:8px"></canvas>
+    <canvas id="sectionOffC" style="height:160px;display:none;margin-top:8px"></canvas>
     <div id="sectionOffNote" class="src" style="margin-top:6px"></div>
   </div>
 
@@ -1234,33 +1234,36 @@ let BATHY=null;
 function drawSectionOffshore(){
   const cvs=document.getElementById('sectionOffC'); if(!cvs)return;
   const spot=SPOTS[selIdx], note=document.getElementById('sectionOffNote');
-  const b=(BATHY&&BATHY.depth)?BATHY.depth[spot.name]:null, dist=BATHY?BATHY.dist_m:null;
-  if(!b||!dist){ cvs.style.display='none'; if(note)note.innerHTML='沖側の実測海底断面（GEBCO）は本地点は未取得です（近岸=自作モデルのみ表示）。'; return; }
   cvs.style.display='block';
-  const W=cvs.width=cvs.clientWidth||600, H=cvs.height=170, padL=40,padR=14,padT=22,padB=24;
+  const DMAX=150; // キャスト到達域に集中（GEBCO最近点300mは範囲外→この帯は自作モデル）
+  const W=cvs.width=cvs.clientWidth||600, H=cvs.height=160, padL=40,padR=14,padT=20,padB=24;
   const g=cvs.getContext('2d'); g.clearRect(0,0,W,H); g.fillStyle='#0a1622'; g.fillRect(0,0,W,H);
   const P=terrainParams(spot);
-  const maxD=Math.max(Math.max(...b), P.A*Math.pow(dist[0],2/3))+4;
-  const innerW=W-padL-padR;
-  const Xd=d=>padL+Math.sqrt(Math.min(d,8000)/8000)*innerW;
-  const Yd=dep=>padT+dep/maxD*(H-padT-padB);
-  g.fillStyle='#0e2036'; g.fillRect(padL,padT,innerW,H-padT-padB);
-  // 近岸=自作モデル(Dean) 0..dist[0]（破線）
-  g.strokeStyle='#c9b787'; g.setLineDash([4,3]); g.lineWidth=2; g.beginPath();
-  for(let d=0,first=1;d<=dist[0];d+=Math.max(20,dist[0]/12)){const x=Xd(d),y=Yd(P.A*Math.pow(Math.max(d,1),2/3)); first?(g.moveTo(x,y),first=0):g.lineTo(x,y);} g.stroke(); g.setLineDash([]);
-  // 沖=GEBCO実測（実線＋点）
-  g.strokeStyle='#38e0ff'; g.lineWidth=2.5; g.beginPath(); g.moveTo(Xd(dist[0]),Yd(P.A*Math.pow(dist[0],2/3)));
-  dist.forEach((d,i)=>g.lineTo(Xd(d),Yd(b[i]))); g.stroke();
-  dist.forEach((d,i)=>{const x=Xd(d),y=Yd(b[i]); g.fillStyle='#38e0ff'; g.beginPath();g.arc(x,y,3,0,7);g.fill();
-    g.fillStyle='#bde9ff'; g.font='10px sans-serif'; g.fillText('-'+b[i], x-9, y-6);});
+  const dep=d=>P.A*Math.pow(Math.max(d,0.5),2/3);           // Dean平衡プロファイル
+  const maxD=Math.max(2, dep(DMAX)+1), innerW=W-padL-padR, innerH=H-padT-padB;
+  const Xd=d=>padL+d/DMAX*innerW, Yd=v=>padT+v/maxD*innerH;
+  g.fillStyle='#0e2036'; g.fillRect(padL,padT,innerW,innerH);
+  // 海底（自作モデル：塗り＋稜線）
+  g.beginPath(); g.moveTo(padL,Yd(0)); for(let d=0;d<=DMAX;d+=5)g.lineTo(Xd(d),Yd(dep(d)));
+  g.lineTo(Xd(DMAX),padT+innerH); g.lineTo(padL,padT+innerH); g.closePath();
+  g.fillStyle=(P.rockEdge>0)?'#8a7050':'#c9b787'; g.globalAlpha=.9; g.fill(); g.globalAlpha=1;
+  g.beginPath(); for(let d=0,f=1;d<=DMAX;d+=5){const x=Xd(d),y=Yd(dep(d)); f?(g.moveTo(x,y),f=0):g.lineTo(x,y);} g.strokeStyle='#e7d9b0'; g.lineWidth=2; g.stroke();
+  // 深さグリッド
   g.font='10px sans-serif';
-  for(let dm=0;dm<=maxD;dm+=(maxD>40?20:10)){const y=Yd(dm);g.strokeStyle='#1c3448';g.globalAlpha=.4;g.beginPath();g.moveTo(padL,y);g.lineTo(W-padR,y);g.stroke();g.globalAlpha=1;g.fillStyle='#6b8299';g.fillText(dm+'m',4,y+3);}
-  [0.3,1,2,4,8].forEach(km=>{const x=Xd(km*1000);g.fillStyle='#6b8299';g.fillText(km+'k',x-6,H-8);});
-  const bx=Xd(dist[0]); g.strokeStyle='rgba(148,163,184,.6)';g.setLineDash([3,3]);g.beginPath();g.moveTo(bx,padT);g.lineTo(bx,H-padB);g.stroke();g.setLineDash([]);
-  g.fillStyle='#c9b787';g.fillText('←近岸=自作モデル',padL+2,padT-7);
-  g.fillStyle='#38e0ff';g.fillText('GEBCO実測（沖）→',bx+4,padT-7);
-  g.fillStyle='#9fc';g.fillText('岸',padL-4,H-8);
-  if(note)note.innerHTML='<b>沖の海底断面</b>：近岸0〜'+dist[0]+'m＝自作モデル（Dean平衡）推定／沖'+dist[0]+'m〜8km＝<b>GEBCO実測</b>。出典: GEBCO Compilation Group (GEBCO_2020 Grid)。釣りどこ/ALB等の限定データは不使用。';
+  for(let m=0;m<=maxD;m+=(maxD>8?2:1)){const y=Yd(m);g.strokeStyle='#1c3448';g.globalAlpha=.4;g.beginPath();g.moveTo(padL,y);g.lineTo(W-padR,y);g.stroke();g.globalAlpha=1;g.fillStyle='#6b8299';g.fillText(m+'m',4,y+3);}
+  // 距離目盛り（0〜150m）
+  [0,50,100,150].forEach(d=>{const x=Xd(d);g.strokeStyle='#1c3448';g.globalAlpha=.3;g.beginPath();g.moveTo(x,padT);g.lineTo(x,padT+innerH);g.stroke();g.globalAlpha=1;g.fillStyle='#6b8299';g.fillText(d+'m',x-8,H-8);});
+  g.fillStyle='#9fc';g.fillText('岸',padL-4,H-8);g.fillText('沖→',W-padR-20,H-8);
+  g.fillStyle='#9fb7cc';g.fillText('水深断面（キャスト到達域 0〜150m・自作モデル推定）',padL+2,padT-6);
+  // GEBCO＝数値参考のみ（150m圏外のため図示せず）
+  const b=(BATHY&&BATHY.depth)?BATHY.depth[spot.name]:null, dist=BATHY?BATHY.dist_m:null;
+  if(note){
+    if(b&&dist){const km=d=>d>=1000?(d/1000)+'km':d+'m';
+      note.innerHTML='近岸0〜150m断面＝自作モデル(Dean平衡)推定。<b>沖の水深（GEBCO実測・参考）</b>：'+dist.map((d,i)=>km(d)+' <b>-'+b[i]+'m</b>').join(' / ')+'｜出典: GEBCO Compilation Group (GEBCO_2020)。釣りどこ/ALB等の限定データ不使用。';
+    } else {
+      note.innerHTML='近岸0〜150m断面＝自作モデル(Dean平衡)推定。沖の実測水深(GEBCO)は本地点未取得（<code>bake_bathy.js</code>で充填可）。';
+    }
+  }
 }
 function drawSection(){
   const cvs=document.getElementById('sectionC'); if(!cvs)return;
