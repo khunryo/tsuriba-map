@@ -745,20 +745,23 @@ function drawMap(scores){
   const X=lon=>wpx(lon,Z)-left, Y=lat=>wpy(lat,Z)-top;
   const invLon=x=>(x+left)/(TS*Math.pow(2,Z))*360-180;
   const invLat=y=>{const n=Math.PI-2*Math.PI*(y+top)/(TS*Math.pow(2,Z));return 180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)));};
-  // 下地＝地理院タイル（淡色地図・実写高精細）を裏レイヤに配置
-  let tiles=''; const ax=Math.floor(left/TS),bx=Math.floor((left+W)/TS),ay=Math.floor(top/TS),by=Math.floor((top+H)/TS);
-  for(let tx=ax;tx<=bx;tx++)for(let ty=ay;ty<=by;ty++){const px=(tx*TS-left).toFixed(1),py=(ty*TS-top).toFixed(1);
-    tiles+='<img src="https://cyberjapandata.gsi.go.jp/xyz/pale/'+Z+'/'+tx+'/'+ty+'.png" style="position:absolute;left:'+px+'px;top:'+py+'px;width:256px;height:256px;pointer-events:none" onerror="this.style.opacity=0">';}
+  // 下地＝地理院タイル（白地図＝海岸線/行政界のみ・ノイズ最小）。★時刻に非依存＝ビュー(県/ズーム/寸法)不変なら据え置き（毎tick再生成＝チカチカの真因を解消）
+  const tileKey=MAPPREF+'|'+Z+'|'+Math.round(left)+'|'+Math.round(top)+'|'+W+'|'+H;
   let td=document.getElementById('mapTiles');
   if(!td){td=document.createElement('div');td.id='mapTiles';td.style.cssText='position:absolute;left:0;top:0;z-index:0;overflow:hidden;border-radius:8px';box.insertBefore(td,box.firstChild);}
-  td.style.width=W+'px'; td.style.height=H+'px'; td.innerHTML=tiles;
+  if(drawMap._tileKey!==tileKey || !td.children.length){
+    let tiles=''; const ax=Math.floor(left/TS),bx=Math.floor((left+W)/TS),ay=Math.floor(top/TS),by=Math.floor((top+H)/TS);
+    for(let tx=ax;tx<=bx;tx++)for(let ty=ay;ty<=by;ty++){const px=(tx*TS-left).toFixed(1),py=(ty*TS-top).toFixed(1);
+      tiles+='<img src="https://cyberjapandata.gsi.go.jp/xyz/blank/'+Z+'/'+tx+'/'+ty+'.png" style="position:absolute;left:'+px+'px;top:'+py+'px;width:256px;height:256px;pointer-events:none" onerror="this.style.opacity=0">';}
+    td.style.width=W+'px'; td.style.height=H+'px'; td.innerHTML=tiles; drawMap._tileKey=tileKey; // ビュー変化時のみ再生成
+  }
   // ヒートマップ（半透明・淡色タイルの上）
   const step=7;
   for(let y=0;y<H;y+=step)for(let x=0;x<W;x+=step){
     const lat=invLat(y+step/2),lon=invLon(x+step/2);
     if(inLand(lat,lon))continue;
     const f=fieldValue(lat,lon,sc); if(f.alpha<=0.02)continue;
-    g.fillStyle=heatColor(f.v,f.alpha*0.6); g.fillRect(x,y,step+1,step+1); // 淡色地図の上でヒートが主役になる透過
+    g.fillStyle=heatColor(f.v,f.alpha*0.62); g.fillRect(x,y,step+1,step+1); // 白地図(明るい)の上でヒートが主役になる透過
   }
   // 潮流ベクトル
   const {dtUTC}=curDateParts();
@@ -776,7 +779,7 @@ function drawMap(scores){
     g.font='bold 12px sans-serif';g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.strokeText(selSpot.name,x+12,y+4);
     g.fillStyle='#04263a';g.fillText(selSpot.name,x+12,y+4);}
   // 出典＋県表示
-  g.fillStyle='rgba(255,255,255,.82)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#456';g.font='10px sans-serif';g.fillText('地理院タイル（淡色地図）',W-146,H-4);
+  g.fillStyle='rgba(255,255,255,.82)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#456';g.font='10px sans-serif';g.fillText('地理院タイル（白地図）',W-146,H-4);
   if(MAPPREF!=='all'){g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.font='bold 12px sans-serif';g.strokeText(MAPPREF+'県（'+sc.length+'地点）',8,16);g.fillStyle='#04263a';g.fillText(MAPPREF+'県（'+sc.length+'地点）',8,16);}
   drawMap._pts=sc.map(o=>({i:SPOTS.indexOf(o.s),px:X(o.s.lon),py:Y(o.s.lat)}));
 }
@@ -1451,7 +1454,10 @@ document.getElementById('mapPrefSel').addEventListener('click',e=>{
     [...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b.dataset.pref===MAPPREF));
     render();}});
 updateMapLegend();
-dateD.oninput=render;dateD.onchange=render;timeR.oninput=render;
+dateD.oninput=render;dateD.onchange=render;
+// 時刻スライダーは連続inputをrAFで1フレーム1回にまとめる（下地タイルは据え置きなので明滅せず、ヒート等のみ再描画）
+let _rafPending=false; function renderRAF(){ if(_rafPending)return; _rafPending=true; requestAnimationFrame(()=>{_rafPending=false; render();}); }
+timeR.oninput=renderRAF;
 document.querySelectorAll('#tbl th').forEach(th=>th.onclick=()=>{
   const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=(k==='name'||k==='region')?1:-1;}
   document.querySelectorAll('#tbl th').forEach(h=>h.textContent=h.textContent.replace(/[▼▲]/g,''));
@@ -1468,7 +1474,7 @@ try{ fetch('bathy.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>
 
 // 出典
 document.getElementById('sources').innerHTML=`
- <b>地図・航空写真</b>：国土地理院タイル（広域マップ下地＝<b>淡色地図</b>／近岸ビュー下地＝シームレス空中写真）
+ <b>地図・航空写真</b>：国土地理院タイル（広域マップ下地＝<b>白地図</b>／近岸ビュー下地＝シームレス空中写真）
  <a href="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/" target="_blank">seamlessphoto</a>
  ／ 出典・利用規約 <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル一覧</a>・<a href="https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html" target="_blank">利用規約</a>（出典明記で利用可）<br>
  <b>潮汐</b>：気象庁 潮位表 掲載地点一覧表（調和定数, 2026）
