@@ -734,13 +734,14 @@ function drawMap(scores){
   let miLa,maLa,miLo,maLo;
   if(MAPPREF!=='all' && sc.length){ miLa=1e9;maLa=-1e9;miLo=1e9;maLo=-1e9;
     sc.forEach(o=>{const s=o.s;miLa=Math.min(miLa,s.lat);maLa=Math.max(maLa,s.lat);miLo=Math.min(miLo,s.lon);maLo=Math.max(maLo,s.lon);});
-    const mLa=Math.max(0.05,(maLa-miLa)*0.15), mLo=Math.max(0.05,(maLo-miLo)*0.2);
-    miLa-=mLa;maLa+=mLa;miLo-=mLo+0.05;maLo+=mLo;
+    const mLa=0.03, mLo=0.04; // 小さめパディングで選択県にフィット＝より拡大（fit-to-bounds）
+    miLa-=mLa;maLa+=mLa;miLo-=mLo;maLo+=mLo;
   } else { miLa=BASE_BOUNDS.LAT0;maLa=BASE_BOUNDS.LAT1;miLo=BASE_BOUNDS.LON0;maLo=BASE_BOUNDS.LON1; }
   // Webメルカトル viewport（bboxが収まるズームを選択）
   const wpx=(lon,Z)=>(lon+180)/360*TS*Math.pow(2,Z);
   const wpy=(lat,Z)=>{const s=Math.sin(lat*Math.PI/180);return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*TS*Math.pow(2,Z);};
   let Z=14; for(;Z>=4;Z--){const pw=wpx(maLo,Z)-wpx(miLo,Z), ph=wpy(miLa,Z)-wpy(maLa,Z); if(pw<=W&&ph<=H)break;}
+  if(MAPPREF!=='all') Z=Math.min(Z,11); // 単一/近接クラスタで寄りすぎ防止の上限
   const cLon=(miLo+maLo)/2,cLat=(miLa+maLa)/2, left=wpx(cLon,Z)-W/2, top=wpy(cLat,Z)-H/2;
   const X=lon=>wpx(lon,Z)-left, Y=lat=>wpy(lat,Z)-top;
   const invLon=x=>(x+left)/(TS*Math.pow(2,Z))*360-180;
@@ -1521,10 +1522,15 @@ else boot();
 </script>
 <script>
 if('serviceWorker' in navigator){
+  var _swRefreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(_swRefreshing) return; _swRefreshing=true; location.reload();   // 新SWが制御を奪ったら1度だけ自動リロード（ワンショットガードでループ防止）
+  });
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js')
-      .then(function(r){ console.log('SW registered', r.scope); })
-      .catch(function(e){ console.warn('SW registration failed', e); });
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      reg.update();                                     // 表示時に最新SWを取得（sw側は自己skipWaiting+clients.claim済→controllerchangeで自動反映）
+      setInterval(function(){ reg.update(); }, 1800000); // 30分毎に更新確認
+    }).catch(function(e){ console.warn('SW registration failed', e); });
   });
 }
 </script>
