@@ -727,6 +727,7 @@ function drawMap(scores){
   const ms=document.getElementById('mapStatic'); if(ms)ms.style.display='none';   // 静的フォールバックは非表示
   const TS=256, W=c.width=(c.clientWidth||box.clientWidth||460), H=c.height=520;
   c.style.display='block'; c.style.position='relative'; c.style.zIndex='1'; c.style.width='100%'; c.style.height=H+'px';
+  c.style.background='transparent'; // ★真因対策：CSS既定 canvas{background:#0a1622} が裏のタイルを覆い真っ黒化するのを解除
   const g=c.getContext('2d'); g.clearRect(0,0,W,H);
   // 県フィルタ：対象スコア集合＋地理的境界（全域は基準）
   const sc=(MAPPREF==='all')?scores:scores.filter(o=>prefOf(o.s.lat)===MAPPREF);
