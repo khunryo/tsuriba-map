@@ -748,7 +748,7 @@ function drawMap(scores){
   // 下地＝地理院タイル（淡色地図・実写高精細）を裏レイヤに配置
   let tiles=''; const ax=Math.floor(left/TS),bx=Math.floor((left+W)/TS),ay=Math.floor(top/TS),by=Math.floor((top+H)/TS);
   for(let tx=ax;tx<=bx;tx++)for(let ty=ay;ty<=by;ty++){const px=(tx*TS-left).toFixed(1),py=(ty*TS-top).toFixed(1);
-    tiles+='<img src="https://cyberjapandata.gsi.go.jp/xyz/std/'+Z+'/'+tx+'/'+ty+'.png" style="position:absolute;left:'+px+'px;top:'+py+'px;width:256px;height:256px;pointer-events:none" onerror="this.style.opacity=0">';}
+    tiles+='<img src="https://cyberjapandata.gsi.go.jp/xyz/pale/'+Z+'/'+tx+'/'+ty+'.png" style="position:absolute;left:'+px+'px;top:'+py+'px;width:256px;height:256px;pointer-events:none" onerror="this.style.opacity=0">';}
   let td=document.getElementById('mapTiles');
   if(!td){td=document.createElement('div');td.id='mapTiles';td.style.cssText='position:absolute;left:0;top:0;z-index:0;overflow:hidden;border-radius:8px';box.insertBefore(td,box.firstChild);}
   td.style.width=W+'px'; td.style.height=H+'px'; td.innerHTML=tiles;
@@ -758,7 +758,7 @@ function drawMap(scores){
     const lat=invLat(y+step/2),lon=invLon(x+step/2);
     if(inLand(lat,lon))continue;
     const f=fieldValue(lat,lon,sc); if(f.alpha<=0.02)continue;
-    g.fillStyle=heatColor(f.v,f.alpha*0.55); g.fillRect(x,y,step+1,step+1); // 標準地図の地形が読める透過
+    g.fillStyle=heatColor(f.v,f.alpha*0.6); g.fillRect(x,y,step+1,step+1); // 淡色地図の上でヒートが主役になる透過
   }
   // 潮流ベクトル
   const {dtUTC}=curDateParts();
@@ -776,7 +776,7 @@ function drawMap(scores){
     g.font='bold 12px sans-serif';g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.strokeText(selSpot.name,x+12,y+4);
     g.fillStyle='#04263a';g.fillText(selSpot.name,x+12,y+4);}
   // 出典＋県表示
-  g.fillStyle='rgba(255,255,255,.82)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#456';g.font='10px sans-serif';g.fillText('地理院タイル（標準地図）',W-146,H-4);
+  g.fillStyle='rgba(255,255,255,.82)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#456';g.font='10px sans-serif';g.fillText('地理院タイル（淡色地図）',W-146,H-4);
   if(MAPPREF!=='all'){g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.font='bold 12px sans-serif';g.strokeText(MAPPREF+'県（'+sc.length+'地点）',8,16);g.fillStyle='#04263a';g.fillText(MAPPREF+'県（'+sc.length+'地点）',8,16);}
   drawMap._pts=sc.map(o=>({i:SPOTS.indexOf(o.s),px:X(o.s.lon),py:Y(o.s.lat)}));
 }
@@ -1468,7 +1468,7 @@ try{ fetch('bathy.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>
 
 // 出典
 document.getElementById('sources').innerHTML=`
- <b>地図・航空写真</b>：国土地理院タイル（広域マップ下地＝<b>標準地図</b>／近岸ビュー下地＝シームレス空中写真）
+ <b>地図・航空写真</b>：国土地理院タイル（広域マップ下地＝<b>淡色地図</b>／近岸ビュー下地＝シームレス空中写真）
  <a href="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/" target="_blank">seamlessphoto</a>
  ／ 出典・利用規約 <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル一覧</a>・<a href="https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html" target="_blank">利用規約</a>（出典明記で利用可）<br>
  <b>潮汐</b>：気象庁 潮位表 掲載地点一覧表（調和定数, 2026）
