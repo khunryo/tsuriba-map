@@ -775,9 +775,23 @@ function drawMap(scores){
   const selSpot=SPOTS[selIdx];
   sc.forEach(o=>{const s=o.s; const v=(MAPMODE==='bait')?(o.bait?o.bait.index:0):o.score/100; const x=X(s.lon),y=Y(s.lat);
     drawMarker(g,x,y,s.type,heatColor(v),s===selSpot);});
-  if(sc.some(o=>o.s===selSpot)){const x=X(selSpot.lon),y=Y(selSpot.lat);
-    g.font='bold 12px sans-serif';g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.strokeText(selSpot.name,x+12,y+4);
-    g.fillStyle='#04263a';g.fillText(selSpot.name,x+12,y+4);}
+  // 釣り場名ラベル（白地図で読める濃色＋白縁。簡易衝突回避＝重要度順に空き位置へ、無ければ間引き。選択地点は必ず表示）
+  const placed=[]; let labelN=0;
+  const order=sc.slice().sort((a,b)=> a.s===selSpot?-1 : b.s===selSpot?1 : (b.score-a.score)); // 選択優先→スコア降順
+  g.textBaseline='alphabetic'; g.lineJoin='round';
+  order.forEach(o=>{const s=o.s, sel=s===selSpot, x=X(s.lon), y=Y(s.lat);
+    g.font=(sel?'bold 12px ':'11px ')+'system-ui,sans-serif';
+    const w=g.measureText(s.name).width, h=sel?13:11;
+    const cands=[[x+9,y+4],[x-9-w,y+4],[x-w/2,y-9],[x-w/2,y+16]]; // 右/左/上/下
+    let pos=null;
+    for(const c of cands){const bx0=c[0]-1,by0=c[1]-h,bx1=c[0]+w+1,by1=c[1]+3;
+      if(bx0<2||bx1>W-2||by0<2||by1>H-2)continue;
+      let hit=false; for(const p of placed){if(bx0<p[2]&&bx1>p[0]&&by0<p[3]&&by1>p[1]){hit=true;break;}}
+      if(!hit){pos=c; placed.push([bx0,by0,bx1,by1]); break;}}
+    if(!pos && sel) pos=[x+9,y+4];         // 選択は衝突でも必ず出す
+    if(pos){ g.strokeStyle='rgba(255,255,255,.92)'; g.lineWidth=3; g.strokeText(s.name,pos[0],pos[1]);
+      g.fillStyle=sel?'#b91c1c':'#04263a'; g.fillText(s.name,pos[0],pos[1]); labelN++; }});
+  drawMap._labelCount=labelN;
   // 出典＋県表示
   g.fillStyle='rgba(255,255,255,.82)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#456';g.font='10px sans-serif';g.fillText('地理院タイル（白地図）',W-146,H-4);
   if(MAPPREF!=='all'){g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.font='bold 12px sans-serif';g.strokeText(MAPPREF+'県（'+sc.length+'地点）',8,16);g.fillStyle='#04263a';g.fillText(MAPPREF+'県（'+sc.length+'地点）',8,16);}
