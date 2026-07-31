@@ -780,7 +780,7 @@ function drawMap(scores){
   const placed=[]; let labelN=0;
   const order=sc.slice().sort((a,b)=> a.s===selSpot?-1 : b.s===selSpot?1 : (b.score-a.score)); // 選択優先→スコア降順
   g.textBaseline='alphabetic'; g.lineJoin='round';
-  order.forEach(o=>{const s=o.s, sel=s===selSpot, x=X(s.lon), y=Y(s.lat);
+  if(MAPPREF!=='all') order.forEach(o=>{const s=o.s, sel=s===selSpot, x=X(s.lon), y=Y(s.lat); // 全域はラベル非表示（マーカー/ヒート/種別記号は従来通り）
     g.font=(sel?'bold 12px ':'11px ')+'system-ui,sans-serif';
     const w=g.measureText(s.name).width, h=sel?13:11;
     const cands=[[x+9,y+4],[x-9-w,y+4],[x-w/2,y-9],[x-w/2,y+16]]; // 右/左/上/下
