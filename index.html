@@ -19,6 +19,7 @@
     --bg:#0d1b2a; --panel:#152a3f; --panel2:#1b3350;
     --line:#284a68; --txt:#e8f1f8; --sub:#9fb7cc; --accent:#38bdf8;
     --good:#22c55e; --mid:#eab308; --low:#94a3b8;
+    --map-sea:#0a1622; --map-land:#152838;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:"Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
@@ -51,7 +52,10 @@
   tr:hover{background:#16324a;cursor:pointer}
   .legend{display:flex;gap:2px;align-items:center;font-size:11px;color:var(--sub);margin-top:6px;flex-wrap:wrap}
   .legend .bar{height:10px;flex:1;min-width:120px;border-radius:3px;
-    background:linear-gradient(90deg,#334155,#3b82f6,#22c55e,#eab308,#ef4444)}
+    background:linear-gradient(90deg,#16293a,#2a5c78 35%,#3d9ed0 70%,#cfefff)}
+  /* P1: 白地図タイルを暗色化（下地はそのまま・フィルタのみ） */
+  #mapWrap{background:var(--map-sea);border-radius:8px}
+  #mapTiles img{filter:invert(1) hue-rotate(180deg) saturate(.55) brightness(.62) contrast(1.05)}
   .pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;background:var(--panel2);color:var(--sub);border:1px solid var(--line)}
   .spotinfo{font-size:12.5px;line-height:1.7}
   .spotinfo b{color:var(--accent)}
@@ -76,11 +80,16 @@
 </style>
 </head>
 <body>
-<header>
-  <h1>🎣 釣り場スコア可視化 ― 鹿島灘〜仙台湾（実潮汐版）</h1>
-  <div class="meta">対象魚：アジ / キス / ヒラメ｜対象22地点｜潮汐＝気象庁 港別調和定数によるブラウザ内推算（近傍験潮所を緯度補間）｜公開安全版：釣れやすさ推定＋地形＋断面。実釣果データは非保持（アングラーズへリンク）</div>
+<header style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <h1>釣り場スコア</h1>
+    <span class="tag" id="hdrScope">鹿島灘〜仙台湾</span>
+  </div>
+  <div class="tag"><span id="hdrState" class="pill"></span>
+    <a href="#about" style="color:var(--accent);margin-left:8px">データについて</a></div>
 </header>
 <div id="nojs">※このプレビューはJavaScriptが無効です。地図・グラフ・スコアは動きません。<b>ファイルをブラウザで開くと</b>日付/時刻スライダー・魚種切替・潮汐が動作します。</div>
+<div id="dayBanner" class="tag" style="margin:12px 14px 0;padding:10px 14px;border-radius:8px;background:rgba(234,179,8,.10);border:1px solid rgba(234,179,8,.30);display:none"></div>
 
 <div class="wrap">
   <!-- LEFT: controls + map -->
@@ -208,7 +217,7 @@
   </div>
 
   <div class="card" style="margin-top:14px">
-    <h2>データ出典・精度メモ</h2>
+    <h2 id="about">データ出典・精度メモ</h2>
     <div class="src" id="sources"></div>
   </div>
 </div>
@@ -324,6 +333,7 @@ const EXTRA_SPOTS=[
  ['鮎川地磯(牡鹿)',38.2975,141.5110,'仙台湾','rocky','rock',0.80,0.80,0.70,null,140],
  ['阿字ヶ浦海岸',36.394,140.611,'鹿島灘','surf','sand',0.50,0.55,0.72,3855,90],
  ['大津港',36.8286,140.7916,'常磐','port','mixed',0.60,0.70,0.35,null,150],
+ ['久慈川河口',36.4795,140.6165,'鹿島灘','surf','sand',0.70,0.85,0.45,null,100],
 ].map(a=>({name:a[0],lat:a[1],lon:a[2],region:a[3],type:a[4],sub:a[5],str:a[6],flow:a[7],wave:a[8],catchArea:a[9],offBearing:a[10]}));
 SPOTS.push(...EXTRA_SPOTS);
 
@@ -610,6 +620,7 @@ const SHORE_ANCHOR={
   '大洗港':{lat:36.30525,lon:140.57826,b:100},
   '那珂湊港':{lat:36.33872,lon:140.60064,b:100},
   '日立港':{lat:36.49111,lon:140.62171,b:100},
+  '久慈川河口':{lat:36.4795,lon:140.6165,b:100}, // 2026 航空写真(seamlessphoto)ピクセル解析で海岸線140.616-140.618を確認。久慈漁港北・久慈川河口/汀線。沖=ESE
   '四倉港':{lat:37.10249,lon:140.99102,b:95},
   '富岡港':{lat:37.33819,lon:141.02731,b:100},
   '相馬原釜港':{lat:37.83720,lon:140.97669,b:95},
@@ -668,15 +679,25 @@ function proj(lat,lon,W,H,pad){
   const y=pad+ (LAT1-lat)/(LAT1-LAT0)*(H-2*pad);
   return [x,y];
 }
-function heatColor(v,alpha){ // 0..1 → 段階カラー
-  const stops=[[51,65,85],[59,130,246],[34,197,94],[234,179,8],[239,68,68]];
-  v=Math.max(0,Math.min(1,v));const s=v*(stops.length-1),i=Math.floor(s),t=s-i;
+function heatColor(v,alpha){ // P2: 面ヒート＝単色濃淡＋低所は自動で透明（αをランプ側で持つ）
+  const stops=[[22,41,58],[36,86,116],[61,158,208],[150,224,252],[228,248,255]];
+  v=Math.max(0,Math.min(1,v));
+  const s=v*(stops.length-1),i=Math.floor(s),t=s-i;
   const a=stops[i],b=stops[Math.min(i+1,stops.length-1)];
   const r=a[0]+(b[0]-a[0])*t|0,gg=a[1]+(b[1]-a[1])*t|0,bl=a[2]+(b[2]-a[2])*t|0;
-  return alpha==null?`rgb(${r},${gg},${bl})`:`rgba(${r},${gg},${bl},${alpha})`;
+  if(alpha==null)return 'rgb('+r+','+gg+','+bl+')';
+  return 'rgba('+r+','+gg+','+bl+','+(alpha*(0.10+0.90*v)).toFixed(3)+')'; // ★αはランプ側
+}
+// P2: テキスト/マーカー用（暗背景で読める明るい側の濃淡）
+function scoreColor(v){
+  const stops=[[122,150,170],[79,163,200],[79,195,247],[168,232,255],[235,250,255]];
+  v=Math.max(0,Math.min(1,v));
+  const s=v*(stops.length-1),i=Math.floor(s),t=s-i;
+  const a=stops[i],b=stops[Math.min(i+1,stops.length-1)];
+  return 'rgb('+(a[0]+(b[0]-a[0])*t|0)+','+(a[1]+(b[1]-a[1])*t|0)+','+(a[2]+(b[2]-a[2])*t|0)+')';
 }
 // 航空写真の上で読みやすい“くっきり5段階”カラー（彩度高め・alphaは値で上昇＝写真は低所で透ける）
-const DHEAT=[[0.20,[30,90,220],0.28],[0.40,[0,200,255],0.42],[0.60,[40,220,90],0.58],[0.80,[255,210,20],0.72],[2,[255,60,50],0.86]];
+const DHEAT=[[0.20,[26,66,102],0.20],[0.40,[42,120,170],0.36],[0.60,[61,158,208],0.52],[0.80,[150,215,245],0.68],[2,[226,248,255],0.82]];
 function detailHeat(v){v=Math.max(0,Math.min(1,v));for(const [th,c,a] of DHEAT){if(v<th)return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';}return 'rgba(255,60,50,0.86)';}
 // 陸地ポリゴン(lat,lon)＝海岸線＋西端。海マスク判定に使用
 const LANDPOLY=(()=>{const p=COAST.slice();
@@ -705,10 +726,11 @@ function latOf(y,H,pad){return LAT1-(y-pad)/(H-2*pad)*(LAT1-LAT0);}
 function lonOf(x,W,pad){return LON0+(x-pad)/(W-2*pad)*(LON1-LON0);}
 
 // 種別マーカー：港=●, サーフ=●＋白波形, 磯=▲
-function drawMarker(g,x,y,type,fill,sel){
-  const r=sel?8:6;
+function drawMarker(g,x,y,type,fill,sel,v){
+  const t=Math.max(0,Math.min(1,v==null?0.5:v));
+  const r=sel?9:(4.5+3.2*t);   // P3:スコアで半径を変える
   // 暗いハロー（ヒートマップ上でも視認できるように）
-  g.fillStyle='rgba(3,10,18,0.6)';
+  g.fillStyle='rgba(3,10,18,0.75)';
   if(type==='rocky'){g.beginPath();g.moveTo(x,y-r-3);g.lineTo(x+r+3,y+r+2);g.lineTo(x-r-3,y+r+2);g.closePath();g.fill();}
   else{g.beginPath();g.arc(x,y,r+2.5,0,7);g.fill();}
   g.lineWidth=sel?3:1.8;g.strokeStyle=sel?'#ffffff':'#eaf6ff';
@@ -762,7 +784,7 @@ function drawMap(scores){
     const lat=invLat(y+step/2),lon=invLon(x+step/2);
     if(inLand(lat,lon))continue;
     const f=fieldValue(lat,lon,sc); if(f.alpha<=0.02)continue;
-    g.fillStyle=heatColor(f.v,f.alpha*0.62); g.fillRect(x,y,step+1,step+1); // 白地図(明るい)の上でヒートが主役になる透過
+    g.fillStyle=heatColor(f.v,f.alpha); g.fillRect(x,y,step+1,step+1); // P2:αはheatColor内のランプで持つ
   }
   // 潮流ベクトル
   const {dtUTC}=curDateParts();
@@ -775,12 +797,17 @@ function drawMap(scores){
   // マーカー
   const selSpot=SPOTS[selIdx];
   sc.forEach(o=>{const s=o.s; const v=(MAPMODE==='bait')?(o.bait?o.bait.index:0):o.score/100; const x=X(s.lon),y=Y(s.lat);
-    drawMarker(g,x,y,s.type,heatColor(v),s===selSpot);});
+    drawMarker(g,x,y,s.type,scoreColor(v),s===selSpot,v);});
   // 釣り場名ラベル（白地図で読める濃色＋白縁。簡易衝突回避＝重要度順に空き位置へ、無ければ間引き。選択地点は必ず表示）
   const placed=[]; let labelN=0;
   const order=sc.slice().sort((a,b)=> a.s===selSpot?-1 : b.s===selSpot?1 : (b.score-a.score)); // 選択優先→スコア降順
   g.textBaseline='alphabetic'; g.lineJoin='round';
-  if(MAPPREF!=='all') order.forEach(o=>{const s=o.s, sel=s===selSpot, x=X(s.lon), y=Y(s.lat); // 全域はラベル非表示（マーカー/ヒート/種別記号は従来通り）
+  // P3: 全域は「上位3＋選択」だけ地名を出す（県選択時は全て）
+  const labelSet=(MAPPREF==='all')
+    ? new Set(order.slice(0,3).concat(order.filter(o=>o.s===selSpot)).map(o=>o.s))
+    : null;
+  order.forEach(o=>{ if(labelSet && !labelSet.has(o.s))return;
+    const s=o.s, sel=s===selSpot, x=X(s.lon), y=Y(s.lat);
     g.font=(sel?'bold 12px ':'11px ')+'system-ui,sans-serif';
     const w=g.measureText(s.name).width, h=sel?13:11;
     const cands=[[x+9,y+4],[x-9-w,y+4],[x-w/2,y-9],[x-w/2,y+16]]; // 右/左/上/下
@@ -790,12 +817,12 @@ function drawMap(scores){
       let hit=false; for(const p of placed){if(bx0<p[2]&&bx1>p[0]&&by0<p[3]&&by1>p[1]){hit=true;break;}}
       if(!hit){pos=c; placed.push([bx0,by0,bx1,by1]); break;}}
     if(!pos && sel) pos=[x+9,y+4];         // 選択は衝突でも必ず出す
-    if(pos){ g.strokeStyle='rgba(255,255,255,.92)'; g.lineWidth=3; g.strokeText(s.name,pos[0],pos[1]);
-      g.fillStyle=sel?'#b91c1c':'#04263a'; g.fillText(s.name,pos[0],pos[1]); labelN++; }});
+    if(pos){ g.strokeStyle='rgba(6,18,28,.92)'; g.lineWidth=4; g.strokeText(s.name,pos[0],pos[1]);
+      g.fillStyle=sel?'#f2b544':'#e6f0f7'; g.fillText(s.name,pos[0],pos[1]); labelN++; }});
   drawMap._labelCount=labelN;
   // 出典＋県表示
-  g.fillStyle='rgba(255,255,255,.82)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#456';g.font='10px sans-serif';g.fillText('地理院タイル（白地図）',W-146,H-4);
-  if(MAPPREF!=='all'){g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.font='bold 12px sans-serif';g.strokeText(MAPPREF+'県（'+sc.length+'地点）',8,16);g.fillStyle='#04263a';g.fillText(MAPPREF+'県（'+sc.length+'地点）',8,16);}
+  g.fillStyle='rgba(10,22,34,.72)';g.fillRect(W-150,H-16,150,16);g.fillStyle='#9fc3d8';g.font='10px sans-serif';g.fillText('地理院タイル（白地図）',W-146,H-4);
+  if(MAPPREF!=='all'){g.strokeStyle='rgba(6,18,28,.9)';g.lineWidth=3;g.font='bold 12px sans-serif';g.strokeText(MAPPREF+'県（'+sc.length+'地点）',8,16);g.fillStyle='#e6f0f7';g.fillText(MAPPREF+'県（'+sc.length+'地点）',8,16);}
   drawMap._pts=sc.map(o=>({i:SPOTS.indexOf(o.s),px:X(o.s.lon),py:Y(o.s.lat)}));
 }
 document.getElementById('mapC').addEventListener('click',e=>{
@@ -1042,7 +1069,7 @@ function arrowPts(p1,p2){ // (a,d) meters → arrowhead barbs at p2
   return [[p2[0]-ux*s+px*w,p2[1]-uy*s+py*w],p2,[p2[0]-ux*s-px*w,p2[1]-uy*s-py*w]];
 }
 /* ===== 狙い所（名前付き構造）＝写真上に候補ピンで明示 ===== */
-const RIVER_SPOTS={'那珂湊港':1,'荒浜漁港(亘理)':1,'蒲生周辺':1,'松川浦':1,'請戸港':1,'富岡港':1,'深沼海岸(仙台)':1};
+const RIVER_SPOTS={'那珂湊港':1,'荒浜漁港(亘理)':1,'蒲生周辺':1,'松川浦':1,'請戸港':1,'富岡港':1,'深沼海岸(仙台)':1,'久慈川河口':1};
 // 実写(GSI航空写真)照合で狙い所の“絶対緯度経度”を確定した地点。genStructuresの機械配置を上書きし、
 // 逆投影で(a,d)へ変換してピンを実構造物へ確実に乗せる。順序＝配列先頭が第一候補(スコア最上位)。
 const STRUCT_OVERRIDE={
@@ -1111,8 +1138,8 @@ function renderPhotoStatic(spot){
   let miLa=1e9,maLa=-1e9,miLo=1e9,maLo=-1e9;
   corners.forEach(c=>{miLa=Math.min(miLa,c[0]);maLa=Math.max(maLa,c[0]);miLo=Math.min(miLo,c[1]);maLo=Math.max(maLo,c[1]);});
   const box=document.getElementById('leafmap');
-  const W=Math.max(320,Math.min(760,(box.clientWidth||box.parentElement.clientWidth||600)));
-  const H=Math.round(W*0.62);
+  const W=Math.max(320,(box.clientWidth||box.parentElement.clientWidth||600)); // P7:760px頭打ちを解除（PC右側の黒余白の真因）
+  const H=Math.round(Math.min(W*0.62,560));
   const wpx=(lon,Z)=>(lon+180)/360*TS*Math.pow(2,Z);
   const wpy=(lat,Z)=>{const s=Math.sin(lat*Math.PI/180);return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*TS*Math.pow(2,Z);};
   let Z=18; for(;Z>=10;Z--){const pw=wpx(maLo,Z)-wpx(miLo,Z),ph=wpy(miLa,Z)-wpy(maLa,Z); if(pw<=W*0.94&&ph<=H*0.94)break;}
@@ -1131,7 +1158,13 @@ function renderPhotoStatic(spot){
   const hc=document.createElement('canvas');hc.width=HW;hc.height=HH;const hg=hc.getContext('2d');
   for(let yi=0;yi<HH;yi++){const a=TERR.AMIN+(yi+0.5)/HH*(TERR.AMAX-TERR.AMIN);
     for(let xj=0;xj<HW;xj++){const d=TERR.DMIN+(xj+0.5)/HW*(DFOCUS-TERR.DMIN);
-      hg.fillStyle=detailHeat(localScoreAt(T,a,d,fishKey,scalar));hg.fillRect(xj,yi,1,1);}}
+      const v=localScoreAt(T,a,d,fishKey,scalar);
+      if(v<0.12)continue;                                   // P7:低所は写真を透かす
+      const ea=1-Math.pow(Math.abs((yi+0.5)/HH*2-1),3);     // 沿岸方向の端をフェード
+      const ed=Math.min(1,(xj+1)/8,(HW-xj)/8);              // 岸/沖の端をフェード
+      hg.globalAlpha=Math.max(0,Math.min(1,ea*ed));
+      hg.fillStyle=detailHeat(v);hg.fillRect(xj,yi,1,1);}}
+  hg.globalAlpha=1;
   // canvas (x=d:0→HW, y=a:AMIN→AMAX bottom) を pixel quad へ写す affine
   const P00=xy(...toLatLon(T,TERR.AMIN,TERR.DMIN)), P10=xy(...toLatLon(T,TERR.AMIN,DFOCUS)), P01=xy(...toLatLon(T,TERR.AMAX,TERR.DMIN));
   const m11=(P10[0]-P00[0])/HW, m12=(P10[1]-P00[1])/HW, m21=(P01[0]-P00[0])/HH, m22=(P01[1]-P00[1])/HH;
@@ -1376,7 +1409,11 @@ function render(){
   let data=[];
   safe(()=>{dateV.textContent=fmtDate(cp.d)+`  ${SELYEAR}`;timeV.textContent=fmtMin(cp.min);
     moonV.textContent=moonPhase(cp.dtUTC);
-    document.getElementById('mapClock').textContent=` … ${FISH[fishKey].label} / ${fmtDate(cp.d)} ${fmtMin(cp.min)}`;},'header');
+    document.getElementById('mapClock').textContent=` … ${FISH[fishKey].label} / ${fmtDate(cp.d)} ${fmtMin(cp.min)}`;
+    const hs=document.getElementById('hdrState'); // P8:ヘッダは現在状態だけ
+    if(hs) hs.textContent=FISH[fishKey].label+' ／ '+fmtDate(cp.d)+' '+fmtMin(cp.min)+' ／ '+moonPhase(cp.dtUTC);
+    const hsc=document.getElementById('hdrScope'); // 地点数は実数(SPOTS.length)を自動表示
+    if(hsc) hsc.textContent='鹿島灘〜仙台湾 ／ '+SPOTS.length+'地点';},'header');
   safe(()=>{data=computeAll();},'compute');
   safe(()=>drawMap(data),'map');
   safe(drawTide,'tide');
@@ -1387,8 +1424,24 @@ function render(){
   safe(updateAnglersLink,'anglers');
   safe(()=>renderTableDetail(data,cp),'table/detail');
 }
+// P6: 15分刻みで1日総当たり→最良時刻
+function bestTimeToday(spot,fk,cp){
+  let bm=cp.min,bs=-1;
+  for(let m=0;m<1440;m+=15){
+    const dt=Date.UTC(SELYEAR,cp.month-1,cp.day)-9*3600000+m*60000;
+    const r=scoreSpot(spot,fk,dt,cp.month,cp.dayFrac,m);
+    if(r.score>bs){bs=r.score;bm=m;}
+  }
+  return {min:bm,score:bs};
+}
 function renderTableDetail(data,cp){
   // テーブル
+  // P4: スコアの相対化（順位・グレード・本日平均）
+  const ranked=data.map((r,i)=>({i,score:r.score})).sort((a,b)=>b.score-a.score);
+  const RANK={}; ranked.forEach((o,k)=>{RANK[o.i]=k+1;});
+  const N=ranked.length, AVG=data.reduce((s,r)=>s+r.score,0)/N, TOP=ranked[0].score;
+  const gradeOf=i=>{const p=RANK[i]/N; return p<=0.10?'A':p<=0.30?'B':p<=0.60?'C':p<=0.85?'D':'E';};
+  const GC={A:'#22c55e',B:'#22c55e',C:'#38bdf8',D:'#8fa9bd',E:'#7f8fa0'};
   const rows=data.map((r,i)=>({...r,i}));
   rows.sort((a,b)=>{
     let va,vb;
@@ -1405,7 +1458,7 @@ function renderTableDetail(data,cp){
     const ty={port:'●',surf:'〜',rocky:'▲'}[r.s.type];
     tr.innerHTML=`<td><span title="${TYPE_JP[r.s.type]}" style="color:var(--sub)">${ty}</span> ${r.s.name}</td><td>${r.s.region}</td>
       <td>${r.wt.toFixed(1)}℃</td><td>${Math.round(r.tideNow)}</td>
-      <td class="sc" style="color:${heatColor(r.score/100)}">${r.score.toFixed(0)}</td>`;
+      <td class="sc" style="color:${scoreColor(r.score/100)}"><span style="color:${GC[gradeOf(r.i)]};margin-right:6px">${gradeOf(r.i)}</span>${r.score.toFixed(0)}</td>`;
     tr.onclick=()=>{selIdx=r.i;render();};tb.appendChild(tr);
   });
   // 詳細
@@ -1413,19 +1466,48 @@ function renderTableDetail(data,cp){
   const subJ={sand:'砂地',sandmud:'砂泥',gravel:'砂利',rock:'岩礁',mixed:'砂＋変化'}[s.sub];
   document.getElementById('tideTitle').textContent=' … '+s.name;
   const bar=(lb,v)=>`<div class="b"><span>${lb}</span><div class="track"><div class="fill" style="width:${(v*100).toFixed(0)}%"></div></div><span style="width:34px;text-align:right">${(v*100).toFixed(0)}</span></div>`;
+  // P5: 伸びしろ順の内訳（乗算モデルの満点時増分を実計算）
+  const F=FISH[fishKey];
+  const waveAdj=1+F.wWave*(d.waveFit-0.5), waveBest=1+F.wWave*0.5;
+  const up=(cur,best)=> d.score*((best/Math.max(0.01,cur))-1);   // 満点時の総合増分
+  const FACTORS=[
+    {k:'時合い',             v:d.timeFac,     g:up(0.35+0.65*d.timeFac, 1)},
+    {k:'ベイト指数',         v:d.bait.index,  g:up(d.baitMult*(d.abundMult||1), 1)},
+    {k:'底質・地形・潮通し', v:d.base,        g:up(d.base, 1)},
+    {k:'季節',               v:d.seas,        g:up(d.seas, 1)},
+    {k:'水温適性',           v:d.tf,          g:up(d.tf, 1)},
+    {k:'タイプ適性',         v:d.tfit,        g:up(d.tfit, 1)},
+    {k:'波当たり適性',       v:d.waveFit,     g:up(waveAdj, waveBest)}
+  ].sort((a,b)=>b.g-a.g);
+  const worst=FACTORS[0];
+  const bar2=o=>{ const hot=(o===worst && o.g>=3);
+    return '<div class="b"><span style="color:'+(hot?'#eab308':'var(--sub)')+';font-weight:'+(hot?700:400)+'">'+o.k+'</span>'
+     +'<div class="track"><div class="fill" style="width:'+(o.v*100).toFixed(0)+'%;background:'+(hot?'#eab308':'#3d7fa6')+'"></div></div>'
+     +'<span style="width:32px;text-align:right;color:'+(hot?'#eab308':'var(--txt)')+'">'+(o.v*100).toFixed(0)+'</span>'
+     +'<span style="width:46px;text-align:right;color:var(--sub);font-size:11px">'+(o.g>=1?'+'+o.g.toFixed(0):'')+'</span></div>'; };
   document.getElementById('spotinfo').innerHTML=
    `<b>${s.name}</b>（${s.region}） <span class="pill">${TYPE_JP[s.type]}</span><span class="pill">${subJ}</span>${s.provisional?'<span class="pill" style="background:#ffe0a0;color:#7a4a00;border-color:#e0a040">暫定・座標要確認</span>':''}
     <span class="pill">${FISH[fishKey].label}</span><br>
-    総合スコア <b style="font-size:18px;color:${heatColor(d.score/100)}">${d.score.toFixed(0)}</b> /100<br>
+    <div style="display:flex;align-items:flex-end;gap:18px;margin:8px 0 8px">
+      <div><div style="color:var(--sub);font-size:11px">本日の順位</div>
+        <b style="font-size:26px;color:var(--accent)">${RANK[selIdx]}</b>
+        <span style="font-size:12px;color:var(--sub)">位 / ${N}</span></div>
+      <div><div style="color:var(--sub);font-size:11px">評価</div>
+        <b style="font-size:24px;color:${GC[gradeOf(selIdx)]}">${gradeOf(selIdx)}</b></div>
+      <div style="flex:1">
+        <div style="color:var(--sub);font-size:11px">素点 ${d.score.toFixed(0)} /100（本日の平均 ${AVG.toFixed(0)}）</div>
+        <div style="position:relative;height:8px;border-radius:4px;background:#0a1622;margin-top:6px">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${d.score.toFixed(0)}%;border-radius:4px;background:var(--accent)"></div>
+          <div style="position:absolute;left:${AVG.toFixed(0)}%;top:-4px;width:1px;height:16px;background:var(--sub)"></div>
+        </div></div>
+    </div>
     水温 <b>${d.wt.toFixed(1)}℃</b>（適水温${FISH[fishKey].topt}℃）｜
     現在潮位 <b>${Math.round(d.tideNow)}cm</b>｜
     流速 <b>${Math.abs(d.cur.raw).toFixed(0)}cm/h</b>（${d.cur.raw>=0?'上げ':'下げ'}）
-    <div class="bars">
-      ${bar('季節',d.seas)}${bar('水温適性',d.tf)}${bar('タイプ適性',d.tfit)}
-      ${bar('底質適性',d.sub)}${bar('地形変化',s.str)}${bar('潮通し',s.flow)}
-      ${bar('波当たり適性',d.waveFit)}${bar('時合い',d.timeFac)}
-      ${bar('ベイト指数',d.bait.index)}
-    </div>
+    <div class="tag" style="margin-top:8px">バー＝現在値／右端＝この要素が満点なら総合が何点上がるか</div>
+    <div class="bars">${FACTORS.slice(0,4).map(bar2).join('')}</div>
+    <details><summary>残り${FACTORS.length-4}要素</summary>
+      <div class="bars">${FACTORS.slice(4).map(bar2).join('')}</div></details>
     <div class="tag" style="margin-top:4px">
       ベイト指数=イワシ/シラス等の“居そうな度合い”（季節${(d.bait.S*100).toFixed(0)}/水温${(d.bait.T*100).toFixed(0)}/地形${(d.bait.G*100).toFixed(0)}を0.4:0.3:0.3で合成）。
       ${d.baitfish?`本魚種は<b>ベイトフィッシュ自身</b>＝シラス船曳CPUEを<b>現況（釣果指数×${(d.abundMult||1).toFixed(2)}）</b>として総合スコア・詳細ヒートに直接反映`:(d.baitW>0?`本魚種はフィッシュイーターのため<b>総合スコア・詳細ヒートマップ（×${d.baitMult.toFixed(2)}）・狙い所の優先順位</b>に反映`:'本魚種は非フィッシュイーター（ベイト無反映）')}。
@@ -1439,6 +1521,24 @@ function renderTableDetail(data,cp){
   const ext=findExtrema(s.site,cp.month,cp.day);
   document.getElementById('tideInfo').innerHTML=
    '本日の満干（推算・JST）： '+ext.map(e=>`${e.type==='H'?'満潮':'干潮'} ${fmtMin(e.min)}(${e.cm}cm)`).join(' ／ ');
+  // P4: 「今日はどこも渋い/好調」を先に伝えるバナー
+  const bn=document.getElementById('dayBanner');
+  if(bn){ const L = TOP>=65?['好調','#22c55e'] : TOP>=50?['ふつう','#38bdf8'] : ['低調','#eab308'];
+    bn.style.display='block';
+    bn.innerHTML='<b style="color:'+L[1]+'">本日は'+L[0]+'</b>　'+N+'地点の平均 '+AVG.toFixed(0)+' ／ 最高 '+TOP.toFixed(0)+'。'; }
+  // P6: 処方（この地点をよくするには＝最良時刻へジャンプ）
+  const bt=bestTimeToday(s,fishKey,cp);
+  if(bt.score>d.score+3){
+    document.getElementById('spotinfo').insertAdjacentHTML('beforeend',
+     '<div style="margin-top:10px;padding:12px 14px;border-radius:8px;'
+    +'background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.28)">'
+    +'<b style="color:#22c55e">この地点をよくするには</b><br>いまは <b>'+worst.k+'</b> が足を引っぱっています。'
+    +'<b>'+fmtMin(bt.min)+'</b> に入れば総合は <b style="color:#22c55e">'
+    +d.score.toFixed(0)+' → '+bt.score.toFixed(0)+'</b> の見込み。'
+    +'<button id="jumpBest" data-min="'+bt.min+'" style="margin-left:8px;background:var(--panel2);'
+    +'color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer">'
+    +fmtMin(bt.min)+' で再計算</button></div>');
+  }
 }
 
 // コントロール
@@ -1473,6 +1573,11 @@ dateD.oninput=render;dateD.onchange=render;
 // 時刻スライダーは連続inputをrAFで1フレーム1回にまとめる（下地タイルは据え置きなので明滅せず、ヒート等のみ再描画）
 let _rafPending=false; function renderRAF(){ if(_rafPending)return; _rafPending=true; requestAnimationFrame(()=>{_rafPending=false; render();}); }
 timeR.oninput=renderRAF;
+// P6: 「最良時刻で再計算」ボタン（詳細内に動的生成されるため委譲・一度だけ登録）
+document.addEventListener('click',e=>{
+  const b=e.target.closest && e.target.closest('#jumpBest');
+  if(b){ timeR.value=b.dataset.min; render(); }
+});
 document.querySelectorAll('#tbl th').forEach(th=>th.onclick=()=>{
   const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=(k==='name'||k==='region')?1:-1;}
   document.querySelectorAll('#tbl th').forEach(h=>h.textContent=h.textContent.replace(/[▼▲]/g,''));
@@ -1524,7 +1629,15 @@ else boot();
 if('serviceWorker' in navigator){
   var _swRefreshing=false;
   navigator.serviceWorker.addEventListener('controllerchange', function(){
-    if(_swRefreshing) return; _swRefreshing=true; location.reload();   // 新SWが制御を奪ったら1度だけ自動リロード（ワンショットガードでループ防止）
+    if(_swRefreshing) return; _swRefreshing=true;                       // P8:無条件reloadをやめ更新トーストに（スライダー操作中の画面飛び防止）
+    var t=document.createElement('div');
+    t.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9999;'
+     +'background:#1b3350;color:#e8f1f8;border:1px solid #284a68;border-radius:10px;padding:10px 14px;'
+     +'font:13px system-ui;display:flex;gap:12px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.5)';
+    t.innerHTML='新しい版があります <button style="background:#38bdf8;color:#04263a;border:0;'
+     +'border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer">更新</button>';
+    t.querySelector('button').onclick=function(){ location.reload(); };
+    document.body.appendChild(t);
   });
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('sw.js').then(function(reg){
