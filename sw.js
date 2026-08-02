@@ -1,5 +1,5 @@
 /* 釣り場マップ PWA service worker */
-const CACHE = 'fishing-map-v40';
+const CACHE = 'fishing-map-v42';
 const SHELL = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-512-maskable.png','./apple-touch-icon-180.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
@@ -9,6 +9,11 @@ self.addEventListener('fetch', (e) => {
   if (url.origin === location.origin && url.pathname.endsWith('bait_live.json')) {
     // 実データは毎日更新 → network-first（オフライン時のみキャッシュにフォールバック）
     e.respondWith(fetch(req).then((res) => { const c = res.clone(); caches.open(CACHE).then((x) => x.put(req, c)); return res; }).catch(() => caches.match(req)));
+    return;
+  }
+  if (url.origin === location.origin && (req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('index.html'))) {
+    // HTMLドキュメントは network-first（オンライン=常に最新を取得／オフライン時のみキャッシュ）＝「新版が反映されない」を根治。skipWaiting/clients.claimは維持。
+    e.respondWith(fetch(req).then((res) => { const c = res.clone(); caches.open(CACHE).then((x) => x.put(req, c)); return res; }).catch(() => caches.match(req).then((h) => h || caches.match('./index.html'))));
     return;
   }
   if (url.origin === location.origin) {
