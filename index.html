@@ -1184,14 +1184,22 @@ function renderPhotoStatic(spot){
   // 近岸ヒートマップ（(d,a)空間の小canvas→アフィンで写真に整合配置）
   const HW=150,HH=120;
   const hc=document.createElement('canvas');hc.width=HW;hc.height=HH;const hg=hc.getContext('2d');
+  // v38: 近岸ヒートは“塗りの虹色”＝赤枠禁止。真因＝絶対しきい値(v<0.35)+絶対DHEATで帯内の中低値が全部透明化し、
+  // 水深バンドのピーク等値線(scalar高時=赤)だけ残って「赤い外枠・内側は暗い海面」に見えていた。
+  // 対策＝フォーカス帯内で相対正規化(nv=v/vmax)し、連続レインボー heatColor(青→シアン→緑→黄→赤)で塗る。
+  const vgrid=new Float32Array(HW*HH); let vmax=0;
   for(let yi=0;yi<HH;yi++){const a=TERR.AMIN+(yi+0.5)/HH*(TERR.AMAX-TERR.AMIN);
     for(let xj=0;xj<HW;xj++){const d=TERR.DMIN+(xj+0.5)/HW*(DFOCUS-TERR.DMIN);
-      const v=localScoreAt(T,a,d,fishKey,scalar);
-      if(v < (ISMAP?0.12:0.35)) continue;                     // 写真は低所を透かす／地図は広めに乗せる
-      const ea=1-Math.pow(Math.abs((yi+0.5)/HH*2-1),3);
+      const v=localScoreAt(T,a,d,fishKey,scalar); vgrid[yi*HW+xj]=v; if(v>vmax)vmax=v;}}
+  const inv=vmax>1e-6?1/vmax:0;
+  for(let yi=0;yi<HH;yi++)for(let xj=0;xj<HW;xj++){
+      const nv=vgrid[yi*HW+xj]*inv;                          // 帯内相対値0..1（近岸ヒートは“相対候補”）
+      if(nv<0.06) continue;                                  // 水以外/ほぼ無得点(陸・極浅)のみ透過
+      const ea=1-Math.pow(Math.abs((yi+0.5)/HH*2-1),3);     // 外周のみ僅かにフェード（ハードな矩形縁を防止）
       const ed=Math.min(1,(xj+1)/8,(HW-xj)/8);
       hg.globalAlpha=Math.max(0,Math.min(1,ea*ed));
-      hg.fillStyle=detailHeat(v);hg.fillRect(xj,yi,1,1);}}
+      hg.fillStyle=heatColor(nv, ISMAP?0.95:0.82);          // 連続レインボーを“塗り”で（外周の赤ふち化を解消）
+      hg.fillRect(xj,yi,1,1);}
   hg.globalAlpha=1;
   // canvas (x=d:0→HW, y=a:AMIN→AMAX bottom) を pixel quad へ写す affine
   const P00=xy(...toLatLon(T,TERR.AMIN,TERR.DMIN)), P10=xy(...toLatLon(T,TERR.AMIN,DFOCUS)), P01=xy(...toLatLon(T,TERR.AMAX,TERR.DMIN));
