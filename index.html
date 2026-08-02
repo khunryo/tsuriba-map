@@ -171,6 +171,8 @@
 </div>
 
 <div id="detailWrap" style="padding:0 14px 14px">
+  <!-- P10①(v37): 近岸ビュー(左)＋断面(右)を2カラム化。align-items:start必須(左カード下の黒帯回避)。目的=沖側の新堤防ピンをフォールド内に収める -->
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) 470px;gap:14px;align-items:start">
   <div class="card">
     <h2>近岸ビュー ― 航空写真＋狙い所<span id="detailTitle" class="tag"></span></h2>
     <div class="row fish" id="detailBaseSel" style="margin:2px 0 8px">
@@ -198,13 +200,13 @@
          style="display:inline-block;background:#1e6fae;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700">🔗 アングラーズでこの地点の釣果を見る</a>
       <a id="turidocoLink" href="https://turidoco.com/map?bm=osm&lat=36.94&lng=140.90&layers=%5B%22waterDepth%22%2C%22poi%22%2C%22fishingResults%22%5D&zoom=14" target="_blank" rel="noopener"
          style="display:inline-block;background:#0891b2;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700">🔗 釣りどこで実海底地形を見る（アジア航測ALB・実測）</a>
-      <div class="tag" style="margin-top:6px">当アプリの海底地形は<b>推定</b>（Dean平衡＋砂州/根モデル）。<b>実測の詳細地形</b>は航空レーザ測深(ALB)ベースの<a href="https://turidoco.com/home/about" target="_blank" rel="noopener" style="color:var(--accent)">釣りどこ（アジア航測）</a>で確認できます。データは複製せず外部リンクで参照します。</div>
-      <div class="tag" style="margin-top:6px;color:#f0a86b">⚠ 実測校正の検証結果：無償の<b>国土数値情報C04（沿岸海域メッシュ）を取得・解析したが、収録範囲が北緯約34°以南（南西日本）に限られ、当エリア(茨城〜宮城, 36〜38.5°N)は未収録</b>のため実測校正は適用できませんでした。よって海底地形は全地点で推定です。無償の実測代替（GEBCO/JODCは約450〜500mでミクロ地形を解像不可）も本エリアには高精細版が存在しません。実測はリンク先の釣りどこ(ALB)でご確認ください。</div>
+      <div class="tag" style="margin-top:6px">海底地形は推定です。実測はページ下部の<a href="#sourcesCard" style="color:var(--accent)">データ出典</a>を参照。</div>
     </div>
     <div id="detailNote" class="src" style="margin-top:6px"></div>
-  </div>
+  </div><!--/近岸ビューcard(左カラム)-->
 
-  <div class="card" style="margin-top:14px">
+  <div style="display:flex;flex-direction:column;gap:14px"><!--P10①:右カラム-->
+  <div class="card">
     <h2>海底断面（岸→沖 120m）<span id="sectionTitle" class="tag"></span></h2>
     <div id="sectionStatic"><svg viewBox="0 0 600 250" width="100%" style="display:block;border-radius:8px;background:#0a1622" xmlns="http://www.w3.org/2000/svg"><rect x="36" y="51.8" width="528" height="172.2" fill="#0e2036"/><polygon points="36.0,57.1 42.6,66.2 42.6,224 36.0,224" fill="#c9b787" opacity="0.92"/><polygon points="42.6,66.2 49.2,73.3 49.2,224 42.6,224" fill="#c9b787" opacity="0.92"/><polygon points="49.2,73.3 55.8,80.1 55.8,224 49.2,224" fill="#c9b787" opacity="0.92"/><polygon points="55.8,80.1 62.4,86.3 62.4,224 55.8,224" fill="#c9b787" opacity="0.92"/><polygon points="62.4,86.3 69.0,91.2 69.0,224 62.4,224" fill="#c9b787" opacity="0.92"/><polygon points="69.0,91.2 75.6,94.2 75.6,224 69.0,224" fill="#c9b787" opacity="0.92"/><polygon points="75.6,94.2 82.2,94.9 82.2,224 75.6,224" fill="#c9b787" opacity="0.92"/><polygon points="82.2,94.9 88.8,93.3 88.8,224 82.2,224" fill="#c9b787" opacity="0.92"/><polygon points="88.8,93.3 95.4,90.3 95.4,224 88.8,224" fill="#c9b787" opacity="0.92"/><polygon points="95.4,90.3 102.0,86.6 102.0,224 95.4,224" fill="#c9b787" opacity="0.92"/><polygon points="102.0,86.6 108.6,83.1 108.6,224 102.0,224" fill="#c9b787" opacity="0.92"/><polygon points="108.6,83.1 115.2,80.7 115.2,224 108.6,224" fill="#c9b787" opacity="0.92"/><polygon points="115.2,80.7 121.8,79.8 121.8,224 115.2,224" fill="#c9b787" opacity="0.92"/><polygon points="121.8,79.8 128.4,80.5 128.4,224 121.8,224" fill="#c9b787" opacity="0.92"/><polygon points="128.4,80.5 135.0,82.7 135.0,224 128.4,224" fill="#c9b787" opacity="0.92"/><polygon points="135.0,82.7 141.6,86.3 141.6,224 135.0,224" fill="#c9b787" opacity="0.92"/><polygon points="141.6,86.3 148.2,90.7 148.2,224 141.6,224" fill="#c9b787" opacity="0.92"/><polygon points="148.2,90.7 154.8,95.6 154.8,224 148.2,224" fill="#c9b787" opacity="0.92"/><polygon points="154.8,95.6 161.4,100.4 161.4,224 154.8,224" fill="#c9b787" opacity="0.92"/><polygon points="161.4,100.4 168.0,104.9 168.0,224 161.4,224" fill="#c9b787" opacity="0.92"/><polygon points="168.0,104.9 174.6,108.8 174.6,224 168.0,224" fill="#c9b787" opacity="0.92"/><polygon points="174.6,108.8 181.2,112.2 181.2,224 174.6,224" fill="#c9b787" opacity="0.92"/><polygon points="181.2,112.2 187.8,115.1 187.8,224 181.2,224" fill="#c9b787" opacity="0.92"/><polygon points="187.8,115.1 194.4,117.5 194.4,224 187.8,224" fill="#c9b787" opacity="0.92"/><polygon points="194.4,117.5 201.0,119.7 201.0,224 194.4,224" fill="#c9b787" opacity="0.92"/><polygon points="201.0,119.7 207.6,121.7 207.6,224 201.0,224" fill="#c9b787" opacity="0.92"/><polygon points="207.6,121.7 214.2,123.5 214.2,224 207.6,224" fill="#c9b787" opacity="0.92"/><polygon points="214.2,123.5 220.8,125.3 220.8,224 214.2,224" fill="#c9b787" opacity="0.92"/><polygon points="220.8,125.3 227.4,127.0 227.4,224 220.8,224" fill="#c9b787" opacity="0.92"/><polygon points="227.4,127.0 234.0,128.6 234.0,224 227.4,224" fill="#c9b787" opacity="0.92"/><polygon points="234.0,128.6 240.6,130.3 240.6,224 234.0,224" fill="#c9b787" opacity="0.92"/><polygon points="240.6,130.3 247.2,131.9 247.2,224 240.6,224" fill="#c9b787" opacity="0.92"/><polygon points="247.2,131.9 253.8,133.5 253.8,224 247.2,224" fill="#c9b787" opacity="0.92"/><polygon points="253.8,133.5 260.4,135.1 260.4,224 253.8,224" fill="#c9b787" opacity="0.92"/><polygon points="260.4,135.1 267.0,136.7 267.0,224 260.4,224" fill="#c9b787" opacity="0.92"/><polygon points="267.0,136.7 273.6,138.3 273.6,224 267.0,224" fill="#c9b787" opacity="0.92"/><polygon points="273.6,138.3 280.2,139.9 280.2,224 273.6,224" fill="#c9b787" opacity="0.92"/><polygon points="280.2,139.9 286.8,141.4 286.8,224 280.2,224" fill="#c9b787" opacity="0.92"/><polygon points="286.8,141.4 293.4,142.9 293.4,224 286.8,224" fill="#c9b787" opacity="0.92"/><polygon points="293.4,142.9 300.0,144.4 300.0,224 293.4,224" fill="#c9b787" opacity="0.92"/><polygon points="300.0,144.4 306.6,145.9 306.6,224 300.0,224" fill="#c9b787" opacity="0.92"/><polygon points="306.6,145.9 313.2,147.4 313.2,224 306.6,224" fill="#c9b787" opacity="0.92"/><polygon points="313.2,147.4 319.8,148.9 319.8,224 313.2,224" fill="#c9b787" opacity="0.92"/><polygon points="319.8,148.9 326.4,150.4 326.4,224 319.8,224" fill="#c9b787" opacity="0.92"/><polygon points="326.4,150.4 333.0,151.8 333.0,224 326.4,224" fill="#c9b787" opacity="0.92"/><polygon points="333.0,151.8 339.6,153.3 339.6,224 333.0,224" fill="#c9b787" opacity="0.92"/><polygon points="339.6,153.3 346.2,154.7 346.2,224 339.6,224" fill="#c9b787" opacity="0.92"/><polygon points="346.2,154.7 352.8,156.1 352.8,224 346.2,224" fill="#c9b787" opacity="0.92"/><polygon points="352.8,156.1 359.4,157.5 359.4,224 352.8,224" fill="#c9b787" opacity="0.92"/><polygon points="359.4,157.5 366.0,158.9 366.0,224 359.4,224" fill="#c9b787" opacity="0.92"/><polygon points="366.0,158.9 372.6,160.3 372.6,224 366.0,224" fill="#c9b787" opacity="0.92"/><polygon points="372.6,160.3 379.2,161.7 379.2,224 372.6,224" fill="#c9b787" opacity="0.92"/><polygon points="379.2,161.7 385.8,163.1 385.8,224 379.2,224" fill="#c9b787" opacity="0.92"/><polygon points="385.8,163.1 392.4,164.5 392.4,224 385.8,224" fill="#c9b787" opacity="0.92"/><polygon points="392.4,164.5 399.0,165.8 399.0,224 392.4,224" fill="#c9b787" opacity="0.92"/><polygon points="399.0,165.8 405.6,167.2 405.6,224 399.0,224" fill="#c9b787" opacity="0.92"/><polygon points="405.6,167.2 412.2,168.5 412.2,224 405.6,224" fill="#c9b787" opacity="0.92"/><polygon points="412.2,168.5 418.8,169.9 418.8,224 412.2,224" fill="#c9b787" opacity="0.92"/><polygon points="418.8,169.9 425.4,171.2 425.4,224 418.8,224" fill="#c9b787" opacity="0.92"/><polygon points="425.4,171.2 432.0,172.5 432.0,224 425.4,224" fill="#c9b787" opacity="0.92"/><polygon points="432.0,172.5 438.6,173.8 438.6,224 432.0,224" fill="#c9b787" opacity="0.92"/><polygon points="438.6,173.8 445.2,175.1 445.2,224 438.6,224" fill="#c9b787" opacity="0.92"/><polygon points="445.2,175.1 451.8,176.4 451.8,224 445.2,224" fill="#c9b787" opacity="0.92"/><polygon points="451.8,176.4 458.4,177.7 458.4,224 451.8,224" fill="#c9b787" opacity="0.92"/><polygon points="458.4,177.7 465.0,179.0 465.0,224 458.4,224" fill="#c9b787" opacity="0.92"/><polygon points="465.0,179.0 471.6,180.3 471.6,224 465.0,224" fill="#c9b787" opacity="0.92"/><polygon points="471.6,180.3 478.2,181.5 478.2,224 471.6,224" fill="#c9b787" opacity="0.92"/><polygon points="478.2,181.5 484.8,182.8 484.8,224 478.2,224" fill="#c9b787" opacity="0.92"/><polygon points="484.8,182.8 491.4,184.1 491.4,224 484.8,224" fill="#c9b787" opacity="0.92"/><polygon points="491.4,184.1 498.0,185.3 498.0,224 491.4,224" fill="#c9b787" opacity="0.92"/><polygon points="498.0,185.3 504.6,186.6 504.6,224 498.0,224" fill="#c9b787" opacity="0.92"/><polygon points="504.6,186.6 511.2,187.8 511.2,224 504.6,224" fill="#c9b787" opacity="0.92"/><polygon points="511.2,187.8 517.8,189.1 517.8,224 511.2,224" fill="#c9b787" opacity="0.92"/><polygon points="517.8,189.1 524.4,190.3 524.4,224 517.8,224" fill="#c9b787" opacity="0.92"/><polygon points="524.4,190.3 531.0,191.5 531.0,224 524.4,224" fill="#c9b787" opacity="0.92"/><polygon points="531.0,191.5 537.6,192.7 537.6,224 531.0,224" fill="#c9b787" opacity="0.92"/><polygon points="537.6,192.7 544.2,193.9 544.2,224 537.6,224" fill="#c9b787" opacity="0.92"/><polygon points="544.2,193.9 550.8,195.2 550.8,224 544.2,224" fill="#c9b787" opacity="0.92"/><polygon points="550.8,195.2 557.4,196.4 557.4,224 550.8,224" fill="#c9b787" opacity="0.92"/><polygon points="557.4,196.4 564.0,197.6 564.0,224 557.4,224" fill="#c9b787" opacity="0.92"/><path d="M36.0 57.1 L42.6 66.2 L49.2 73.3 L55.8 80.1 L62.4 86.3 L69.0 91.2 L75.6 94.2 L82.2 94.9 L88.8 93.3 L95.4 90.3 L102.0 86.6 L108.6 83.1 L115.2 80.7 L121.8 79.8 L128.4 80.5 L135.0 82.7 L141.6 86.3 L148.2 90.7 L154.8 95.6 L161.4 100.4 L168.0 104.9 L174.6 108.8 L181.2 112.2 L187.8 115.1 L194.4 117.5 L201.0 119.7 L207.6 121.7 L214.2 123.5 L220.8 125.3 L227.4 127.0 L234.0 128.6 L240.6 130.3 L247.2 131.9 L253.8 133.5 L260.4 135.1 L267.0 136.7 L273.6 138.3 L280.2 139.9 L286.8 141.4 L293.4 142.9 L300.0 144.4 L306.6 145.9 L313.2 147.4 L319.8 148.9 L326.4 150.4 L333.0 151.8 L339.6 153.3 L346.2 154.7 L352.8 156.1 L359.4 157.5 L366.0 158.9 L372.6 160.3 L379.2 161.7 L385.8 163.1 L392.4 164.5 L399.0 165.8 L405.6 167.2 L412.2 168.5 L418.8 169.9 L425.4 171.2 L432.0 172.5 L438.6 173.8 L445.2 175.1 L451.8 176.4 L458.4 177.7 L465.0 179.0 L471.6 180.3 L478.2 181.5 L484.8 182.8 L491.4 184.1 L498.0 185.3 L504.6 186.6 L511.2 187.8 L517.8 189.1 L524.4 190.3 L531.0 191.5 L537.6 192.7 L544.2 193.9 L550.8 195.2 L557.4 196.4 L564.0 197.6 " fill="none" stroke="#e7d9b0" stroke-width="2"/><line x1="36" y1="54.0" x2="564" y2="54.0" stroke="#1c3448" opacity="0.35"/><text x="4" y="57.0" fill="#6b8299" font-size="10">0m</text><line x1="36" y1="106.9" x2="564" y2="106.9" stroke="#1c3448" opacity="0.35"/><text x="4" y="109.9" fill="#6b8299" font-size="10">2m</text><line x1="36" y1="159.8" x2="564" y2="159.8" stroke="#1c3448" opacity="0.35"/><text x="4" y="162.8" fill="#6b8299" font-size="10">4m</text><line x1="36" y1="212.7" x2="564" y2="212.7" stroke="#1c3448" opacity="0.35"/><text x="4" y="215.7" fill="#6b8299" font-size="10">6m</text><text x="28.0" y="240" fill="#6b8299" font-size="10">0m</text><text x="160.0" y="240" fill="#6b8299" font-size="10">100m</text><text x="292.0" y="240" fill="#6b8299" font-size="10">200m</text><text x="424.0" y="240" fill="#6b8299" font-size="10">300m</text><text x="556.0" y="240" fill="#6b8299" font-size="10">400m</text><text x="34" y="240" fill="#9fc" font-size="11">岸</text><text x="548" y="240" fill="#9fc" font-size="11">沖→</text><line x1="36" y1="54" x2="564" y2="54" stroke="#3a6ea5" stroke-dasharray="5 4"/><line x1="36" y1="51.8" x2="564" y2="51.8" stroke="#7fd3ff" stroke-width="2"/><text x="468" y="47.8" fill="#7fd3ff" font-size="10">潮位60%(上げ)</text><line x1="154.8" y1="51.8" x2="154.8" y2="95.6" stroke="#ffffff" stroke-dasharray="2 2" opacity="0.7"/><text x="0" y="0" fill="#ffffff" font-size="10" transform="translate(154.8,48.8) rotate(-90)">かけ上がり</text><line x1="121.8" y1="51.8" x2="121.8" y2="79.8" stroke="#fde68a" stroke-dasharray="2 2" opacity="0.7"/><text x="0" y="0" fill="#fde68a" font-size="10" transform="translate(121.8,48.8) rotate(-90)">砂州(バー)</text><line x1="82.2" y1="51.8" x2="82.2" y2="94.9" stroke="#a5f3fc" stroke-dasharray="2 2" opacity="0.7"/><text x="0" y="0" fill="#a5f3fc" font-size="10" transform="translate(82.2,48.8) rotate(-90)">ヨブ(トラフ)</text><path d="M214.2 51.8 L154.8 95.6 L71.6 51.8" fill="none" stroke="#22c55e" stroke-width="3"/><polygon points="71.6,51.8 81.6,46.8 81.6,56.8" fill="#22c55e"/><circle cx="214.2" cy="51.8" r="4" fill="#0a1622" stroke="#22c55e" stroke-width="2"/><circle cx="154.8" cy="95.6" r="6" fill="#22c55e" stroke="#fff" stroke-width="2"/><text x="36" y="16" fill="#cfe" font-size="12">静止：大竹海岸(サーフ) 断面／ヒラメ＝かけ上がりを越えて着水→肩を舐めて手前へ</text><text x="592" y="16" text-anchor="end" fill="#7d97ad" font-size="10">ブラウザで魚種/潮位により変化</text></svg></div>
     <canvas id="sectionC" style="height:250px;display:none"></canvas>
@@ -220,11 +222,26 @@
       <canvas id="sectionOffC" style="height:160px;display:none;margin-top:8px"></canvas>
       <div id="sectionOffNote" class="src" style="margin-top:6px"></div>
     </details>
-  </div>
+  </div><!--/海底断面card-->
+  </div><!--/P10①右カラム-->
+  </div><!--/P10①grid-->
 
-  <div class="card" style="margin-top:14px">
-    <h2>データ出典・精度メモ</h2>
-    <div class="src" id="sources"></div>
+  <div class="card" id="sourcesCard" style="margin-top:14px">
+    <h2>データ出典・参照先</h2>
+    <div class="src" style="line-height:1.9">
+      <b>地図・写真</b>　国土地理院タイル（白地図／淡色地図／航空写真）<br>
+      <b>潮汐</b>　気象庁 港別調和定数（潮位表掲載地点一覧表2026）をブラウザ内で調和推算。近傍験潮所を緯度補間<br>
+      <b>水温</b>　気象庁 沿岸海面水温（実測が無い期間は平年値）<br>
+      <b>ベイト</b>　茨城県 船曳網シラスCPUE（数値のみ引用・原表非転載）<br>
+      <b>沖の水深</b>　GEBCO Compilation Group (GEBCO_2020)<br>
+      <b>釣果</b>　<a href="https://anglers.jp/" target="_blank" rel="noopener">アングラーズ</a>（外部リンク・当アプリでは保持しません）<br>
+      <b>実測の海底地形</b>　<a href="https://turidoco.com/home/about" target="_blank" rel="noopener">釣りどこ（アジア航測ALB）</a>（外部リンク）
+    </div>
+    <details style="margin-top:10px"><summary style="color:var(--sub);font-size:12px">精度について</summary>
+      <div class="src" style="margin-top:6px">当アプリの海底地形は<b>推定</b>（Dean平衡＋砂州/根モデル）で、実測ではありません。狙い所のピンは「根拠のある候補」であり、実在が確認できる構造物のみ実座標、それ以外は概位です。<br>
+      国土数値情報C04（沿岸海域メッシュ）は収録範囲が北緯約34°以南のため当エリア（茨城〜宮城）は未収録で、実測校正は適用できていません。GEBCO/JODCは約450〜500m解像度でミクロ地形を解像できません。実測は釣りどこ(ALB)でご確認ください。</div>
+    </details>
+    <div class="src" id="sources" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -1179,7 +1196,7 @@ function renderPhotoStatic(spot){
   // canvas (x=d:0→HW, y=a:AMIN→AMAX bottom) を pixel quad へ写す affine
   const P00=xy(...toLatLon(T,TERR.AMIN,TERR.DMIN)), P10=xy(...toLatLon(T,TERR.AMIN,DFOCUS)), P01=xy(...toLatLon(T,TERR.AMAX,TERR.DMIN));
   const m11=(P10[0]-P00[0])/HW, m12=(P10[1]-P00[1])/HW, m21=(P01[0]-P00[0])/HH, m22=(P01[1]-P00[1])/HH;
-  const heatCanvas='<canvas id="_phc" width="'+HW+'" height="'+HH+'" style="position:absolute;left:0;top:0;transform-origin:0 0;opacity:'+(ISMAP?'.92':'.78')+';pointer-events:none;transform:matrix('+f1(m11*100)/100+','+f1(m12*100)/100+','+f1(m21*100)/100+','+f1(m22*100)/100+','+f1(P00[0])+','+f1(P00[1])+')"></canvas>';
+  const heatCanvas='<canvas id="_phc" width="'+HW+'" height="'+HH+'" style="position:absolute;left:0;top:0;transform-origin:0 0;filter:blur(7px);opacity:'+(ISMAP?'.9':'.8')+';pointer-events:none;transform:matrix('+f1(m11*100)/100+','+f1(m12*100)/100+','+f1(m21*100)/100+','+f1(m22*100)/100+','+f1(P00[0])+','+f1(P00[1])+')"></canvas>';
   // ---- SVG オーバーレイ ----
   let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="position:absolute;left:0;top:0;pointer-events:none" font-family="system-ui,sans-serif">';
   const o=[spot.oLat!=null?spot.oLat:spot.lat, spot.oLon!=null?spot.oLon:spot.lon];
@@ -1188,8 +1205,7 @@ function renderPhotoStatic(spot){
   s+='<circle cx="'+f1(ox)+'" cy="'+f1(oy)+'" r="'+f1(50/mpp)+'" fill="none" stroke="#ffe14d" stroke-width="1.4" stroke-dasharray="2 5" opacity=".85"/>';
   s+='<circle cx="'+f1(ox)+'" cy="'+f1(oy)+'" r="'+f1(100/mpp)+'" fill="none" stroke="#ff8c3a" stroke-width="1.4" stroke-dasharray="6 5" opacity=".85"/>';
   // 断面測線（沖方向）
-  const secB=xy(...toLatLon(T,0,270));
-  s+='<line x1="'+f1(ox)+'" y1="'+f1(oy)+'" x2="'+f1(secB[0])+'" y2="'+f1(secB[1])+'" stroke="#c060ff" stroke-width="2" stroke-dasharray="5 4"/><rect x="'+f1(secB[0]+2)+'" y="'+f1(secB[1]-15)+'" width="72" height="22" rx="7" fill="rgba(10,22,34,.92)" stroke="#2f6285"/><text x="'+f1(secB[0]+12)+'" y="'+f1(secB[1]+1)+'" font-size="13" fill="#e6f0f7">断面(沖)</text>';
+  // 断面測線は断面図パネルに任せ、写真上には描かない（線が多いと読めない）
   let firstLabel='—', sts=[];
   if(spot.banned){
     s+='<rect x="'+f1(ox-60)+'" y="'+f1(oy-14)+'" width="120" height="24" rx="5" fill="#b91c1c"/><text x="'+f1(ox)+'" y="'+f1(oy+3)+'" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">🚫 釣り禁止</text>';
@@ -1197,10 +1213,10 @@ function renderPhotoStatic(spot){
     // STRUCT_OVERRIDE地点は定義配列順を固定（baitで順位を動かさない＝大津:新堤防=第一を保護）。非override地点のみbaitで並び替え。
     const _fixed=!!STRUCT_OVERRIDE[spot.name], _list=genStructures(spot), _bi=sc0.bait?sc0.bait.index:0.5;
     sts=_list.map((st,i)=>({st, sc:_fixed?(_list.length-i):pinScore(st,fishKey,min,tn,cs.raw,_bi)})).sort((x,y)=>y.sc-x.sc);
-    const topN=Math.min(3,sts.length); firstLabel=sts.length?sts[0].st.label:'—';
+    const topN=Math.min(ISMAP?3:2,sts.length); firstLabel=sts.length?sts[0].st.label:'—';
     // 通し方の一例（第一候補）
     if(sts.length){const b=sts[0].st; const line=[[b.a,Math.min(DFOCUS-5,b.d+15)],[b.a,b.d],[Math.max(TERR.AMIN+10,b.a-25),Math.max(8,b.d*0.4)]].map(p=>xy(...toLatLon(T,p[0],p[1])));
-      s+='<path d="M'+line.map(p=>f1(p[0])+' '+f1(p[1])).join(' L')+'" fill="none" stroke="#38bdf8" stroke-width="3" opacity=".9"/>';}
+      s+='<path d="M'+line.map(p=>f1(p[0])+' '+f1(p[1])).join(' L')+'" fill="none" stroke="#38bdf8" stroke-width="2" opacity=".75"/>';}
     // 候補ピン
     sts.forEach((oo,idx)=>{const st=oo.st,ll=xy(...toLatLon(T,st.a,st.d)),topp=idx<topN;
       const col=idx===0?'#f59e0b':(topp?'#22c55e':'#94a3b8');
@@ -1226,13 +1242,20 @@ function renderPhotoStatic(spot){
   // スケール
   const bar=100/mpp; s+='<g transform="translate(14,'+(H-16)+')"><rect x="-5" y="-14" width="'+(Math.round(bar)+126)+'" height="20" rx="3" fill="#000" opacity=".5"/><line x1="0" y1="0" x2="'+Math.round(bar)+'" y2="0" stroke="#fff" stroke-width="3"/><text x="0" y="-4" font-size="11" fill="#fff">100m ｜破線=50/100mキャスト</text></g>';
   // 出典＋暫定
-  s+='<text x="'+(W-6)+'" y="'+(H-5)+'" font-size="10" fill="#fff" stroke="#000" stroke-width=".4" text-anchor="end">出典:国土地理院('+(ISMAP?'淡色地図':'航空写真')+')</text>';
+  s+='<text x="'+(W-6)+'" y="'+(H-5)+'" font-size="10" fill="#fff" stroke="#000" stroke-width=".4" text-anchor="end">ピン位置は目安 ／ 出典:国土地理院('+(ISMAP?'淡色地図':'航空写真')+')</text>';
   if(spot.provisional) s+='<rect x="'+(W-118)+'" y="6" width="112" height="20" rx="4" fill="#ffcf33" opacity=".92"/><text x="'+(W-62)+'" y="20" font-size="11" font-weight="700" fill="#5a4a00" text-anchor="middle">暫定・座標要確認</text>';
   s+='</svg>';
   box.style.display='block'; box.style.position='relative'; box.style.height=H+'px'; box.style.width='100%'; box.style.overflow='hidden'; box.style.background='#0a1622'; box.style.borderRadius='8px';
   box.innerHTML='<div style="position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto">'+tiles+heatCanvas+s+'</div>';
   // ヒートcanvasへ描画
-  const dst=document.getElementById('_phc'); if(dst){const dg=dst.getContext('2d'); dg.drawImage(hc,0,0);}
+  const dst=document.getElementById('_phc');
+  if(dst){const dg=dst.getContext('2d'); dg.drawImage(hc,0,0);
+    // 矩形の縁（＝「余計な枠」）を消す：楕円のソフトマスクで抜く
+    dg.globalCompositeOperation='destination-in';
+    const rg=dg.createRadialGradient(HW*0.42,HH/2,0,HW*0.42,HH/2,Math.max(HW,HH)*0.60);
+    rg.addColorStop(0,'rgba(0,0,0,1)'); rg.addColorStop(0.62,'rgba(0,0,0,1)'); rg.addColorStop(1,'rgba(0,0,0,0)');
+    dg.fillStyle=rg; dg.fillRect(0,0,HW,HH);
+    dg.globalCompositeOperation='source-over';}
   return {sts,cs,tn,dir,firstLabel};
 }
 function renderDetail(){
@@ -1247,9 +1270,7 @@ function renderDetail(){
     const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ', iwashi:'サビキ（アミコマセ）'}[fishKey];
     const acc = spot.provisional?'この地点は<b style="color:#a06000">暫定座標（要ユーザー確認）</b>＝位置は目安。' : (spot.anchored?'この地点は<b>航空写真で位置確認済み</b>。':'この地点は座標が目安です。');
     document.getElementById('detailNote').innerHTML=
-      `<b>下地＝航空写真(実物・国土地理院)／面＝釣れやすさヒートマップ(相対候補・モデル推定)</b>。${acc}`
-      +`ピンは“根拠のある候補(目印)”で釣れる保証ではありません。`
-      +`いま(${r.dir>0?'上げ':'下げ'}潮/潮位${(r.tn*100).toFixed(0)}%)の${FISH[fishKey].label}の第一候補＝<b>${r.firstLabel}</b>。参考タックル：${lure}。実水深は「釣りどこ(ALB)」で確認を。`;
+      `いま（${r.dir>0?'上げ':'下げ'}潮／潮位${(r.tn*100).toFixed(0)}%）の第一候補＝<b>${r.firstLabel}</b>　参考タックル：${lure}`;
   }
   return; // 以降の旧Leaflet実装は不使用（静的写真ビューへ置換）
   /* eslint-disable */
@@ -1513,7 +1534,7 @@ function renderTableDetail(data,cp){
     <div class="tag" style="margin-top:8px">バー＝現在値／右端＝この要素が満点なら総合が何点上がるか</div>
     <div class="bars">${FACTORS.slice(0,4).map(bar2).join('')}</div>
     <details><summary>残り${FACTORS.length-4}要素</summary><div class="bars">${FACTORS.slice(4).map(bar2).join('')}</div></details>
-    <div class="tag" style="margin-top:4px">
+    <details class="tag" style="margin-top:6px"><summary style="cursor:pointer;color:var(--sub)">計算の内訳とデータ出典</summary><div style="margin-top:4px">
       ベイト指数=イワシ/シラス等の“居そうな度合い”（季節${(d.bait.S*100).toFixed(0)}/水温${(d.bait.T*100).toFixed(0)}/地形${(d.bait.G*100).toFixed(0)}を0.4:0.3:0.3で合成）。
       ${d.baitfish?`本魚種は<b>ベイトフィッシュ自身</b>＝シラス船曳CPUEを<b>現況（釣果指数×${(d.abundMult||1).toFixed(2)}）</b>として総合スコア・詳細ヒートに直接反映`:(d.baitW>0?`本魚種はフィッシュイーターのため<b>総合スコア・詳細ヒートマップ（×${d.baitMult.toFixed(2)}）・狙い所の優先順位</b>に反映`:'本魚種は非フィッシュイーター（ベイト無反映）')}。
       ${(()=>{const L=(d.bait&&d.bait.live)||{};const p=[];
@@ -1521,7 +1542,7 @@ function renderTableDetail(data,cp){
         p.push(L.cpue?`ベイト=茨城県船曳 ${L.cpue.dist} ${L.cpue.date.slice(5)} CPUE${L.cpue.cpue}kg/隻→<b>実測反映</b>`:'ベイト現況=季節推定');
         return `<b>${(L.sst||L.cpue)?'一部実測反映':'推定'}</b>：${p.join(' ／ ')}。数値は出典から引用（原表非転載）。`;})()}
     </div>
-    <div class="tag" style="margin-top:4px">潮汐参照験潮所：${s.site.ref}（距離補間）</div>`;
+    <div style="margin-top:4px">潮汐参照験潮所：${s.site.ref}（距離補間）</div></div></details>`;
   // 潮位テキスト
   const ext=findExtrema(s.site,cp.month,cp.day);
   document.getElementById('tideInfo').innerHTML=
