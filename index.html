@@ -159,6 +159,7 @@
 
     <div class="card">
       <h2>地点別スコア（クリックで選択・列見出しで並替）</h2>
+      <div class="tag" style="margin:-2px 0 6px"><span style="color:#38bdf8;font-weight:700">◎</span>=近岸ビュー対応済み（航空写真＋等深線＋狙い所ピン）／<span style="color:#5b6b7a">○</span>=準備中（座標未検証・近岸図は非表示）</div>
       <div style="max-height:260px;overflow:auto">
         <table id="tbl">
           <thead><tr>
@@ -675,6 +676,11 @@ const SHORE_ANCHOR={
 };
 // 暫定（要ユーザー確認）＝UIに「暫定」バッジ表示。ユーザー座標受領後に差し替え。
 const PROVISIONAL={'波崎新港':1,'江名港':1,'請戸港':1,'荒浜漁港(亘理)':1,'大竹海岸':1,'深沼海岸(仙台)':1};
+// v43: 近岸ビュー（航空写真＋等深線＋狙い所ピン）を描画してよい“検証済み”港。
+// アンカーが実際の港の水面に乗ることを権威データ＋航空写真照合で確認できた港のみ掲載。
+// 未掲載の港は近岸ビューを描かず「準備中」を明示（推測座標での描画は完全禁止）。確認でき次第ここへ追加。
+const VERIFIED_NEARSHORE={'大津港':1}; // 2026-08-02: 大津のみ実写照合済(新堤防/東船溜/中央突堤=実構造物に一致・DOM実測でピン=真緯度経度)
+function isNearshoreVerified(name){return !!VERIFIED_NEARSHORE[name];}
 const BW_TIP={ // 実防波堤の先端（絶対座標）※各地点の原点から概ね400m以内の物のみ有効
   '那珂湊港':[36.338166,140.605233],
   '仙台港':[38.272638,141.025256]
@@ -1151,6 +1157,19 @@ function pinScore(st,fk,min,tn,cur,bi){
 }
 /* ===== 静的 航空写真2Dビュー（Leaflet置換）：seamlessphoto <img>＋同一Webメルカトル変換の重畳 ===== */
 function renderPhotoStatic(spot){
+  // v43: 未verified港は推測座標で近岸ビューを描かない＝「準備中」を明示（航空写真/等深線/ピンとも非描画）。
+  if(!isNearshoreVerified(spot.name)){
+    const box0=document.getElementById('leafmap');
+    const _cs=currentSpeed(spot.site,curDateParts().dtUTC), _tn=tideNormNow(spot);
+    if(box0){ box0.style.display='block'; box0.style.position='relative'; box0.style.height='auto'; box0.style.width='100%';
+      box0.style.overflow='visible'; box0.style.background='#0e1c2b'; box0.style.borderRadius='8px';
+      box0.innerHTML='<div style="padding:26px 16px;text-align:center;color:#9fb7cc;font-size:14px;line-height:1.75">'
+        +'<div style="font-size:30px;margin-bottom:2px">🛠️</div>'
+        +'<b style="color:#e6f0f7">この港は近岸ビュー準備中</b><br>座標・地形データが未整備のため、<b>航空写真＋推定水深の等深線＋狙い所ピン</b>は表示していません。<br>'
+        +'<span style="font-size:12px;color:#7d97ad">推測座標で不正確な図を描かない方針です。実際の港の水面で確認でき次第、この港も有効化します。</span></div>';
+    }
+    return {sts:[],cs:_cs,tn:_tn,dir:_cs.raw>=0?1:-1,firstLabel:'—',unverified:true};
+  }
   const T=buildTerrain(spot); const DFOCUS=120; const TS=256;
   const ISMAP = (typeof DETAILBASE!=='undefined' && DETAILBASE==='map');
   const {month,day,dayFrac,min,dtUTC}=curDateParts();
@@ -1256,9 +1275,10 @@ function renderDetail(){
   const r=renderPhotoStatic(spot);
   if(spot.banned){
     document.getElementById('detailNote').innerHTML='<b style="color:#f87171">🚫 '+spot.name+'は釣り禁止区域の指定あり</b>（'+(spot.banReason||'')+'）。候補は表示しません。近隣の釣り可能な地点をご利用ください。';
+  } else if(r.unverified){
+    document.getElementById('detailNote').innerHTML='<b style="color:#9fb7cc">近岸ビュー準備中</b>：この港はアンカー座標が未検証のため、近岸の図（航空写真＋等深線＋狙い所ピン）と海底断面は表示していません。全体マップ・潮汐・スコアはご利用いただけます。（推測座標で不正確な図を描かない方針）';
   } else {
     const lure={hirame:'鉄板バイブ/ミノー/ワインド', kisu:'天秤＋石ゴカイ', aji:'ジグヘッド＋ワーム/サビキ', iwashi:'サビキ（アミコマセ）'}[fishKey];
-    const acc = spot.provisional?'この地点は<b style="color:#a06000">暫定座標（要ユーザー確認）</b>＝位置は目安。' : (spot.anchored?'この地点は<b>航空写真で位置確認済み</b>。':'この地点は座標が目安です。');
     document.getElementById('detailNote').innerHTML=
       `いま（${r.dir>0?'上げ':'下げ'}潮／潮位${(r.tn*100).toFixed(0)}%）の第一候補＝<b>${r.firstLabel}</b>　参考タックル：${lure}`;
   }
@@ -1340,6 +1360,7 @@ let BATHY=null;
 function drawSectionOffshore(){
   const cvs=document.getElementById('sectionOffC'); if(!cvs)return;
   const spot=SPOTS[selIdx], note=document.getElementById('sectionOffNote');
+  if(!isNearshoreVerified(spot.name)){ cvs.style.display='none'; if(note)note.innerHTML=''; return; } // v43:未verifiedは非描画
   cvs.style.display='block';
   const DMAX=150; // キャスト到達域に集中（GEBCO最近点300mは範囲外→この帯は自作モデル）
   const W=cvs.width=cvs.clientWidth||600, H=cvs.height=160, padL=40,padR=14,padT=20,padB=24;
@@ -1374,6 +1395,15 @@ function drawSectionOffshore(){
 function drawSection(){
   const cvs=document.getElementById('sectionC'); if(!cvs)return;
   const spot=SPOTS[selIdx];
+  // v43: 未verified港は推測座標での断面も描かない＝「準備中」を明示（近岸ビューと一貫）。
+  if(!isNearshoreVerified(spot.name)){
+    cvs.style.display='none';
+    document.getElementById('sectionTitle').textContent=` … ${spot.name}`;
+    const sn=document.getElementById('sectionNote'); if(sn)sn.innerHTML='<b style="color:#9fb7cc">断面 準備中</b>：この港はアンカー座標が未検証のため、海底断面（推定地形）は表示していません。座標を確認でき次第、近岸ビューとあわせて有効化します。';
+    const so=document.getElementById('sectionOffC'); if(so)so.style.display='none';
+    const son=document.getElementById('sectionOffNote'); if(son)son.innerHTML='';
+    return;
+  }
   document.getElementById('sectionTitle').textContent=` … ${spot.name}（${TYPE_JP[spot.type]}）/ ${FISH[fishKey].label}`;
   const W=cvs.width=Math.min(cvs.clientWidth||600,900), H=cvs.height=340, pad=36;
   cvs.style.width=W+'px'; cvs.style.height=H+'px'; cvs.style.display='block'; cvs.style.margin='0 auto';
@@ -1474,7 +1504,8 @@ function renderTableDetail(data,cp){
   rows.forEach(r=>{
     const tr=document.createElement('tr');if(r.i===selIdx)tr.className='sel';
     const ty={port:'●',surf:'〜',rocky:'▲'}[r.s.type];
-    tr.innerHTML=`<td><span title="${TYPE_JP[r.s.type]}" style="color:var(--sub)">${ty}</span> ${r.s.name}</td><td>${r.s.region}</td>
+    const nv=isNearshoreVerified(r.s.name)?'<span title="近岸ビュー対応済み（座標検証済）" style="color:#38bdf8;font-weight:700">◎</span>':'<span title="近岸ビュー準備中（座標未検証）" style="color:#5b6b7a">○</span>';
+    tr.innerHTML=`<td>${nv} <span title="${TYPE_JP[r.s.type]}" style="color:var(--sub)">${ty}</span> ${r.s.name}</td><td>${r.s.region}</td>
       <td>${r.wt.toFixed(1)}℃</td><td>${Math.round(r.tideNow)}</td>
       <td class="sc" style="color:${scoreColor(r.score/100)}"><span style="color:${GC[gradeOf(r.i)]};margin-right:6px">${gradeOf(r.i)}</span>${r.score.toFixed(0)}</td>`;
     tr.onclick=()=>{selIdx=r.i;render();};tb.appendChild(tr);
