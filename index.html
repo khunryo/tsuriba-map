@@ -29,6 +29,9 @@
   #nojs{background:#7c2d12;color:#fed7aa;padding:8px 16px;font-size:13px}
   .wrap{display:grid;grid-template-columns:minmax(320px,1fr) minmax(360px,1.15fr);gap:14px;padding:14px}
   @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  /* P10①(v39): 近岸ビュー(左)＋断面(右)の2カラムはdesktop専用。狭幅では1カラム(縦積み)＝スマホで左列0幅潰れ→近岸canvas暗箱化を防止 */
+  .detailGrid{display:grid;grid-template-columns:minmax(0,1fr) 470px;gap:14px;align-items:start}
+  @media(max-width:900px){.detailGrid{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
   .card h2{margin:0 0 8px;font-size:14px;color:var(--accent);font-weight:600}
   .controls{display:flex;flex-direction:column;gap:10px}
@@ -172,7 +175,7 @@
 
 <div id="detailWrap" style="padding:0 14px 14px">
   <!-- P10①(v37): 近岸ビュー(左)＋断面(右)を2カラム化。align-items:start必須(左カード下の黒帯回避)。目的=沖側の新堤防ピンをフォールド内に収める -->
-  <div style="display:grid;grid-template-columns:minmax(0,1fr) 470px;gap:14px;align-items:start">
+  <div class="detailGrid">
   <div class="card">
     <h2>近岸ビュー ― 航空写真＋狙い所<span id="detailTitle" class="tag"></span></h2>
     <div class="row fish" id="detailBaseSel" style="margin:2px 0 8px">
