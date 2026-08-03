@@ -1189,8 +1189,13 @@ function renderPhotoStatic(spot){
   const H=Math.round(W*0.66);
   const wpx=(lon,Z)=>(lon+180)/360*TS*Math.pow(2,Z);
   const wpy=(lat,Z)=>{const s=Math.sin(lat*Math.PI/180);return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*TS*Math.pow(2,Z);};
-  let Z=18; for(;Z>=10;Z--){const pw=wpx(maLo,Z)-wpx(miLo,Z),ph=wpy(miLa,Z)-wpy(maLa,Z); if(pw<=W*0.94&&ph<=H*0.94)break;}
-  const cLon=(miLo+maLo)/2,cLat=(miLa+maLa)/2, left=wpx(cLon,Z)-W/2, top=wpy(cLat,Z)-H/2;
+  // v47: 近岸スケールを全港統一。港ごとのbbox自動フィットはZ段差(大津Z18/他Z17=2倍差)を生むため廃止し、
+  //      「那珂湊基準の固定表示幅 NEARSHORE_SPAN_M」から Z を決める＝全verified港が同一スケール（大洗も港＋周辺が入る）。
+  const cLon=(miLo+maLo)/2,cLat=(miLa+maLa)/2;
+  const NEARSHORE_SPAN_M=950; // 那珂湊の実効表示幅(≈962m)基準の統一スケール
+  let Z=Math.round(Math.log2(156543.03392*Math.cos(cLat*Math.PI/180)*W/NEARSHORE_SPAN_M));
+  Z=Math.max(10,Math.min(19,Z));
+  const left=wpx(cLon,Z)-W/2, top=wpy(cLat,Z)-H/2;
   const xy=(lat,lon)=>[wpx(lon,Z)-left, wpy(lat,Z)-top];
   const mpp=156543.03392*Math.cos(cLat*Math.PI/180)/Math.pow(2,Z);
   const bR=(spot.offBearing!=null?spot.offBearing:90)*Math.PI/180, seaV=[Math.sin(bR),-Math.cos(bR)];
