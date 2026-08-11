@@ -1,0 +1,7 @@
+<!-- Copy these keys into ios/App/App/Info.plist after `npm run ios:add`. -->
+<key>NSCameraUsageDescription</key>
+<string>釣果写真を撮影して投稿するためにカメラを使用します。</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>釣果写真を選んで投稿するために写真ライブラリを使用します。</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>撮影した釣果写真を写真ライブラリへ保存する場合に使用します。</string>

@@ -1,0 +1,9 @@
+{
+  "appId": "com.khunryo.shiome",
+  "appName": "潮目",
+  "webDir": "www",
+  "backgroundColor": "#07131f",
+  "ios": {
+    "preferredContentMode": "mobile"
+  }
+}
