@@ -36,7 +36,8 @@ const tideMemory=new Map();
 const postRate=new Map();
 let postsSchemaReady=false;
 function decode(value){const raw=atob(value);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return bytes;}
-function jsonResponse(value,status=200){return new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});}
+const corsHeaders={'access-control-allow-origin':'*','access-control-allow-methods':'GET, POST, OPTIONS','access-control-allow-headers':'content-type, accept','access-control-max-age':'86400'};
+function jsonResponse(value,status=200){return new Response(JSON.stringify(value),{status,headers:{...corsHeaders,'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});}
 function textField(form,name,maxLength){return String(form.get(name)||'').trim().slice(0,maxLength);}
 function optionalNumber(form,name,min,max){const raw=textField(form,name,20);if(!raw)return null;const value=Number(raw);return Number.isFinite(value)&&value>=min&&value<=max?value:null;}
 async function ensurePostsSchema(env){
@@ -54,14 +55,14 @@ async function tideResponse(request,url){
   const currentYear=new Date().getUTCFullYear();
   if(!/^[A-Z0-9]{2}$/.test(station)||!Number.isInteger(year)||year<currentYear-2||year>currentYear+2)return new Response('Invalid tide request',{status:400});
   const memoryKey=station+'|'+year;
-  if(tideMemory.has(memoryKey))return new Response(tideMemory.get(memoryKey),{status:200,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=21600','x-data-source':'Japan Meteorological Agency'}});
+  if(tideMemory.has(memoryKey))return new Response(tideMemory.get(memoryKey),{status:200,headers:{...corsHeaders,'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=21600','x-data-source':'Japan Meteorological Agency'}});
   const upstream='https://www.data.jma.go.jp/kaiyou/data/db/tide/suisan/txt/'+year+'/'+station+'.txt';
   const source=await fetch(upstream,{headers:{accept:'text/plain'}});
   if(!source.ok)return new Response('Tide data unavailable',{status:source.status===404?404:502});
   const body=await source.text();
   if(tideMemory.size>=64)tideMemory.delete(tideMemory.keys().next().value);
   tideMemory.set(memoryKey,body);
-  const response=new Response(body,{status:200,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=21600, s-maxage=21600','x-data-source':'Japan Meteorological Agency'}});
+  const response=new Response(body,{status:200,headers:{...corsHeaders,'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=21600, s-maxage=21600','x-data-source':'Japan Meteorological Agency'}});
   return response;
 }
 async function photoTileResponse(path){
@@ -75,7 +76,7 @@ async function photoTileResponse(path){
     try{
       const source=await fetch(upstream,{headers:{accept:'image/avif,image/webp,image/jpeg,image/*'}});
       if(!source.ok)continue;
-      const headers=new Headers({'content-type':source.headers.get('content-type')||'image/jpeg','cache-control':'public, max-age=86400, s-maxage=86400','x-photo-source':'GSI '+sourceName,'x-content-type-options':'nosniff'});
+      const headers=new Headers({...corsHeaders,'content-type':source.headers.get('content-type')||'image/jpeg','cache-control':'public, max-age=86400, s-maxage=86400','x-photo-source':'GSI '+sourceName,'x-content-type-options':'nosniff'});
       return new Response(source.body,{status:200,headers});
     }catch(error){}
   }
@@ -117,9 +118,9 @@ async function postPhotoResponse(path,env){
   const row=await env.DB.prepare('SELECT photo_key, photo_type FROM posts WHERE id = ? LIMIT 1').bind(id).first();
   if(!row||!row.photo_key)return new Response('Not found',{status:404});
   const object=await env.UPLOADS.get(row.photo_key);if(!object)return new Response('Not found',{status:404});
-  return new Response(object.body,{headers:{'content-type':row.photo_type||'application/octet-stream','cache-control':'public, max-age=86400','x-content-type-options':'nosniff'}});
+  return new Response(object.body,{headers:{...corsHeaders,'content-type':row.photo_type||'application/octet-stream','cache-control':'public, max-age=86400','x-content-type-options':'nosniff'}});
 }
-export default {async fetch(request,env){const url=new URL(request.url);let path=decodeURIComponent(url.pathname);if(path==='/api/tide')return tideResponse(request,url);if(path==='/api/posts')return postsResponse(request,env);if(path.startsWith('/api/post-photo/'))return postPhotoResponse(path,env);if(path.startsWith('/api/photo-tile/'))return photoTileResponse(path);if(path.endsWith('/'))path='/';const asset=assets[path]||(path.includes('.')?null:assets['/index.html']);if(!asset)return new Response('Not found',{status:404});const headers=new Headers({'content-type':asset.type,'x-content-type-options':'nosniff'});if(path==='/sw.js')headers.set('service-worker-allowed','/');if(path==='/index.html'||path==='/')headers.set('cache-control','no-cache');else headers.set('cache-control','public, max-age=3600');return new Response(decode(asset.body),{status:200,headers});}};
+export default {async fetch(request,env){const url=new URL(request.url);let path=decodeURIComponent(url.pathname);if(request.method==='OPTIONS'&&path.startsWith('/api/'))return new Response(null,{status:204,headers:corsHeaders});if(path==='/api/tide')return tideResponse(request,url);if(path==='/api/posts')return postsResponse(request,env);if(path.startsWith('/api/post-photo/'))return postPhotoResponse(path,env);if(path.startsWith('/api/photo-tile/'))return photoTileResponse(path);if(path.endsWith('/'))path='/';const asset=assets[path]||(path.includes('.')?null:assets['/index.html']);if(!asset)return new Response('Not found',{status:404});const headers=new Headers({'content-type':asset.type,'x-content-type-options':'nosniff'});if(path==='/sw.js')headers.set('service-worker-allowed','/');if(path==='/index.html'||path==='/')headers.set('cache-control','no-cache');else headers.set('cache-control','public, max-age=3600');return new Response(decode(asset.body),{status:200,headers});}};
 "@
 $distPath = Join-Path $projectRoot 'dist'
 if (Test-Path $distPath) {
