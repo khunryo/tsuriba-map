@@ -801,7 +801,7 @@
     /* 実地図・航空写真レイヤー。タイルが読めない環境では既存の簡易地図を残す。 */
     (function(){
       var geoMainMap=null, geoMainReady=false, geoSpotMap=null, geoTideMap=null, geoMarkers=[], geoTideMarkers=[], geoSpotMarker=null;
-      var geoDetailBase='photo', geoViewKey='', geoTideViewKey='';
+      var geoDetailBase='photo', geoViewKey='', geoTideViewKey='', SHOW_SPOT_SURROUNDINGS=false;
       var geoOldDraw=window.drawMap, geoOldDetail=window.renderDetail, geoOldRender=window.render;
       var GSI_ATTR='出典：国土地理院／地理院タイル';
       var GSI_LIST='https://maps.gsi.go.jp/development/ichiran.html';
@@ -931,6 +931,7 @@
       }
       function enhancedDetail(){
         geoOldDetail();
+        if(!SHOW_SPOT_SURROUNDINGS)return;
         var card=document.getElementById('detailCard'),s=spot(state.selected),feature=s.type==='港'?'港口・明暗・係留周り':s.type==='サーフ'?'砂底・かけ上がり・離岸流':'岩礁・潮目・足元の根',risk=s.type==='サーフ'?'波・離岸流':s.type==='磯'?'滑り・高波':'立入区画・混雑';
         card.insertAdjacentHTML('beforeend','<div class="detail-assets"><div class="asset-head"><div><strong>釣り場周辺</strong><small>代表点 '+s.lat.toFixed(4)+' / '+s.lon.toFixed(4)+'</small></div><div class="segmented" id="detailBaseMode"><button class="active" data-detail-base="photo">航空写真</button><button data-detail-base="standard">地図</button></div></div><div class="asset-map" id="spotPhotoMap"></div><div class="spot-facts"><div class="spot-fact"><span>地形候補</span><b>'+feature+'</b></div><div class="spot-fact"><span>安全メモ</span><b>'+risk+'</b></div><div class="spot-fact"><span>情報状態</span><b>参考地点 / 要確認</b></div></div><div class="asset-note">航空写真：<a href="'+GSI_LIST+'" target="_blank" rel="noreferrer">国土地理院・地理院タイル</a>。地点は周辺確認用の代表位置です。正確な釣り可能範囲は施設管理者・自治体の最新情報を確認してください。</div></div>');
         drawSpotPhotoMap();
