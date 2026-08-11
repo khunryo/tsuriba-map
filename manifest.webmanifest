@@ -1,14 +1,14 @@
 {
-  "name": "釣り場マップ（茨城〜宮城）",
-  "short_name": "釣り場マップ",
-  "description": "鹿島灘〜仙台湾の釣れやすさ（全体＋局所）・地形・断面。実釣果は外部リンク。",
+  "name": "潮目｜今日の釣り場を、科学する",
+  "short_name": "潮目",
+  "description": "魚種・潮汐・水温・地形・みんなの釣果から、今日の釣り場を提案するアプリ。",
   "lang": "ja",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0d1b2a",
-  "theme_color": "#0d1b2a",
+  "background_color": "#07131f",
+  "theme_color": "#07131f",
   "icons": [
     {
       "src": "icon-192.png",
