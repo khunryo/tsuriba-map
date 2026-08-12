@@ -205,9 +205,7 @@
     .breakdown-note { margin:7px 2px 0; color:var(--muted-2); font-size:9px; line-height:1.5; }
     .reason-insight { display:flex; gap:8px; align-items:flex-start; margin-top:10px; padding:10px 11px; border-radius:10px; color:#cfe6e8; background:rgba(100,228,210,.065); font-size:10px; line-height:1.55; }
     .reason-insight b { color:var(--aqua); white-space:nowrap; }
-    .confidence { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 19px; padding: 10px; border: 1px solid rgba(100,228,210,.12); border-radius: 10px; background: rgba(100,228,210,.045); }
-    .confidence span { color: var(--muted); font-size: 10px; }
-    .confidence strong { color: var(--aqua); font-size: 12px; }
+    #recommendCard .confidence { display:none; }
     .link-button { margin-top: 16px; width: 100%; border: 1px solid rgba(100,228,210,.25); border-radius: 10px; padding: 10px; color: var(--aqua); background: rgba(100,228,210,.07); font-size: 11px; font-weight: 800; }
     .link-button:hover { background: rgba(100,228,210,.13); }
     .date-strip { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: none; }
@@ -403,7 +401,6 @@
       .recommend-card .reason-list { display:grid; padding:11px; gap:10px; }
       .recommend-card .reason { grid-template-columns:74px 1fr 28px; }
       .recommend-card .score-line { margin:14px 0 12px; }
-      .recommend-card .confidence { margin-top:12px; }
     }
     @media (max-width: 500px) {
       .hero-meta { gap: 5px; }
