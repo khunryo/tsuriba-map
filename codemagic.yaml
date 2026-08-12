@@ -5,7 +5,7 @@ workflows:
     max_build_duration: 60
 
     integrations:
-      app_store_connect: shiome-app-store-connect
+      app_store_connect: CodemagicASCKey
 
     environment:
       xcode: 26.4

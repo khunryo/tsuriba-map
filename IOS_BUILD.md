@@ -15,7 +15,7 @@ Macを所有していなくても、リポジトリ直下の `codemagic.yaml` �
 1. Apple Developer Programへ登録し、Bundle ID `com.khunryo.shiome` を作成する。
 2. App Store Connectで「潮目」のアプリレコードを同じBundle IDで作成する。
 3. App Store Connectの「ユーザとアクセス」→「統合」から、App Manager権限のAPIキーを作成して `.p8`、Key ID、Issuer IDを保管する。
-4. CodemagicのTeam integrations → Developer PortalへAPIキーを登録し、名前を `shiome-app-store-connect` にする。
+4. CodemagicのTeam integrations → Developer PortalへAPIキーを登録する。このアカウントでは既存の `CodemagicASCKey` を使用する。
 5. CodemagicのCode signing identitiesでApple Distribution証明書とApp Store provisioning profileを生成または登録する。
 6. CodemagicへGitHubリポジトリを追加し、`codemagic.yaml` を読み込んで `ios-testflight` を実行する。
 
