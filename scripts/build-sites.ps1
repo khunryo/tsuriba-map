@@ -14,6 +14,7 @@ $fileList = @(
   'privacy.html',
   'terms.html',
   'support.html',
+  'app-ads.txt',
   'assets/fish-species-sprite-v1.png'
 )
 $contentTypes = @{
@@ -22,6 +23,7 @@ $contentTypes = @{
   '.js' = 'text/javascript; charset=utf-8'
   '.json' = 'application/json; charset=utf-8'
   '.png' = 'image/png'
+  '.txt' = 'text/plain; charset=utf-8'
 }
 $assetMap = [ordered]@{}
 foreach ($fileName in $fileList) {
