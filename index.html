@@ -199,6 +199,8 @@
     .reason-bar i { display: block; height: 100%; border-radius: inherit; background: var(--aqua); }
     .reason b { color: var(--ink); font-size: 11px; text-align: right; }
     .breakdown-note { margin:7px 2px 0; color:var(--muted-2); font-size:9px; line-height:1.5; }
+    .reason-insight { display:flex; gap:8px; align-items:flex-start; margin-top:10px; padding:10px 11px; border-radius:10px; color:#cfe6e8; background:rgba(100,228,210,.065); font-size:10px; line-height:1.55; }
+    .reason-insight b { color:var(--aqua); white-space:nowrap; }
     .confidence { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 19px; padding: 10px; border: 1px solid rgba(100,228,210,.12); border-radius: 10px; background: rgba(100,228,210,.045); }
     .confidence span { color: var(--muted); font-size: 10px; }
     .confidence strong { color: var(--aqua); font-size: 12px; }
@@ -389,7 +391,10 @@
       .bottom-nav button { min-height: 48px; border: 0; border-radius: 11px; padding: 5px 3px; color: var(--muted); background: transparent; font-size: 9px; }
       .bottom-nav button.active { color: var(--aqua); background: rgba(100,228,210,.1); }
       .bottom-nav span { display: block; font-size: 17px; line-height: 1.1; }
-      .recommend-card .spot-profile-grid, .recommend-card .reason-list, .recommend-card .spot-alert { display:none; }
+      .recommend-card .spot-profile-grid, .recommend-card .spot-alert { display:none; }
+      .recommend-card .score-breakdown-head { margin-top:16px; }
+      .recommend-card .reason-list { display:grid; padding:11px; gap:10px; }
+      .recommend-card .reason { grid-template-columns:74px 1fr 28px; }
       .recommend-card .score-line { margin:14px 0 12px; }
       .recommend-card .confidence { margin-top:12px; }
     }
@@ -414,7 +419,10 @@
       .source-grid { grid-template-columns: 1fr; }
       .post { grid-template-columns: 34px minmax(0,1fr) auto; padding: 11px; }
       .avatar { width: 32px; height: 32px; }
-      .modal { width: calc(100% - 20px); max-height: calc(100dvh - 20px); overflow-y: auto; padding: 18px; }
+      .modal-backdrop { bottom:calc(68px + env(safe-area-inset-bottom)); padding:10px; place-items:stretch; }
+      .modal { width:100%; height:100%; max-height:none; overflow-y:auto; padding:18px 18px calc(20px + env(safe-area-inset-bottom)); border-radius:18px; }
+      .modal-actions { position:sticky; bottom:0; z-index:3; margin:18px -8px -8px; padding:12px 8px 8px; background:linear-gradient(180deg,rgba(16,40,59,0),#10283b 22%); }
+      .modal-actions button { min-height:46px; flex:1; }
       .form-grid { grid-template-columns: 1fr; }
       .field.full { grid-column: auto; }
     }
@@ -770,6 +778,11 @@
       const bait=clamp(base*.58+fish.weights[1]*.42+baitType);
       return [['潮の動き',tide],['ベイト期待',bait],['地形相性',terrain],['時間帯',time]];
     }
+    function scoreInsightFor(s,breakdown){
+      const best=breakdown.slice().sort((a,b)=>b[1]-a[1]).slice(0,2),profile=profileFor(s),motion=tideMotionFor(s),parts=[];
+      best.forEach(([label,value])=>{if(label==='潮の動き')parts.push(`${motion?motion.label+'で'+motion.strength:'潮止まりとの距離'}が好条件`);if(label==='ベイト期待')parts.push(`${s.type}周辺で${selectedSpecies().name}のベイト接触を期待`);if(label==='地形相性')parts.push(`${profile.terrain}が魚種特性と好相性`);if(label==='時間帯')parts.push(`${String(state.hour).padStart(2,'0')}時は活性が上がりやすい時間帯`);});
+      return `${best.map(x=>`${x[0]} ${x[1]}`).join('・')}が得点を押し上げています。${parts.join('。')}。`;
+    }
     function dataStatusFor(s){ const count=state.logs.filter(l=>l.spot===s.name).length; return count?`投稿あり ${count}件`:s.sourceStatus==='自治体等で釣り利用確認'?'公式情報確認済み':s.sourceStatus==='港湾の開放実績'?'公的資料掲載・現地確認':s.sourceStatus==='公開釣果掲載・要確認'?'公開釣果あり・現地確認':s.id.startsWith('全国-')?'候補地点・要検証':'基礎地点・投稿待ち'; }
     function visibleSpots(){
       if(state.scope === '全国') return SPOTS;
@@ -789,8 +802,8 @@
     function renderRecommend(){
       const list=visibleSpots().slice().sort((a,b)=>scoreFor(b)-scoreFor(a)),top=list[0]||SPOTS[0];
       state.selected=state.selected&&list.some(s=>s.id===state.selected)?state.selected:top.id;
-      const s=spot(state.selected),score=scoreFor(s),fish=selectedSpecies(),profile=profileFor(s),bestTime=bestTimeFor(s),flow=flowFor(s),habitat=habitatFor(),rank=Math.max(1,list.findIndex(x=>x.id===s.id)+1),isSaved=state.favorites.includes(s.id),scoreText=score>=82?'特に条件が合う':score>=72?'候補':'様子見';
-      document.getElementById('recommendCard').innerHTML=`<div class="recommend-top"><div><div class="recommend-label">TODAY'S PICK / ${rank}位</div><h3>${esc(s.name)}</h3><div class="detail-sub">${s.prefecture} ・ ${s.type} ・ ${fish.name}</div></div><button class="heart ${isSaved?'saved':''}" data-action="save-spot" aria-label="お気に入り">${isSaved?'♥':'♡'}</button></div><div class="score-line"><div class="score-ring" style="background:conic-gradient(${fish.color} 0 ${score}%,rgba(255,255,255,.08) ${score}% 100%)"><div class="score-ring-inner"><strong style="color:${fish.color}">${score}</strong><small>/ 100</small></div></div><div class="score-copy"><strong>${scoreText}コンディション</strong><p>この魚種の相対的な予測指数</p></div></div><div class="tag-row"><span class="tag hot">✦ おすすめ ${bestTime.window}</span><span class="tag">${tideStatusFor(s)}</span><span class="tag">水温 ${s.water}</span></div><div class="spot-profile-grid"><div class="spot-profile"><span>地形</span><strong>${esc(profile.terrain)}</strong></div><div class="spot-profile"><span>向く釣り方</span><strong>${esc(profile.method)}</strong></div><div class="spot-profile"><span>狙う時間</span><strong>${esc(profile.best)}</strong></div><div class="spot-profile"><span>足場・アクセス</span><strong>${esc(profile.footing)}</strong></div></div><div class="spot-alert"><b>安全・ルール</b><br>${esc(profile.safety)}<br><span style="color:var(--muted)">${esc(profile.access)}／${esc(profile.status)}</span></div><div class="score-breakdown-head"><strong>予測指数の内訳</strong><small>各項目 100点の相対評価</small></div><div class="reason-list">${scoreBreakdownFor(s).map(([label,val])=>`<div class="reason"><span>${label}</span><div class="reason-bar"><i style="width:${val}%;background:${fish.color}"></i></div><b>${val}</b></div>`).join('')}</div><div class="breakdown-note">総合点は魚種別モデルで重み付けしているため、4項目の単純平均ではありません。</div><div class="confidence"><span>データ状態</span><strong>${esc(dataStatusFor(s))}</strong></div><button class="link-button" data-action="view-catches">この釣り場の釣果情報を見る →</button>`;
+      const s=spot(state.selected),score=scoreFor(s),fish=selectedSpecies(),profile=profileFor(s),bestTime=bestTimeFor(s),flow=flowFor(s),habitat=habitatFor(),rank=Math.max(1,list.findIndex(x=>x.id===s.id)+1),isSaved=state.favorites.includes(s.id),scoreText=score>=82?'特に条件が合う':score>=72?'候補':'様子見',breakdown=scoreBreakdownFor(s);
+      document.getElementById('recommendCard').innerHTML=`<div class="recommend-top"><div><div class="recommend-label">TODAY'S PICK / ${rank}位</div><h3>${esc(s.name)}</h3><div class="detail-sub">${s.prefecture} ・ ${s.type} ・ ${fish.name}</div></div><button class="heart ${isSaved?'saved':''}" data-action="save-spot" aria-label="お気に入り">${isSaved?'♥':'♡'}</button></div><div class="score-line"><div class="score-ring" style="background:conic-gradient(${fish.color} 0 ${score}%,rgba(255,255,255,.08) ${score}% 100%)"><div class="score-ring-inner"><strong style="color:${fish.color}">${score}</strong><small>/ 100</small></div></div><div class="score-copy"><strong>${scoreText}コンディション</strong><p>この魚種の相対的な予測指数</p></div></div><div class="tag-row"><span class="tag hot">✦ おすすめ ${bestTime.window}</span><span class="tag">${tideStatusFor(s)}</span><span class="tag">水温 ${s.water}</span></div><div class="spot-profile-grid"><div class="spot-profile"><span>地形</span><strong>${esc(profile.terrain)}</strong></div><div class="spot-profile"><span>向く釣り方</span><strong>${esc(profile.method)}</strong></div><div class="spot-profile"><span>狙う時間</span><strong>${esc(profile.best)}</strong></div><div class="spot-profile"><span>足場・アクセス</span><strong>${esc(profile.footing)}</strong></div></div><div class="spot-alert"><b>安全・ルール</b><br>${esc(profile.safety)}<br><span style="color:var(--muted)">${esc(profile.access)}／${esc(profile.status)}</span></div><div class="score-breakdown-head"><strong>なぜこの得点？</strong><small>4条件を100点で比較</small></div><div class="reason-list">${breakdown.map(([label,val])=>`<div class="reason"><span>${label}</span><div class="reason-bar"><i style="width:${val}%;background:${fish.color}"></i></div><b>${val}</b></div>`).join('')}</div><div class="reason-insight"><b>高得点の理由</b><span>${esc(scoreInsightFor(s,breakdown))}</span></div><div class="breakdown-note">総合点は魚種別モデルで重み付けしているため、4項目の単純平均ではありません。</div><div class="confidence"><span>データ状態</span><strong>${esc(dataStatusFor(s))}</strong></div><button class="link-button" data-action="view-catches">この釣り場の釣果情報を見る →</button>`;
     }
     function renderList(){ const list=visibleSpots().slice().sort((a,b)=>scoreFor(b)-scoreFor(a)).slice(0,5),area=state.scope==='県'?state.prefecture:state.region; document.getElementById('listCaption').textContent=`${area}・${selectedSpecies().name}`; document.getElementById('spotList').innerHTML=list.map((s,i)=>`<div class="spot-row ${s.id===state.selected?'selected':''}" data-spot="${s.id}"><span class="rank ${i===0?'top':''}">${String(i+1).padStart(2,'0')}</span><div><strong>${esc(s.name)}</strong><small>${s.prefecture} ・ ${s.type} ・ ${tideStatusFor(s)}</small></div><div class="spot-score">${scoreFor(s)}<small> /100</small></div></div>`).join(''); }
     function renderDetail(){ const s=spot(state.selected), fish=selectedSpecies(), score=scoreFor(s),saved=state.favorites.includes(s.id),motion=tideMotionFor(s),bestTime=bestTimeFor(s); const f=fmtDate(state.date); const focus=fish.basis; document.getElementById('detailCard').innerHTML=`<div class="detail-title"><div><div class="card-kicker">SELECTED SPOT / ${f.month}.${f.day}</div><h3>${esc(s.name)}</h3><div class="detail-sub">${s.prefecture} ・ ${s.type} ・ ${fish.name}の予測</div></div><div style="display:flex;align-items:start;gap:4px"><button class="heart ${saved?'saved':''}" data-action="save-spot" aria-label="お気に入り">${saved?'♥':'♡'}</button><div class="detail-score"><strong>${score}</strong><small>予測指数 / 100</small></div></div></div><div class="best-time-card"><div><span>おすすめの時間</span><strong>${bestTime.window}</strong></div><small>${bestTime.period}。${bestTime.reason}</small></div><div class="signal-grid"><div class="signal"><small>水温</small><strong>${s.water}</strong></div><div class="signal"><small>潮位変化</small><strong>${motion?motion.label:'取得中'}</strong></div><div class="signal"><small>${String(state.hour).padStart(2,'0')}時の潮位</small><strong>${motion?motion.height+'cm':'—'}</strong></div></div><div class="science-note"><b>魚種の着き場メモ</b><br>${esc(focus)} ${esc(s.note)}</div><div class="tag-row" style="margin-top:15px"><span class="tag">魚種別モデル</span><span class="tag">現地投稿 ${state.logs.filter(l=>l.spot===s.name).length}件</span><span class="tag">ルール確認が必要</span></div>`; document.getElementById('tideLocation').textContent=`${s.name} / JST`; }
@@ -832,6 +845,7 @@
     function closeLog(){ document.getElementById('logModal').hidden=true; const preview=document.getElementById('logPhotoPreview');if(window._logPhotoUrl)URL.revokeObjectURL(window._logPhotoUrl);window._logPhotoUrl='';preview.removeAttribute('src');preview.classList.remove('show'); }
     function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
     function switchView(view){
+      if(!document.getElementById('logModal').hidden)closeLog();
       document.body.dataset.view=view;
       document.querySelectorAll('.app-view').forEach(el=>{el.hidden=!el.classList.contains(`view-${view}`);});
       document.querySelectorAll('.nav button,.bottom-nav button').forEach(el=>el.classList.toggle('active',el.dataset.scroll===view));
