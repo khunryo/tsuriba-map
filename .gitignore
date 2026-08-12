@@ -1,5 +1,6 @@
 node_modules/
 www/
+tides/
 *.xcuserstate
 DerivedData/
 .DS_Store

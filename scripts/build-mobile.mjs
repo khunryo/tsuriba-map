@@ -9,6 +9,7 @@ const files = [
   "bait_live.json",
   "bathy.json",
   "tide_stations.json",
+  "tide_data",
   "icon-192.png",
   "icon-512.png",
   "icon-512-maskable.png",
@@ -20,7 +21,7 @@ await rm(out, { recursive: true, force: true });
 for (const file of files) {
   const target = resolve(out, file);
   await mkdir(dirname(target), { recursive: true });
-  await cp(resolve(root, file), target);
+  await cp(resolve(root, file), target, { recursive: true });
 }
 
 const indexPath = resolve(out, "index.html");
