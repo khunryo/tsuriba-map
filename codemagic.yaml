@@ -88,5 +88,19 @@ workflows:
             CODE_SIGN_ENTITLEMENTS="" \
             build
 
+      - name: Package unsigned IPA
+        script: |
+          APP_PATH="$CM_BUILD_DIR/build/ios/derived/Build/Products/Release-iphoneos/App.app"
+          OUT_DIR="$CM_BUILD_DIR/build/ios/ipa"
+          test -d "$APP_PATH"
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR/Payload"
+          cp -R "$APP_PATH" "$OUT_DIR/Payload/App.app"
+          cd "$OUT_DIR"
+          zip -qry "Shiome-unsigned.ipa" Payload
+          rm -rf Payload
+          ls -lh "$OUT_DIR"
+
     artifacts:
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
