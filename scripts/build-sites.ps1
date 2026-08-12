@@ -68,15 +68,19 @@ async function tideResponse(request,url){
   const currentYear=new Date().getUTCFullYear();
   if(!/^[A-Z0-9]{2}$/.test(station)||!Number.isInteger(year)||year<currentYear-2||year>currentYear+2)return new Response('Invalid tide request',{status:400});
   const memoryKey=station+'|'+year;
-  if(tideMemory.has(memoryKey))return new Response(tideMemory.get(memoryKey),{status:200,headers:{...corsHeaders,'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=21600','x-data-source':'Japan Meteorological Agency'}});
+  const responseHeaders={...corsHeaders,'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800','x-data-source':'Japan Meteorological Agency','x-tide-year':String(year)};
+  if(tideMemory.has(memoryKey))return new Response(tideMemory.get(memoryKey),{status:200,headers:responseHeaders});
   const upstream='https://www.data.jma.go.jp/kaiyou/data/db/tide/suisan/txt/'+year+'/'+station+'.txt';
+  const edgeCache=caches.default,cacheKey=new Request(upstream,{method:'GET'}),cached=await edgeCache.match(cacheKey);
+  if(cached){const body=await cached.text();tideMemory.set(memoryKey,body);return new Response(body,{status:200,headers:responseHeaders});}
   const source=await fetch(upstream,{headers:{accept:'text/plain'}});
   if(!source.ok)return new Response('Tide data unavailable',{status:source.status===404?404:502});
   const body=await source.text();
+  if(!body.trim())return new Response('Tide data unavailable',{status:502});
   if(tideMemory.size>=64)tideMemory.delete(tideMemory.keys().next().value);
   tideMemory.set(memoryKey,body);
-  const response=new Response(body,{status:200,headers:{...corsHeaders,'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=21600, s-maxage=21600','x-data-source':'Japan Meteorological Agency'}});
-  return response;
+  await edgeCache.put(cacheKey,new Response(body,{headers:{'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=86400'}}));
+  return new Response(body,{status:200,headers:responseHeaders});
 }
 async function photoTileResponse(path){
   const match=path.match(/^\/api\/photo-tile\/(\d{1,2})\/(\d+)\/(\d+)\.(?:jpg|jpeg)$/);

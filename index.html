@@ -483,7 +483,7 @@
       <div class="launch-mark" aria-hidden="true"><img src="icon-192.png" alt=""></div>
       <h1 class="launch-name">潮先</h1>
       <div class="launch-en">SHIOSAKI / FISHING INTELLIGENCE</div>
-      <div class="launch-copy-wrap"><div class="launch-ripples" aria-hidden="true"><i></i><i></i><i></i></div><p class="launch-copy"><span class="copy-tide">潮</span>と<span class="copy-bait">ベイト</span>の動きに合わせて、<br><span class="copy-place">いちばん良い場所</span>、<span class="copy-time">いちばん良い時間</span>へ。</p></div>
+      <div class="launch-copy-wrap"><div class="launch-ripples" aria-hidden="true"><i></i><i></i><i></i></div><p class="launch-copy"><span class="copy-tide">潮</span>と<span class="copy-bait">魚種の特性</span>に合わせて、<br><span class="copy-place">いちばん良い場所</span>、<span class="copy-time">いちばん良い時間</span>へ。</p></div>
       <div class="launch-line" aria-hidden="true"></div>
     </div>
   </div>
@@ -520,7 +520,7 @@
       <section class="hero app-view view-explore" id="explore">
         <div class="hero-content">
           <div class="eyebrow">GOOD MORNING, ANGLER</div>
-          <h2>潮とベイトが動く日。<br><span style="color:var(--aqua)">一番いい時間</span>に、いい場所へ。</h2>
+          <h2>潮と魚種の特性を読む。<br><span style="color:var(--aqua)">一番いい時間</span>に、いい場所へ。</h2>
           <p>魚種・潮汐・水温・地形・みんなの釣果を重ねて、今日の「行く理由」を見つけます。</p>
           <div class="hero-meta"><span class="hero-pill">☀ 晴れ / 28℃</span><span class="hero-pill">月齢 <b>18.6</b></span><span class="hero-pill">関東の潮 <b>中潮</b></span></div>
         </div>
@@ -718,8 +718,11 @@
     function loadOwnedPosts(){try{return JSON.parse(localStorage.getItem('shiosaki_owned_posts')||'{}')||{};}catch(e){return {};}}
     function regionForPref(pref){return Object.keys(PREFS_BY_REGION).find(region=>(PREFS_BY_REGION[region]||[]).includes(pref))||'関東';}
     const tideStationsPromise=fetch('tide_stations.json').then(r=>{if(!r.ok)throw new Error('station list');return r.json();});
-    const bundledTideYears=new Map();
+    const bundledTideYears=new Map(),TIDE_CACHE_KEY='shiosaki_official_tides_v1',TIDE_CACHE_LIMIT=8;
     async function bundledTideText(year,stationCode){if(!bundledTideYears.has(year))bundledTideYears.set(year,fetch(`tide_data/${year}.json`).then(r=>r.ok?r.json():null).catch(()=>null));const tables=await bundledTideYears.get(year);return tables?.[stationCode]||'';}
+    function readTideCache(year,stationCode){try{const cache=JSON.parse(localStorage.getItem(TIDE_CACHE_KEY)||'{}'),entry=cache[stationCode+'|'+year];return entry?.text||'';}catch(e){return '';}}
+    function writeTideCache(year,stationCode,value){try{const cache=JSON.parse(localStorage.getItem(TIDE_CACHE_KEY)||'{}'),key=stationCode+'|'+year;cache[key]={savedAt:Date.now(),text:value};Object.entries(cache).sort((a,b)=>(b[1].savedAt||0)-(a[1].savedAt||0)).slice(TIDE_CACHE_LIMIT).forEach(([oldKey])=>delete cache[oldKey]);localStorage.setItem(TIDE_CACHE_KEY,JSON.stringify(cache));}catch(e){}}
+    async function officialTideText(year,stationCode){const cached=readTideCache(year,stationCode);if(cached)return cached;const res=await fetch(apiUrl('/api/tide?station='+encodeURIComponent(stationCode)+'&year='+encodeURIComponent(year)));if(!res.ok)throw new Error('tide request');const text=await res.text();if(!text.trim())throw new Error('empty tide response');writeTideCache(year,stationCode,text);return text;}
     const state = { species:'aji', date:'2026-08-12', hour:6, region:'関東', prefecture:'神奈川県', homePref:loadHomePref(), mapMode:'score', scope:'地方', selected:'走水港', mapTappedSpot:null, tidePickMode:'ranking', communitySpot:'', favorites:loadFavorites(), blockedAuthors:loadBlockedAuthors(), ownedPosts:loadOwnedPosts(), authorId:deviceAuthorId(), zoom:1, logs: loadLogs(), tideData:null, tideKey:'', tideLoading:false, tideError:'', userLocation:null, locationMessage:'', locating:false };
     function loadLogs(){ try { return JSON.parse(localStorage.getItem('shiome_logs') || '[]'); } catch(e) { return []; } }
     function selectedSpecies(){ return SPECIES[state.species]; }
@@ -770,7 +773,7 @@
     async function ensureTideData(){
       const s=spot(state.selected),requestKey=s.id+'|'+state.date;if(state.tideKey===requestKey&&(state.tideLoading||state.tideData))return;
       state.tideKey=requestKey;state.tideLoading=true;state.tideData=null;state.tideError='';drawTide();
-      try{const stations=await tideStationsPromise,station=nearestTideStation(s,stations),year=state.date.slice(0,4);let text=await bundledTideText(year,station.code);if(!text){const res=await fetch(apiUrl('/api/tide?station='+encodeURIComponent(station.code)+'&year='+year));if(!res.ok)throw new Error('tide request');text=await res.text();}const data=parseJmaTide(text,state.date,station);data.spotId=s.id;if(state.tideKey!==requestKey)return;state.tideData=data;state.tideLoading=false;window.render();}
+      try{const stations=await tideStationsPromise,station=nearestTideStation(s,stations),year=state.date.slice(0,4);let text=await bundledTideText(year,station.code);if(!text)text=await officialTideText(year,station.code);const data=parseJmaTide(text,state.date,station);data.spotId=s.id;if(state.tideKey!==requestKey)return;state.tideData=data;state.tideLoading=false;window.render();}
       catch(e){if(state.tideKey!==requestKey)return;let station=null;try{station=nearestTideStation(s,await tideStationsPromise);}catch(_){}const data=fallbackTideData(s,state.date,station);data.spotId=s.id;state.tideData=data;state.tideLoading=false;state.tideError='';window.render();}
     }
     const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22]};
@@ -813,11 +816,11 @@
       const terrain=clamp(base*.62+fish.weights[2]*.38+(typeMatch[state.species]?.[s.type]||0));
       const baitType=(['aji','iwashi','saba'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi'].includes(state.species)&&s.type!=='港'?4:0);
       const bait=clamp(base*.58+fish.weights[1]*.42+baitType);
-      return [['潮の動き',tide],['ベイト期待',bait],['地形相性',terrain],['時間帯',time]];
+      return [['潮の動き',tide],['餌場適性',bait],['地形相性',terrain],['時間帯',time]];
     }
     function scoreInsightFor(s,breakdown){
       const best=breakdown.slice().sort((a,b)=>b[1]-a[1]).slice(0,2),profile=profileFor(s),motion=tideMotionFor(s),parts=[];
-      best.forEach(([label,value])=>{if(label==='潮の動き')parts.push(`${motion?motion.label+'で'+motion.strength:'潮止まりとの距離'}が好条件`);if(label==='ベイト期待')parts.push(`${s.type}周辺で${selectedSpecies().name}のベイト接触を期待`);if(label==='地形相性')parts.push(`${profile.terrain}が魚種特性と好相性`);if(label==='時間帯')parts.push(`${String(state.hour).padStart(2,'0')}時は活性が上がりやすい時間帯`);});
+      best.forEach(([label,value])=>{if(label==='潮の動き')parts.push(`${motion?motion.label+'で'+motion.strength:'潮止まりとの距離'}が好条件`);if(label==='餌場適性')parts.push(`${s.type}という場所の特徴が${selectedSpecies().name}の採餌傾向と好相性`);if(label==='地形相性')parts.push(`${profile.terrain}が魚種特性と好相性`);if(label==='時間帯')parts.push(`${String(state.hour).padStart(2,'0')}時は活性が上がりやすい時間帯`);});
       return `${best.map(x=>`${x[0]} ${x[1]}`).join('・')}が得点を押し上げています。${parts.join('。')}。`;
     }
     function dataStatusFor(s){ const count=state.logs.filter(l=>l.spot===s.name).length; return count?`投稿あり ${count}件`:s.sourceStatus==='自治体等で釣り利用確認'?'公式情報確認済み':s.sourceStatus==='港湾の開放実績'?'公的資料掲載・現地確認':s.sourceStatus==='公開釣果掲載・要確認'?'公開釣果あり・現地確認':s.id.startsWith('全国-')?'候補地点・要検証':'基礎地点・投稿待ち'; }
