@@ -49,3 +49,44 @@ workflows:
         auth: integration
         submit_to_testflight: false
         submit_to_app_store: false
+
+  ios-debug-unsigned:
+    name: Shiome iOS / Unsigned debug build
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    environment:
+      xcode: 26.4
+      node: 22.14.0
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+
+    scripts:
+      - name: Install JavaScript dependencies
+        script: npm ci
+
+      - name: Build web app and sync Capacitor
+        script: npm run ios:sync
+
+      - name: Show synced web assets
+        script: |
+          ls -la "$CM_BUILD_DIR/www"
+          ls -la "$CM_BUILD_DIR/ios/App/App/public" || true
+
+      - name: Build unsigned app
+        script: |
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios/derived" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            build
+
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
