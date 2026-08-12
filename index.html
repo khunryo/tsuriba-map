@@ -156,8 +156,12 @@
     .segmented button { border: 0; border-radius: 7px; padding: 7px 9px; color: var(--muted); background: transparent; font-size: 10px; font-weight: 700; }
     .segmented button.active { color: #06222b; background: var(--aqua); }
     .select-sm { min-width: 105px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: #122b40; font-size: 10px; outline: none; }
-    .home-location-btn, .home-save-btn { min-height:34px; padding:7px 10px; border:1px solid rgba(100,228,210,.24); border-radius:9px; color:var(--aqua); background:rgba(100,228,210,.08); font-size:10px; font-weight:750; white-space:nowrap; }
+    .home-location-btn, .home-save-btn, .nearby-location-btn { min-height:34px; padding:7px 10px; border:1px solid rgba(100,228,210,.24); border-radius:9px; color:var(--aqua); background:rgba(100,228,210,.08); font-size:10px; font-weight:750; white-space:nowrap; }
     .home-location-btn { min-height:42px; padding:9px 13px; font-size:13px; box-shadow:0 0 0 1px rgba(100,228,210,.07) inset; }
+    .nearby-location-btn { min-height:38px; display:inline-flex; align-items:center; gap:6px; }
+    .nearby-location-btn:disabled { opacity:.55; }
+    .location-result { display:block; width:100%; color:var(--muted); font-size:9px; line-height:1.45; }
+    .user-location-marker { width:18px; height:18px; border:3px solid #fff; border-radius:50%; background:#2fc8e5; box-shadow:0 0 0 7px rgba(47,200,229,.2),0 3px 12px rgba(0,0,0,.45); }
     .home-save-btn { color:var(--muted); border-color:var(--line); background:rgba(255,255,255,.025); }
     .map-wrap { position: relative; height: 410px; overflow: hidden; border: 1px solid rgba(115, 195, 218, .12); border-radius: 14px; background: #081b2b; }
     #mapCanvas { width: 100%; height: 100%; display: none; }
@@ -529,7 +533,7 @@
         <div class="card map-card">
           <div class="card-pad">
             <div class="card-head"><div><div class="card-kicker">POTENTIAL MAP</div><h2 class="card-title">魚種別の釣れやすさ</h2><button class="home-location-btn" id="homeLocationBtn" data-action="home-location">ホーム：神奈川県</button></div><div class="control-stack"><div class="segmented" id="mapScope"><button class="active" data-scope="地方">地方</button><button data-scope="県">県</button></div></div></div>
-            <div class="control-stack" style="justify-content:start;margin:-4px 0 12px"><select id="regionSelect" class="select-sm" aria-label="地方を選ぶ"><option value="関東" selected>関東</option><option value="北海道・東北">北海道・東北</option><option value="中部・近畿">中部・近畿</option><option value="中国・四国">中国・四国</option><option value="九州・沖縄">九州・沖縄</option></select><select id="prefSelect" class="select-sm" aria-label="都道府県を選ぶ" hidden><option value="神奈川県" selected>神奈川県</option><option value="千葉県">千葉県</option><option value="茨城県">茨城県</option><option value="東京都">東京都</option></select><button class="home-save-btn" id="homeSaveBtn" data-action="set-home" hidden>ここをホームに設定</button><span class="tag" id="mapStatus" hidden>地方</span></div>
+            <div class="control-stack" style="justify-content:start;margin:-4px 0 12px"><select id="regionSelect" class="select-sm" aria-label="地方を選ぶ"><option value="関東" selected>関東</option><option value="北海道・東北">北海道・東北</option><option value="中部・近畿">中部・近畿</option><option value="中国・四国">中国・四国</option><option value="九州・沖縄">九州・沖縄</option></select><select id="prefSelect" class="select-sm" aria-label="都道府県を選ぶ" hidden><option value="神奈川県" selected>神奈川県</option><option value="千葉県">千葉県</option><option value="茨城県">茨城県</option><option value="東京都">東京都</option></select><button class="nearby-location-btn" id="nearbyLocationBtn" data-action="nearby-location">⌖ 現在地から探す</button><button class="home-save-btn" id="homeSaveBtn" data-action="set-home" hidden>ここをホームに設定</button><span class="tag" id="mapStatus" hidden>地方</span><span class="location-result" id="locationResult" hidden></span></div>
             <div class="map-wrap"><canvas id="mapCanvas" aria-label="地形・潮流・魚種特性から算出した海域ヒートマップ"></canvas><div class="map-corner" id="mapCorner">アジ / 海域予測</div></div>
             <div class="map-legend"><span>予測指数 低</span><span class="gradient-legend"></span><span>高</span></div>
             <div class="time-control"><div class="time-control-head"><span>時間で予測を変更</span><strong id="heatTimeLabel">06:00 朝マズメ</strong></div><input class="time-range" id="heatTime" type="range" min="0" max="23" step="1" value="6" aria-label="ヒートマップの予測時間"><div class="time-marks"><span>0時</span><span>6時</span><span>12時</span><span>18時</span><span>23時</span></div></div>
@@ -709,11 +713,28 @@
     const tideStationsPromise=fetch('tide_stations.json').then(r=>{if(!r.ok)throw new Error('station list');return r.json();});
     const bundledTideYears=new Map();
     async function bundledTideText(year,stationCode){if(!bundledTideYears.has(year))bundledTideYears.set(year,fetch(`tide_data/${year}.json`).then(r=>r.ok?r.json():null).catch(()=>null));const tables=await bundledTideYears.get(year);return tables?.[stationCode]||'';}
-    const state = { species:'aji', date:'2026-08-12', hour:6, region:'関東', prefecture:'神奈川県', homePref:loadHomePref(), mapMode:'score', scope:'地方', selected:'走水港', mapTappedSpot:null, tidePickMode:'ranking', communitySpot:'', favorites:loadFavorites(), zoom:1, logs: loadLogs(), tideData:null, tideKey:'', tideLoading:false, tideError:'' };
+    const state = { species:'aji', date:'2026-08-12', hour:6, region:'関東', prefecture:'神奈川県', homePref:loadHomePref(), mapMode:'score', scope:'地方', selected:'走水港', mapTappedSpot:null, tidePickMode:'ranking', communitySpot:'', favorites:loadFavorites(), zoom:1, logs: loadLogs(), tideData:null, tideKey:'', tideLoading:false, tideError:'', userLocation:null, locationMessage:'', locating:false };
     function loadLogs(){ try { return JSON.parse(localStorage.getItem('shiome_logs') || '[]'); } catch(e) { return []; } }
     function selectedSpecies(){ return SPECIES[state.species]; }
     function spot(id){ return SPOTS.find(s => s.id === id) || SPOTS[0]; }
     function distanceKm(a,b){const r=Math.PI/180,x=(b.lon-a.lon)*r*Math.cos((a.lat+b.lat)*r/2),y=(b.lat-a.lat)*r;return 6371*Math.sqrt(x*x+y*y);}
+    function findNearestSpot(position){return SPOTS.reduce((best,s)=>{const distance=distanceKm(position,s);return !best||distance<best.distance?{spot:s,distance}:best;},null);}
+    function locateNearbySpots(){
+      if(!navigator.geolocation){toast('この端末では現在地を取得できません');return;}
+      state.locating=true;state.locationMessage='現在地を確認しています…';renderMapControls();
+      navigator.geolocation.getCurrentPosition(position=>{
+        const current={lat:position.coords.latitude,lon:position.coords.longitude,accuracy:position.coords.accuracy},nearest=findNearestSpot(current);
+        state.userLocation=current;state.locating=false;
+        if(!nearest){state.locationMessage='近くの釣り場を見つけられませんでした';renderMapControls();return;}
+        state.region=nearest.spot.region;state.prefecture=nearest.spot.prefecture;state.scope='県';state.selected=nearest.spot.id;state.mapTappedSpot=nearest.spot.id;state.zoom=1;
+        state.locationMessage=`現在地から約${nearest.distance<10?nearest.distance.toFixed(1):Math.round(nearest.distance)}km：${nearest.spot.name}周辺を表示`;
+        window.render();toast('現在地に近い釣り場を表示しました');
+      },error=>{
+        state.locating=false;
+        state.locationMessage=error.code===1?'位置情報が許可されていません。iPhoneの設定から「潮先」の位置情報を許可してください。':error.code===2?'現在地を確認できませんでした。電波状況を確認してください。':'現在地の取得が時間切れになりました。もう一度お試しください。';
+        renderMapControls();toast('現在地を取得できませんでした');
+      },{enableHighAccuracy:true,timeout:12000,maximumAge:300000});
+    }
     function nearestTideStation(s,stations){return stations.reduce((best,x)=>{const d=distanceKm(s,x);return !best||d<best.distance?{...x,distance:d}:best;},null);}
     function parseJmaTide(text,date,station){
       const d=new Date(date+'T00:00:00+09:00'),key=String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,' ')+String(d.getDate()).padStart(2,' ');
@@ -806,7 +827,7 @@
     function renderDateControl(){ const f=fmtDate(state.date); document.getElementById('exploreDate').value=state.date; document.getElementById('exploreDateLabel').textContent=`${state.date.slice(0,4)}年${f.month}月${f.day}日（${f.week}）`; }
     function renderFavorites(){ const wrap=document.getElementById('favoriteStrip'),items=state.favorites.map(id=>SPOTS.find(s=>s.id===id)).filter(Boolean); wrap.innerHTML=items.length?items.map(s=>`<button class="favorite-chip" data-favorite-spot="${esc(s.id)}">♥ ${esc(s.name)}</button>`).join(''):`<span class="favorite-empty">おすすめ地点の♡を押すと、ここからすぐ開けます</span>`; }
     function renderTidePicker(){ document.querySelectorAll('#tidePickTabs button').forEach(b=>b.classList.toggle('active',b.dataset.tidePick===state.tidePickMode)); document.getElementById('rankingPicker').hidden=state.tidePickMode!=='ranking'; document.getElementById('mapPicker').hidden=state.tidePickMode!=='map'; document.getElementById('tideMapCaption').textContent=state.scope==='県'?state.prefecture:state.region; renderFavorites(); }
-      function renderMapControls(){ document.querySelectorAll('#mapMode button').forEach(b => b.classList.toggle('active', b.dataset.mapMode===state.mapMode)); document.querySelectorAll('#mapScope button').forEach(b => b.classList.toggle('active', b.dataset.scope===state.scope)); document.getElementById('regionSelect').value=state.region; const prefs=PREFS_BY_REGION[state.region]||[]; if(!prefs.includes(state.prefecture)) state.prefecture=prefs[0]||''; const prefSelect=document.getElementById('prefSelect'); prefSelect.innerHTML=prefs.map(p=>`<option value="${p}">${p}</option>`).join(''); prefSelect.value=state.prefecture; prefSelect.hidden=state.scope!=='県'; const homeBtn=document.getElementById('homeLocationBtn'),saveBtn=document.getElementById('homeSaveBtn');homeBtn.textContent='ホーム：'+state.homePref;saveBtn.hidden=state.scope!=='県'||state.prefecture===state.homePref; const list=visibleSpots(); document.getElementById('mapStatus').textContent=`${state.scope} ${list.length}地点`; document.getElementById('mapCorner').textContent=`${selectedSpecies().name} / ${String(state.hour).padStart(2,'0')}時 海域予測`; }
+      function renderMapControls(){ document.querySelectorAll('#mapMode button').forEach(b => b.classList.toggle('active', b.dataset.mapMode===state.mapMode)); document.querySelectorAll('#mapScope button').forEach(b => b.classList.toggle('active', b.dataset.scope===state.scope)); document.getElementById('regionSelect').value=state.region; const prefs=PREFS_BY_REGION[state.region]||[]; if(!prefs.includes(state.prefecture)) state.prefecture=prefs[0]||''; const prefSelect=document.getElementById('prefSelect'); prefSelect.innerHTML=prefs.map(p=>`<option value="${p}">${p}</option>`).join(''); prefSelect.value=state.prefecture; prefSelect.hidden=state.scope!=='県'; const homeBtn=document.getElementById('homeLocationBtn'),saveBtn=document.getElementById('homeSaveBtn'),nearbyBtn=document.getElementById('nearbyLocationBtn'),locationResult=document.getElementById('locationResult');homeBtn.textContent='ホーム：'+state.homePref;saveBtn.hidden=state.scope!=='県'||state.prefecture===state.homePref;nearbyBtn.disabled=state.locating;nearbyBtn.textContent=state.locating?'⌖ 取得中…':'⌖ 現在地から探す';locationResult.hidden=!state.locationMessage;locationResult.textContent=state.locationMessage; const list=visibleSpots(); document.getElementById('mapStatus').textContent=`${state.scope} ${list.length}地点`; document.getElementById('mapCorner').textContent=`${selectedSpecies().name} / ${String(state.hour).padStart(2,'0')}時 海域予測`; }
     function renderRankingControls(){ const prefs=PREFS_BY_REGION[state.region]||[]; document.querySelectorAll('#rankScope button').forEach(b=>b.classList.toggle('active',b.dataset.scope===state.scope)); const region=document.getElementById('rankRegionSelect'),pref=document.getElementById('rankPrefSelect'); region.value=state.region; pref.innerHTML=prefs.map(p=>`<option value="${p}">${p}</option>`).join(''); pref.value=state.prefecture; pref.hidden=state.scope!=='県'; }
     function renderRecommend(){
       const list=visibleSpots().slice().sort((a,b)=>scoreFor(b)-scoreFor(a)),top=list[0]||SPOTS[0];
@@ -868,12 +889,13 @@
     document.getElementById('mapCanvas').addEventListener('click',e=>{const c=e.currentTarget,r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;const hit=(c._mapPoints||[]).map(p=>({...p,d:(p.x-x)**2+(p.y-y)**2})).sort((a,b)=>a.d-b.d)[0];if(hit&&hit.d<420){state.mapTappedSpot=hit.s.id;state.selected=hit.s.id;window.render();}});
     document.getElementById('logPhoto').addEventListener('change',e=>{const file=e.target.files?.[0],preview=document.getElementById('logPhotoPreview');if(window._logPhotoUrl)URL.revokeObjectURL(window._logPhotoUrl);window._logPhotoUrl='';preview.classList.remove('show');if(!file)return;if(file.size>8*1024*1024){e.target.value='';toast('写真は8MB以内にしてください');return;}window._logPhotoUrl=URL.createObjectURL(file);preview.src=window._logPhotoUrl;preview.classList.add('show');});
     document.getElementById('logModal').addEventListener('click',e=>{if(e.target.id==='logModal')closeLog();}); document.getElementById('logForm').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,button=document.getElementById('logSubmit'),messages={POST_DB_NOT_READY:'投稿機能を準備中です',POST_RATE_LIMIT:'短時間の投稿回数が多すぎます。少し待ってからお試しください',POST_REQUIRED_FIELDS:'釣り場・魚種・日付を確認してください',POST_INVALID_TIME:'時刻を確認してください',POST_INVALID_PHOTO:'写真はJPEG・PNG・WebP・HEICの8MB以内にしてください',POST_PHOTO_NOT_READY:'写真機能を準備中です'};button.disabled=true;button.textContent='投稿中…';try{const res=await fetch(apiUrl('/api/posts'),{method:'POST',body:new FormData(form)}),data=await res.json();if(!res.ok)throw new Error(messages[data.error]||data.error||'投稿できませんでした');state.logs.unshift(normalizePost(data.post));form.reset();closeLog();window.render();toast('釣行を投稿しました。予測に反映します');}catch(error){toast(error.message||'投稿できませんでした');}finally{button.disabled=false;button.textContent='投稿する';}});
+    document.addEventListener('click',e=>{const button=e.target.closest('button[data-action="nearby-location"]');if(!button)return;e.preventDefault();e.stopImmediatePropagation();locateNearbySpots();},true);
     render(); loadCommunityPosts();
   </script>
   <script>
     /* 実地図・航空写真レイヤー。タイルが読めない環境では既存の簡易地図を残す。 */
     (function(){
-      var geoMainMap=null, geoMainReady=false, geoSpotMap=null, geoTideMap=null, geoMarkers=[], geoTideMarkers=[], geoSpotMarker=null;
+      var geoMainMap=null, geoMainReady=false, geoSpotMap=null, geoTideMap=null, geoMarkers=[], geoTideMarkers=[], geoSpotMarker=null, geoUserMarker=null;
       var geoDetailBase='photo', geoViewKey='', geoTideViewKey='', SHOW_SPOT_SURROUNDINGS=false;
       var geoOldDraw=window.drawMap, geoOldDetail=window.renderDetail, geoOldRender=window.render;
       var GSI_ATTR='出典：国土地理院／地理院タイル';
@@ -964,6 +986,8 @@
         var list=visibleSpots(),heatList=state.scope==='県'?SPOTS.filter(function(s){return s.region===state.region;}):list; fitGeoMap(list);
         var source=geoMainMap.getSource('prediction'); if(source)source.setData(predictionGeoJSON(heatList));
         geoMarkers.forEach(function(marker){marker.remove();}); geoMarkers=[];
+        if(geoUserMarker){geoUserMarker.remove();geoUserMarker=null;}
+        if(state.userLocation){var userEl=document.createElement('div');userEl.className='user-location-marker';userEl.setAttribute('aria-label','現在地');geoUserMarker=new maplibregl.Marker({element:userEl,anchor:'center'}).setLngLat([state.userLocation.lon,state.userLocation.lat]).addTo(geoMainMap);}
         var points=state.scope==='県'?list.slice().sort(function(a,b){return scoreFor(b)-scoreFor(a);}):[];
         points.forEach(function(s){
           var active=s.id===state.mapTappedSpot,el=document.createElement('button');el.type='button';el.className='spot-point-marker'+(active?' active':'');el.innerHTML='<span class="spot-dot"></span><span class="spot-popup">'+esc(s.name)+'</span>';el.setAttribute('aria-label',s.name+'を表示');el.setAttribute('aria-pressed',active?'true':'false');

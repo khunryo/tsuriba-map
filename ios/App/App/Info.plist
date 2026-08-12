@@ -30,6 +30,8 @@
 	<string>釣果写真を選んで投稿するために写真ライブラリを使用します。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>撮影した釣果写真を写真ライブラリへ保存する場合に使用します。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>現在地に近い釣り場と、その周辺の釣れやすさを表示するために使用します。位置情報は端末内での検索に使用し、投稿時を除いて保存しません。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
