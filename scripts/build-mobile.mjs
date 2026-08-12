@@ -27,6 +27,20 @@ for (const file of files) {
   await cp(resolve(root, file), target, { recursive: true });
 }
 
+await mkdir(resolve(out, "assets"), { recursive: true });
+await cp(
+  resolve(root, "node_modules/@capacitor/core/dist/capacitor.js"),
+  resolve(out, "assets/capacitor-runtime.js"),
+);
+await cp(
+  resolve(root, "node_modules/@capacitor-community/admob/dist/plugin.js"),
+  resolve(out, "assets/admob-plugin.js"),
+);
+await cp(
+  resolve(root, "scripts/admob-mobile.js"),
+  resolve(out, "assets/admob-mobile.js"),
+);
+
 const indexPath = resolve(out, "index.html");
 const html = await readFile(indexPath, "utf8");
 await writeFile(
@@ -34,6 +48,9 @@ await writeFile(
   html.replace(
     "<body>",
     '<body data-native-shell="capacitor">',
+  ).replace(
+    "</body>",
+    '<script src="assets/capacitor-runtime.js"></script><script src="assets/admob-plugin.js"></script><script src="assets/admob-mobile.js"></script></body>',
   ),
   "utf8",
 );
