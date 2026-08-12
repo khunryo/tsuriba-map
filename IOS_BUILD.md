@@ -1,4 +1,4 @@
-# 潮目 iOSビルド手順
+# 潮先 iOSビルド手順
 
 ## 現在の構成
 
@@ -13,7 +13,7 @@
 Macを所有していなくても、リポジトリ直下の `codemagic.yaml` を使ってクラウド上のMacで署名済みIPAを作成し、App Store Connectへアップロードできる。
 
 1. Apple Developer Programへ登録し、Bundle ID `com.khunryo.shiome` を作成する。
-2. App Store Connectで「潮目」のアプリレコードを同じBundle IDで作成する。
+2. App Store Connectで「潮先」のアプリレコードを同じBundle IDで作成する。
 3. App Store Connectの「ユーザとアクセス」→「統合」から、App Manager権限のAPIキーを作成して `.p8`、Key ID、Issuer IDを保管する。
 4. CodemagicのTeam integrations → Developer PortalへAPIキーを登録する。このアカウントでは既存の `CodemagicASCKey` を使用する。
 5. CodemagicのCode signing identitiesでApple Distribution証明書とApp Store provisioning profileを生成または登録する。

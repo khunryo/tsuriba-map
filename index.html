@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07131f">
-  <meta name="description" content="潮目は、魚種・潮汐・水温・地形・みんなの釣果から今日の釣り場を提案する釣りアプリです。">
+  <meta name="description" content="潮先は、魚種・潮汐・水温・地形・みんなの釣果から今日の釣り場を提案する釣りアプリです。">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="潮目｜今日の釣り場を、科学する">
+  <meta property="og:title" content="潮先｜今日の釣り場を、科学する">
   <meta property="og:description" content="魚種・潮汐・水温・地形・みんなの釣果から、今日の釣り場を提案します。">
   <meta property="og:url" content="https://shiome-fishing.khunryo.chatgpt.site/">
   <meta property="og:image" content="https://shiome-fishing.khunryo.chatgpt.site/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="潮目">
-  <title>潮目｜今日の釣り場を、科学する</title>
+  <meta name="apple-mobile-web-app-title" content="潮先">
+  <title>潮先｜今日の釣り場を、科学する</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
@@ -179,8 +179,11 @@
     .recommend-top { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
     .recommend-label { color: var(--yellow); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
     .recommend-top h3 { margin: 5px 0 0; font-size: 22px; letter-spacing: -.045em; }
-    .heart { border: 0; color: var(--muted); background: transparent; font-size: 20px; }
-    .heart:hover, .heart.saved { color: var(--coral); }
+    .heart { min-height:32px; padding:0 10px; border:1px solid var(--line-strong); border-radius:999px; color:var(--muted); background:rgba(255,255,255,.025); display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:750; white-space:nowrap; }
+    .heart::after { content:"お気に入り"; margin-left:4px; }
+    .heart.saved::after { content:"保存済み"; }
+    .heart:hover, .heart.saved { color:#ffd8cf; border-color:rgba(255,142,114,.4); background:rgba(255,142,114,.08); }
+    #detailCard > .tag-row:last-child { display:none; }
     .score-line { display: flex; align-items: center; gap: 14px; margin: 18px 0 17px; }
     .score-ring { width: 82px; height: 82px; padding: 7px; border-radius: 50%; background: conic-gradient(var(--aqua) 0 78%, rgba(255,255,255,.08) 78% 100%); }
     .score-ring-inner { width: 100%; height: 100%; display: grid; place-items: center; align-content: center; border-radius: 50%; background: var(--surface); }
@@ -250,6 +253,7 @@
     .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, .75fr); gap: 18px; align-items: stretch; }
     .detail-summary { min-height: 306px; }
     .detail-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    #detailCard .detail-title > div:last-child { flex-direction:column; align-items:stretch!important; gap:6px!important; }
     .detail-title h3 { margin: 4px 0 2px; font-size: 21px; letter-spacing: -.04em; }
     .detail-sub { color: var(--muted); font-size: 11px; }
     .detail-score { min-width: 76px; padding: 10px 12px; border-radius: 12px; background: rgba(100,228,210,.1); text-align: center; }
@@ -469,11 +473,11 @@
   <script src="https://unpkg.com/pmtiles@4.4.1/dist/pmtiles.js"></script>
 </head>
 <body data-view="explore">
-  <div class="launch-screen" id="launchScreen" role="status" aria-label="潮目を起動しています">
+  <div class="launch-screen" id="launchScreen" role="status" aria-label="潮先を起動しています">
     <div class="launch-inner">
       <div class="launch-mark" aria-hidden="true"><img src="icon-192.png" alt=""></div>
-      <h1 class="launch-name">潮目</h1>
-      <div class="launch-en">SHIOME / FISHING INTELLIGENCE</div>
+      <h1 class="launch-name">潮先</h1>
+      <div class="launch-en">SHIOSAKI / FISHING INTELLIGENCE</div>
       <div class="launch-copy-wrap"><div class="launch-ripples" aria-hidden="true"><i></i><i></i><i></i></div><p class="launch-copy"><span class="copy-tide">潮</span>と<span class="copy-bait">ベイト</span>の動きに合わせて、<br><span class="copy-place">いちばん良い場所</span>、<span class="copy-time">いちばん良い時間</span>へ。</p></div>
       <div class="launch-line" aria-hidden="true"></div>
     </div>
@@ -482,7 +486,7 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><img src="icon-192.png" alt=""></div>
-        <div><div class="brand-name">潮目</div><span class="brand-sub">SHIOME / FISHING INTELLIGENCE</span></div>
+        <div><div class="brand-name">潮先</div><span class="brand-sub">SHIOSAKI / FISHING INTELLIGENCE</span></div>
       </div>
       <div class="nav-label">MENU</div>
       <nav class="nav" aria-label="メインメニュー">
@@ -500,7 +504,7 @@
 
     <main class="main">
       <div class="mobile-header">
-        <div class="mobile-brand"><div class="brand-mark"><img src="icon-192.png" alt=""></div><span>潮目</span></div>
+        <div class="mobile-brand"><div class="brand-mark"><img src="icon-192.png" alt=""></div><span>潮先</span></div>
         <button class="ghost-btn" data-action="open-log">＋ 記録する</button>
       </div>
       <header class="topbar">
@@ -550,7 +554,7 @@
 
       <section class="section detail-grid app-view view-tide" hidden>
         <div class="card detail-summary"><div class="card-pad" id="detailCard"></div></div>
-        <div class="card tide-card"><div class="card-pad"><div class="tide-head"><h3>潮位のリズム</h3><span id="tideLocation">—</span></div><canvas id="tideCanvas" aria-label="選択地点のタイドグラフ"></canvas><div class="tide-events" id="tideEvents"></div><div class="tide-live"><span id="tideLiveLabel">選択時間の潮位変化</span><strong id="tideLiveValue">読み込み中</strong></div><div class="tide-source" id="tideSource">気象庁の天文潮位をもとに潮目が補間・加工して表示。実測潮位・潮流方向とは異なります。</div></div></div>
+        <div class="card tide-card"><div class="card-pad"><div class="tide-head"><h3>潮位のリズム</h3><span id="tideLocation">—</span></div><canvas id="tideCanvas" aria-label="選択地点のタイドグラフ"></canvas><div class="tide-events" id="tideEvents"></div><div class="tide-live"><span id="tideLiveLabel">選択時間の潮位変化</span><strong id="tideLiveValue">読み込み中</strong></div><div class="tide-source" id="tideSource">気象庁の天文潮位をもとに潮先が補間・加工して表示。実測潮位・潮流方向とは異なります。</div></div></div>
       </section>
 
       <section class="section app-view view-community" id="community" hidden>
@@ -559,7 +563,7 @@
       </section>
 
       <section class="section app-view view-sources" id="sources" hidden><div class="section-heading"><div><h2>予測の根拠</h2><p>生態の一般則をベースに、現地データで更新する設計です。</p></div></div><div class="source-grid"><article class="source-card"><div class="source-type">SPECIES</div><strong>魚種プロファイル</strong><p>好適水温・底質・潮通し・季節性を魚種ごとに設定。</p><a href="https://www.fra.go.jp/home/kenkyushokai/ronbun/2025/20260306.html" target="_blank" rel="noreferrer">マアジ電子タグ研究 ↗</a></article><article class="source-card"><div class="source-type">HABITAT</div><strong>砂底・かけ上がり</strong><p>ヒラメやマゴチは浅い砂・砂泥域と地形変化を重視。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2023/08/details_2008_060.pdf" target="_blank" rel="noreferrer">ヒラメ資源評価 ↗</a></article><article class="source-card"><div class="source-type">TIDE</div><strong>潮汐と時合い</strong><p>満干潮の前後、潮が動く時間帯をタイドグラフで可視化。</p><a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">気象庁 潮位表 ↗</a></article><article class="source-card"><div class="source-type">LOCATION</div><strong>港湾・海岸候補</strong><p>公的な釣り場開放港と海岸線資料を基礎に、候補地点を区別して登録。</p><a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 海釣り施設 ↗</a></article><article class="source-card"><div class="source-type">CROSSCHECK</div><strong>公開釣果との照合</strong><p>不足地点の発見に公開エリア一覧を使い、投稿本文や独自集計値は転載しません。</p><a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ エリア一覧 ↗</a></article><article class="source-card"><div class="source-type">COMMUNITY</div><strong>みんなの現地情報</strong><p>釣果・水色・ベイト・立入情報を投稿で蓄積。</p><a href="#community">投稿を見る →</a></article></div></section>
-      <p class="footer-note app-view view-sources" hidden>潮目のスコアは釣果を保証するものではありません。予測は自然科学の知見・公開データ・ユーザー投稿から「次に見るべき場所」を提案するものです。港湾名の掲載は全域での釣り許可を意味しません。立入禁止・漁業権・駐車・天候と波の安全を最優先してください。<br>データ出典・参考: <a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構</a> / <a href="https://www.data.jma.go.jp/" target="_blank" rel="noreferrer">気象庁</a> / <a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 港湾の釣り場開放状況</a> / <a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ 公開エリア一覧</a> / 国土地理院。投稿内容と写真はサービス上に保存され、みんなの釣果画面に表示されます。</p>
+      <p class="footer-note app-view view-sources" hidden>潮先のスコアは釣果を保証するものではありません。予測は自然科学の知見・公開データ・ユーザー投稿から「次に見るべき場所」を提案するものです。港湾名の掲載は全域での釣り許可を意味しません。立入禁止・漁業権・駐車・天候と波の安全を最優先してください。<br>データ出典・参考: <a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構</a> / <a href="https://www.data.jma.go.jp/" target="_blank" rel="noreferrer">気象庁</a> / <a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 港湾の釣り場開放状況</a> / <a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ 公開エリア一覧</a> / 国土地理院。投稿内容と写真はサービス上に保存され、みんなの釣果画面に表示されます。</p>
     </main>
   </div>
   <nav class="bottom-nav" aria-label="モバイルメニュー">
@@ -836,7 +840,7 @@
       const c=document.getElementById('tideCanvas'),box=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1,W=Math.max(300,box.width),H=Math.max(160,box.height),g=c.getContext('2d'),eventsEl=document.getElementById('tideEvents'),liveEl=document.getElementById('tideLiveValue'),sourceEl=document.getElementById('tideSource');
       c.width=W*dpr;c.height=H*dpr;g.scale(dpr,dpr);g.clearRect(0,0,W,H);g.fillStyle='#091d2c';g.fillRect(0,0,W,H);
       const data=state.tideData&&state.tideData.spotId===state.selected&&state.tideData.date===state.date?state.tideData:null;
-      if(!data){g.fillStyle='rgba(198,224,229,.66)';g.font='11px system-ui';g.textAlign='center';g.fillText(state.tideError||'潮位データを読み込んでいます…',W/2,H/2);g.textAlign='left';eventsEl.innerHTML='';liveEl.textContent=state.tideError||'読み込み中';sourceEl.textContent='気象庁の天文潮位をもとに潮目が補間・加工して表示。実測潮位・潮流方向とは異なります。';return;}
+      if(!data){g.fillStyle='rgba(198,224,229,.66)';g.font='11px system-ui';g.textAlign='center';g.fillText(state.tideError||'潮位データを読み込んでいます…',W/2,H/2);g.textAlign='left';eventsEl.innerHTML='';liveEl.textContent=state.tideError||'読み込み中';sourceEl.textContent='気象庁の天文潮位をもとに潮先が補間・加工して表示。実測潮位・潮流方向とは異なります。';return;}
       const p={l:31,r:14,t:17,b:24},vals=Array.from({length:97},(_,i)=>[i/4,tideAt(data,i/4)]),raw=data.hourly,yMin=Math.min(...raw)-12,yMax=Math.max(...raw)+12,X=h=>p.l+(W-p.l-p.r)*h/24,Y=v=>p.t+(H-p.t-p.b)*(1-(v-yMin)/(yMax-yMin));
       g.strokeStyle='rgba(130,195,213,.1)';g.lineWidth=1;for(let h=0;h<=24;h+=6){const x=X(h);g.beginPath();g.moveTo(x,p.t);g.lineTo(x,H-p.b);g.stroke();g.fillStyle='rgba(159,201,212,.52)';g.font='9px system-ui';g.fillText(String(h).padStart(2,'0')+':00',x-10,H-7);}
       [yMin+12,(yMin+yMax)/2,yMax-12].forEach(v=>{const y=Y(v);g.beginPath();g.moveTo(p.l,y);g.lineTo(W-p.r,y);g.stroke();g.fillStyle='rgba(159,201,212,.42)';g.font='8px system-ui';g.fillText(Math.round(v)+'',3,y+3);});
@@ -845,7 +849,7 @@
       data.events.forEach(m=>{const x=X(m.t),y=Y(m.h);g.beginPath();g.arc(x,y,3.4,0,Math.PI*2);g.fillStyle=m.label==='満潮'?'#f6cb6b':'#64c9ee';g.fill();});
       const nowX=X(state.hour),nowY=Y(tideAt(data,state.hour));g.strokeStyle='rgba(255,255,255,.86)';g.setLineDash([3,3]);g.beginPath();g.moveTo(nowX,p.t);g.lineTo(nowX,H-p.b);g.stroke();g.setLineDash([]);g.beginPath();g.arc(nowX,nowY,4,0,Math.PI*2);g.fillStyle='#fff';g.fill();
       const fmt=t=>String(Math.floor(t)).padStart(2,'0')+':'+String(Math.round((t%1)*60)).padStart(2,'0');eventsEl.innerHTML=data.events.slice(0,4).map(m=>`<span class="tide-event">${m.label} ${m.h}cm<br><b>${fmt(m.t)}</b></span>`).join('');
-      const motion=tideMotionFor();liveEl.textContent=motion?`${motion.label}・${motion.strength}（${motion.rate>0?'+':''}${motion.rate}cm/h）`:'—';sourceEl.innerHTML=data.estimated?`最寄りの潮位地点：${esc(data.station.name)}｜気象庁データへ接続できない場合の参考曲線です。実際の潮位値ではありません。地点または日付を選び直すと公式データを再取得します。`:`最寄りの潮位地点：${esc(data.station.name)}（約${Math.round(data.station.distance)}km）｜<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/" target="_blank" rel="noreferrer">出典：気象庁 潮位表</a>を潮目が15分間隔に補間・加工。天文潮位であり、実測潮位・潮流方向・航海用途の情報ではありません。`;
+      const motion=tideMotionFor();liveEl.textContent=motion?`${motion.label}・${motion.strength}（${motion.rate>0?'+':''}${motion.rate}cm/h）`:'—';sourceEl.innerHTML=data.estimated?`最寄りの潮位地点：${esc(data.station.name)}｜気象庁データへ接続できない場合の参考曲線です。実際の潮位値ではありません。地点または日付を選び直すと公式データを再取得します。`:`最寄りの潮位地点：${esc(data.station.name)}（約${Math.round(data.station.distance)}km）｜<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/" target="_blank" rel="noreferrer">出典：気象庁 潮位表</a>を潮先が15分間隔に補間・加工。天文潮位であり、実測潮位・潮流方向・航海用途の情報ではありません。`;
     }
     function updateLogSpots(prefecture,selectedId=state.selected){const select=document.getElementById('logSpot'),items=SPOTS.filter(s=>s.prefecture===prefecture).sort((a,b)=>a.name.localeCompare(b.name,'ja'));select.innerHTML=items.map(s=>`<option value="${esc(s.name)}" ${s.id===selectedId?'selected':''}>${esc(s.name)}</option>`).join('');}
     function populateLog(){ let species=document.getElementById('logSpecies');if(species.tagName==='SELECT'){const input=document.createElement('input');input.id='logSpecies';input.name='species';input.type='text';input.required=true;input.maxLength=30;input.placeholder='例：アジ、カサゴ、クロダイ';input.setAttribute('list','logSpeciesSuggestions');input.autocomplete='off';species.replaceWith(input);species=input;const list=document.createElement('datalist');list.id='logSpeciesSuggestions';list.innerHTML=Object.values(SPECIES).map(s=>`<option value="${esc(s.name)}"></option>`).join('');species.after(list);}let pref=document.getElementById('logPrefecture');if(!pref){const field=document.createElement('div');field.className='field';field.innerHTML='<label for="logPrefecture">都道府県</label><select id="logPrefecture" required></select>';document.getElementById('logSpot').closest('.field').before(field);pref=field.querySelector('select');pref.addEventListener('change',()=>updateLogSpots(pref.value,''));}const selected=spot(state.selected),prefectures=[...new Set(SPOTS.map(s=>s.prefecture))].sort((a,b)=>a.localeCompare(b,'ja'));pref.innerHTML=prefectures.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');pref.value=selected.prefecture;updateLogSpots(pref.value,selected.id);species.value=selectedSpecies().name;document.getElementById('logDate').value=state.date;document.getElementById('logTime').value=String(state.hour).padStart(2,'0')+':00'; }
