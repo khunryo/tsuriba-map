@@ -71,15 +71,12 @@ async function tideResponse(request,url){
   const responseHeaders={...corsHeaders,'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800','x-data-source':'Japan Meteorological Agency','x-tide-year':String(year)};
   if(tideMemory.has(memoryKey))return new Response(tideMemory.get(memoryKey),{status:200,headers:responseHeaders});
   const upstream='https://www.data.jma.go.jp/kaiyou/data/db/tide/suisan/txt/'+year+'/'+station+'.txt';
-  const edgeCache=caches.default,cacheKey=new Request(upstream,{method:'GET'}),cached=await edgeCache.match(cacheKey);
-  if(cached){const body=await cached.text();tideMemory.set(memoryKey,body);return new Response(body,{status:200,headers:responseHeaders});}
   const source=await fetch(upstream,{headers:{accept:'text/plain'}});
   if(!source.ok)return new Response('Tide data unavailable',{status:source.status===404?404:502});
   const body=await source.text();
   if(!body.trim())return new Response('Tide data unavailable',{status:502});
   if(tideMemory.size>=64)tideMemory.delete(tideMemory.keys().next().value);
   tideMemory.set(memoryKey,body);
-  await edgeCache.put(cacheKey,new Response(body,{headers:{'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=86400'}}));
   return new Response(body,{status:200,headers:responseHeaders});
 }
 async function photoTileResponse(path){
