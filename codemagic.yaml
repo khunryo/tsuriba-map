@@ -4,6 +4,13 @@ workflows:
     instance_type: mac_mini_m2
     max_build_duration: 60
 
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'ios-build-*'
+          include: true
+
     integrations:
       app_store_connect: CodemagicASCKey
 
