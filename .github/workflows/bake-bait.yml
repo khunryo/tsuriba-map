@@ -1,8 +1,8 @@
 name: bake-bait
 # 気象庁沿岸SST + 茨城船曳シラスCPUE を取得し bait_live.json を日次更新
 on:
-  schedule:
-    - cron: '0 3 * * *'
+  # 現在のアプリではこの旧ベイトデータを使用していないため、
+  # 定期実行は停止。必要な場合のみ Actions 画面から手動実行する。
   workflow_dispatch: {}
 permissions:
   contents: write
