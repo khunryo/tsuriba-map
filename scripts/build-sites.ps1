@@ -53,6 +53,7 @@ async function ensurePostsSchema(env){
     env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS post_reports (id TEXT PRIMARY KEY NOT NULL, post_id TEXT NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_post_reports_post_id ON post_reports(post_id)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS suspended_authors (author_id TEXT PRIMARY KEY NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS support_requests (id TEXT PRIMARY KEY NOT NULL, kind TEXT NOT NULL, reply TEXT, message TEXT NOT NULL, created_at TEXT NOT NULL)')
   ]);
   const columns=await env.DB.prepare('PRAGMA table_info(posts)').all(),names=new Set((columns.results||[]).map(x=>x.name));
@@ -110,6 +111,10 @@ async function postsResponse(request,env){
   if(recent.length>=6)return jsonResponse({error:'POST_RATE_LIMIT'},429);
   const form=await request.formData();
   if(textField(form,'website',80))return jsonResponse({error:'Invalid submission'},400);
+  if(textField(form,'age_confirmed',1)!=='1'||textField(form,'terms_accepted',1)!=='1')return jsonResponse({error:'POST_TERMS_REQUIRED'},403);
+  const authorId=/^[0-9a-f-]{36}$/i.test(textField(form,'author_id',36))?textField(form,'author_id',36):crypto.randomUUID();
+  const suspended=await env.DB.prepare('SELECT author_id FROM suspended_authors WHERE author_id = ? LIMIT 1').bind(authorId).first();
+  if(suspended)return jsonResponse({error:'POST_AUTHOR_SUSPENDED'},403);
   const spot=cleanText(textField(form,'spot',80)),species=cleanText(textField(form,'species',40)),date=textField(form,'date',10),time=textField(form,'time',5),weather=cleanText(textField(form,'weather',20)),method=cleanText(textField(form,'method',30)),memo=cleanText(textField(form,'memo',500));
   if(!spot||!species||!/^\d{4}-\d{2}-\d{2}$/.test(date))return jsonResponse({error:'POST_REQUIRED_FIELDS'},400);
   if(objectionable([spot,species,memo].join(' ')))return jsonResponse({error:'POST_REJECTED_CONTENT'},400);
@@ -119,7 +124,7 @@ async function postsResponse(request,env){
   const allowedTypes=['image/jpeg','image/png','image/webp','image/heic','image/heif'];
   if(hasPhoto&&(!allowedTypes.includes(photo.type)||photo.size>8*1024*1024))return jsonResponse({error:'POST_INVALID_PHOTO'},400);
   if(hasPhoto&&!env.UPLOADS)return jsonResponse({error:'POST_PHOTO_NOT_READY'},503);
-  const id=crypto.randomUUID(),createdAt=new Date().toISOString(),photoKey=hasPhoto?'posts/'+id+'/photo':null,authorId=/^[0-9a-f-]{36}$/i.test(textField(form,'author_id',36))?textField(form,'author_id',36):crypto.randomUUID(),ownerToken=textField(form,'owner_token',100),ownerTokenHash=ownerToken?await sha256(ownerToken):null;
+  const id=crypto.randomUUID(),createdAt=new Date().toISOString(),photoKey=hasPhoto?'posts/'+id+'/photo':null,ownerToken=textField(form,'owner_token',100),ownerTokenHash=ownerToken?await sha256(ownerToken):null;
   if(hasPhoto)await env.UPLOADS.put(photoKey,await photo.arrayBuffer(),{httpMetadata:{contentType:photo.type},customMetadata:{postId:id}});
   try{
     await env.DB.prepare('INSERT INTO posts (id, spot, species, catch_count, max_size_cm, method, memo, fishing_date, fishing_time, weather, wave_m, depth_m, photo_key, photo_type, author_id, owner_token_hash, hidden, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)').bind(id,spot,species,catchCount??0,maxSize,method||null,memo||null,date,time||null,weather||null,wave,depth,photoKey,hasPhoto?photo.type:null,authorId,ownerTokenHash,createdAt).run();
@@ -133,7 +138,10 @@ async function postActionResponse(request,path,env){
   if(path.endsWith('/report')&&request.method==='POST'){
     const form=await request.formData(),reason=cleanText(textField(form,'reason',120))||'reported content';
     await env.DB.prepare('INSERT INTO post_reports (id, post_id, reason, created_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(),id,reason,new Date().toISOString()).run();
-    const count=await env.DB.prepare('SELECT COUNT(*) AS total FROM post_reports WHERE post_id = ?').bind(id).first();if(Number(count?.total||0)>=3)await env.DB.prepare('UPDATE posts SET hidden = 1 WHERE id = ?').bind(id).run();
+    const reported=await env.DB.prepare('SELECT author_id FROM posts WHERE id = ? LIMIT 1').bind(id).first();
+    await env.DB.prepare('UPDATE posts SET hidden = 1 WHERE id = ?').bind(id).run();
+    if(reported?.author_id){await env.DB.prepare('INSERT OR IGNORE INTO suspended_authors (author_id, reason, created_at) VALUES (?, ?, ?)').bind(reported.author_id,'User content report',new Date().toISOString()).run();await env.DB.prepare('UPDATE posts SET hidden = 1 WHERE author_id = ?').bind(reported.author_id).run();}
+    await env.DB.prepare('INSERT INTO support_requests (id, kind, reply, message, created_at) VALUES (?, ?, ?, ?, ?)').bind(crypto.randomUUID(),'ugc_report_24h',null,'post_id: '+id+' / reason: '+reason,new Date().toISOString()).run();
     return jsonResponse({ok:true});
   }
   if(request.method==='DELETE'){
@@ -149,7 +157,7 @@ async function postPhotoResponse(path,env){
   await ensurePostsSchema(env);
   const id=decodeURIComponent(path.slice('/api/post-photo/'.length));
   if(!/^[0-9a-f-]{36}$/i.test(id))return new Response('Not found',{status:404});
-  const row=await env.DB.prepare('SELECT photo_key, photo_type FROM posts WHERE id = ? LIMIT 1').bind(id).first();
+  const row=await env.DB.prepare('SELECT photo_key, photo_type FROM posts WHERE id = ? AND hidden = 0 LIMIT 1').bind(id).first();
   if(!row||!row.photo_key)return new Response('Not found',{status:404});
   const object=await env.UPLOADS.get(row.photo_key);if(!object)return new Response('Not found',{status:404});
   return new Response(object.body,{headers:{...corsHeaders,'content-type':row.photo_type||'application/octet-stream','cache-control':'public, max-age=86400','x-content-type-options':'nosniff'}});

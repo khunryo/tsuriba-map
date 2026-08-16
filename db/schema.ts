@@ -28,6 +28,12 @@ export const postReports = sqliteTable("post_reports", {
   createdAt: text("created_at").notNull(),
 }, (table) => [index("idx_post_reports_post_id").on(table.postId)]);
 
+export const suspendedAuthors = sqliteTable("suspended_authors", {
+  authorId: text("author_id").primaryKey(),
+  reason: text("reason").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
 export const supportRequests = sqliteTable("support_requests", {
   id: text("id").primaryKey(),
   kind: text("kind").notNull(),
