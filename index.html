@@ -135,6 +135,9 @@
     .fish-blue { background-position:33.333% 70%; }
     .fish-kisu { background-position:66.667% 70%; }
     .fish-rock { background-position:100% 70%; }
+    .fish-octopus, .fish-squid { background-image:none; display:grid; place-items:center; font-size:30px; line-height:1; }
+    .fish-octopus::before { content:'🐙'; }
+    .fish-squid::before { content:'🦑'; }
     .species-chip strong { display: block; font-size: 12px; white-space: nowrap; }
     .species-chip small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
     .explore-date-bar { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding:11px 12px; border:1px solid rgba(100,228,210,.17); border-radius:14px; background:linear-gradient(120deg,rgba(100,228,210,.09),rgba(18,43,61,.72)); }
@@ -577,7 +580,7 @@
         <div class="community-wrap"><div class="feed" id="communityFeed"></div><div class="card model-card"><h3>モデルの状態</h3><p>みんなから集まった現地情報</p><div class="model-item"><span>予測方式</span><strong class="aqua">試算モデル</strong></div><div class="model-item"><span>共有された投稿</span><strong id="freshLogs">0件</strong></div><div class="model-item"><span>検証状態</span><strong id="dataFreshness">データ収集中</strong></div><div class="model-foot">投稿が増えるほど、地域・魚種・時間帯ごとの重み付けが細かくなります。釣れなかった記録も大切なデータです。</div><div class="ugc-safety"><strong>安心して投稿を見るために</strong><p>不適切な投稿や迷惑行為は許容しません。投稿の「通報」で直ちに非表示となり、運営者が24時間以内に確認します。</p><a href="https://shiome-fishing.khunryo.chatgpt.site/support.html" target="_blank" rel="noreferrer">運営者へ連絡・削除を依頼 →</a></div></div></div>
       </section>
 
-      <section class="section app-view view-sources" id="sources" hidden><div class="section-heading"><div><h2>予測の根拠</h2><p>生態の一般則をベースに、現地データで更新する設計です。</p></div></div><div class="source-grid"><article class="source-card"><div class="source-type">SPECIES</div><strong>魚種プロファイル</strong><p>好適水温・底質・潮通し・季節性を魚種ごとに設定。</p><a href="https://www.fra.go.jp/home/kenkyushokai/ronbun/2025/20260306.html" target="_blank" rel="noreferrer">マアジ電子タグ研究 ↗</a></article><article class="source-card"><div class="source-type">HABITAT</div><strong>砂底・かけ上がり</strong><p>ヒラメやマゴチは浅い砂・砂泥域と地形変化を重視。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2023/08/details_2008_060.pdf" target="_blank" rel="noreferrer">ヒラメ資源評価 ↗</a></article><article class="source-card"><div class="source-type">TIDE</div><strong>潮汐と時合い</strong><p>満干潮の前後、潮が動く時間帯をタイドグラフで可視化。</p><a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">気象庁 潮位表 ↗</a></article><article class="source-card"><div class="source-type">LOCATION</div><strong>港湾・海岸候補</strong><p>公的な釣り場開放港と海岸線資料を基礎に、候補地点を区別して登録。</p><a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 海釣り施設 ↗</a></article><article class="source-card"><div class="source-type">CROSSCHECK</div><strong>公開釣果との照合</strong><p>不足地点の発見に公開エリア一覧を使い、投稿本文や独自集計値は転載しません。</p><a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ エリア一覧 ↗</a></article><article class="source-card"><div class="source-type">COMMUNITY</div><strong>みんなの現地情報</strong><p>釣果・水色・ベイト・立入情報を投稿で蓄積。</p><a href="#community">投稿を見る →</a></article></div></section>
+      <section class="section app-view view-sources" id="sources" hidden><div class="section-heading"><div><h2>予測の根拠</h2><p>生態の一般則をベースに、現地データで更新する設計です。</p></div></div><div class="source-grid"><article class="source-card"><div class="source-type">SPECIES</div><strong>魚種プロファイル</strong><p>好適水温・底質・潮通し・季節性を魚種ごとに設定。</p><a href="https://www.fra.go.jp/home/kenkyushokai/ronbun/2025/20260306.html" target="_blank" rel="noreferrer">マアジ電子タグ研究 ↗</a></article><article class="source-card"><div class="source-type">HABITAT</div><strong>砂底・かけ上がり</strong><p>ヒラメやマゴチは浅い砂・砂泥域と地形変化を重視。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2023/08/details_2008_060.pdf" target="_blank" rel="noreferrer">ヒラメ資源評価 ↗</a></article><article class="source-card"><div class="source-type">CEPHALOPOD</div><strong>マダコの着き場</strong><p>砂礫・岩礁、岩穴や転石、護岸の隙間と夜間活動を重視。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2020/report_2020_chu.pdf" target="_blank" rel="noreferrer">水産研究・教育機構 マダコ資料 ↗</a></article><article class="source-card"><div class="source-type">CEPHALOPOD</div><strong>アオリイカの沿岸来遊</strong><p>水温16℃以上の沿岸来遊、藻場・岩礁と朝夕から夜の活動を重視。</p><a href="https://www.jstage.jst.go.jp/article/suisan1932/61/6/61_6_838/_article/-char/ja/" target="_blank" rel="noreferrer">アオリイカ産卵生態研究 ↗</a></article><article class="source-card"><div class="source-type">TIDE</div><strong>潮汐と時合い</strong><p>満干潮の前後、潮が動く時間帯をタイドグラフで可視化。</p><a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">気象庁 潮位表 ↗</a></article><article class="source-card"><div class="source-type">LOCATION</div><strong>港湾・海岸候補</strong><p>公的な釣り場開放港と海岸線資料を基礎に、候補地点を区別して登録。</p><a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 海釣り施設 ↗</a></article><article class="source-card"><div class="source-type">CROSSCHECK</div><strong>公開釣果との照合</strong><p>不足地点の発見に公開エリア一覧を使い、投稿本文や独自集計値は転載しません。</p><a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ エリア一覧 ↗</a></article><article class="source-card"><div class="source-type">COMMUNITY</div><strong>みんなの現地情報</strong><p>釣果・水色・ベイト・立入情報を投稿で蓄積。</p><a href="#community">投稿を見る →</a></article></div></section>
       <p class="footer-note app-view view-sources" hidden>潮先のスコアは釣果を保証するものではありません。予測は自然科学の知見・公開データ・ユーザー投稿から「次に見るべき場所」を提案するものです。港湾名の掲載は全域での釣り許可を意味しません。立入禁止・漁業権・駐車・天候と波の安全を最優先してください。<br>データ出典・参考: <a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構</a> / <a href="https://www.data.jma.go.jp/" target="_blank" rel="noreferrer">気象庁</a> / <a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 港湾の釣り場開放状況</a> / <a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ 公開エリア一覧</a> / 国土地理院。投稿内容と写真はサービス上に保存され、みんなの釣果画面に表示されます。<span class="legal-links"><a href="https://shiome-fishing.khunryo.chatgpt.site/privacy.html" target="_blank" rel="noreferrer">プライバシーポリシー</a><a href="https://shiome-fishing.khunryo.chatgpt.site/terms.html" target="_blank" rel="noreferrer">利用規約</a><a href="https://shiome-fishing.khunryo.chatgpt.site/support.html" target="_blank" rel="noreferrer">サポート</a></span></p>
     </main>
   </div>
@@ -603,7 +606,9 @@
       saba: { name: 'サバ', symbol: '≋', color: '#b7a6ff', season: '回遊魚', temp: '16–24℃', basis: '潮通しのよい港口とベイトの集積、群れの回遊を重視。', source: '回遊性魚類の環境条件', weights: [84, 77, 72, 86] },
       blue: { name: 'その他青物', short: '青物', symbol: '↗', color: '#87e4a8', season: '回遊魚', temp: '17–25℃', basis: '湾口・磯の潮目、ベイト量、朝夕の光量変化を重視。', source: '回遊性魚類の行動特性', weights: [80, 76, 69, 92] },
       kisu: { name: 'シロギス', symbol: '⌇', color: '#ffd784', season: '砂底魚', temp: '18–27℃', basis: '遠浅の砂浜、砕波帯の沖側、砂底の底層と春から秋の水温上昇を重視。', source: '砂浜海岸砕波帯のシロギス研究', weights: [66, 78, 96, 72] },
-      rock: { name: '根魚', symbol: '◆', color: '#caa9ff', season: '居着き', temp: '12–23℃', basis: '岩礁・テトラ・海藻帯と、身を隠せる水深を重視。', source: '沿岸岩礁域の生息環境', weights: [73, 79, 94, 69] }
+      rock: { name: '根魚', symbol: '◆', color: '#caa9ff', season: '居着き', temp: '12–23℃', basis: '岩礁・テトラ・海藻帯と、身を隠せる水深を重視。', source: '沿岸岩礁域の生息環境', weights: [73, 79, 94, 69] },
+      octopus: { name: 'タコ', symbol: '●', color: '#ff8fa3', season: '底生・夜行性', temp: '地域差あり', basis: 'マダコを対象に、沿岸の岩礁・砂礫、岩穴、転石、護岸の隙間と夜間の活動を重視。甲殻類や貝類がいる海底を評価します。', source: '水産研究・教育機構／東京都島しょ農林水産総合センター', weights: [70, 84, 96, 86] },
+      squid: { name: 'イカ', short: 'イカ', symbol: '◇', color: '#8ed8ff', season: 'アオリイカ', temp: '16℃以上目安', basis: '岸から狙うアオリイカを対象に、藻場・岩礁・港口、沿岸の小魚、朝夕の薄明から夜間を重視。水温16℃以上で沿岸へ来遊する産卵生態も反映します。', source: 'アオリイカ産卵・回遊生態研究', weights: [76, 88, 92, 90], tempMin:16 }
     };
     const SPOTS = [
       { id:'走水港', name:'走水港', prefecture:'神奈川県', region:'関東', type:'港', lat:35.24, lon:139.72, base: [88, 73, 52, 48, 77, 62, 69], tide:['04:51','11:42','18:09','23:31'], water:'23.8℃', tideNow:'上げ', note:'港口の潮通しと朝マズメ。アジ狙いなら係留船の明暗境界へ。' },
@@ -694,7 +699,9 @@
       saba:{shape:'pelagic',length:1.42,width:.50,layer:'表中層の回遊ライン'},
       blue:{shape:'pelagic',length:1.58,width:.46,layer:'沖向きの潮目・回遊ライン'},
       kisu:{shape:'bottom',length:.92,width:1.42,layer:'遠浅の砂底・砕波帯の沖側'},
-      rock:{shape:'reef',length:.52,width:.66,layer:'岩礁・テトラ際'}
+      rock:{shape:'reef',length:.52,width:.66,layer:'岩礁・テトラ際'},
+      octopus:{shape:'reef',length:.48,width:.62,layer:'岩礁・転石・護岸の隙間'},
+      squid:{shape:'reef',length:.88,width:.82,layer:'藻場・岩礁沿い・港口の中層'}
     };
     const FLOW_PROFILES = {
       '走水港':{bearing:72,offshore:82,strength:.96,label:'東京湾口へ抜ける流れ'},
@@ -719,7 +726,12 @@
       const dirs=['北','北東','東','南東','南','南西','西','北西'];
       return Object.assign({},base,{bearing,direction:dirs[Math.round(bearing/45)%8]});
     }
-    function profileFor(s){ return Object.assign({ best:'朝夕のマズメ・潮が動く時間', status:'参考情報／現地確認が必要' },TYPE_PROFILES[s.type]||TYPE_PROFILES['港'],SPOT_PROFILES[s.id]||{}); }
+    function speciesProfileFor(s){
+      if(state.species==='octopus') return {terrain:s.type==='港'?'岸壁際・捨石・穴や隙間':s.type==='磯'?'岩礁の穴・転石周り':'砂礫と岩礁の境界',method:'タコエギ／テンヤで海底を探る',best:'日没後〜夜・潮が緩み始める時間'};
+      if(state.species==='squid') return {terrain:s.type==='港'?'港口・明暗・沈み根':s.type==='磯'?'藻場・岩礁沿い':'藻場が隣接する潮通し',method:'エギング',best:'朝夕の薄明〜夜'};
+      return {};
+    }
+    function profileFor(s){ return Object.assign({ best:'朝夕のマズメ・潮が動く時間', status:'参考情報／現地確認が必要' },TYPE_PROFILES[s.type]||TYPE_PROFILES['港'],SPOT_PROFILES[s.id]||{},speciesProfileFor(s)); }
     const PREFS_BY_REGION = {};
     SPOTS.forEach(s=>{if(!PREFS_BY_REGION[s.region])PREFS_BY_REGION[s.region]=[];if(!PREFS_BY_REGION[s.region].includes(s.prefecture))PREFS_BY_REGION[s.region].push(s.prefecture);});
     function loadHomePref(){try{return localStorage.getItem('shiome_home_pref')||'神奈川県';}catch(e){return '神奈川県';}}
@@ -788,7 +800,7 @@
       try{const stations=await tideStationsPromise,station=nearestTideStation(s,stations),year=state.date.slice(0,4);let text=await bundledTideText(year,station.code);if(!text)text=await officialTideText(year,station.code);const data=parseJmaTide(text,state.date,station);data.spotId=s.id;if(state.tideKey!==requestKey)return;state.tideData=data;state.tideLoading=false;window.render();}
       catch(e){if(state.tideKey!==requestKey)return;let station=null;try{station=nearestTideStation(s,await tideStationsPromise);}catch(_){}const data=fallbackTideData(s,state.date,station);data.spotId=s.id;state.tideData=data;state.tideLoading=false;state.tideError='';window.render();}
     }
-    const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22]};
+    const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22],octopus:[0,4,20,23],squid:[5,18,21,23]};
     function hourDistance(a,b){ const d=Math.abs(a-b); return Math.min(d,24-d); }
     function timeLiftAt(s,h){
       const peaks=ACTIVE_HOURS[state.species]||[6,18];
@@ -807,32 +819,46 @@
       const hasLive=s.id===state.selected&&state.tideData?.spotId===s.id&&state.tideData.date===state.date;
       return {hour,period,window:windowText,reason:hasLive?'魚種の活性時間と気象庁の潮位変化が重なる時間':'魚種の活性傾向と登録された潮時が重なる時間'};
     }
-    function scoreFor(s){
-      const idx=Object.keys(SPECIES).indexOf(state.species);
-      const fallback=state.species==='kisu'?(s.type==='サーフ'?76:s.type==='港'?54:42):60;
+    function baseForSpecies(s){
+      const special={octopus:{'港':72,'磯':84,'サーフ':47},squid:{'港':76,'磯':82,'サーフ':52}};
+      if(special[state.species]) return special[state.species][s.type]??60;
+      const idx=Object.keys(SPECIES).indexOf(state.species),fallback=state.species==='kisu'?(s.type==='サーフ'?76:s.type==='港'?54:42):60;
       const raw=state.species==='rock'&&s.base.length===7?s.base[6]:s.base[idx];
-      const base=Number.isFinite(raw)?raw:fallback;
+      return Number.isFinite(raw)?raw:fallback;
+    }
+    function temperatureScoreFor(s){
+      const fish=selectedSpecies(),range=fish.tempRange,min=fish.tempMin;if(!range&&!Number.isFinite(min))return null;
+      const value=Number.parseFloat(s.water);if(!Number.isFinite(value))return 60;
+      if(Number.isFinite(min))return value>=min?82:Math.max(25,Math.round(66-(min-value)*10));
+      if(value>=range[0]&&value<=range[1]){const mid=(range[0]+range[1])/2;return Math.round(88-Math.abs(value-mid)*2.1);}
+      const distance=value<range[0]?range[0]-value:value-range[1];return Math.max(25,Math.round(66-distance*8));
+    }
+    function scoreFor(s){
+      const base=baseForSpecies(s);
       const localLogs=state.logs.filter(l=>l.spot===s.name);
       const candidatePenalty=s.sourceStatus==='自治体等で釣り利用確認'?2:s.sourceStatus==='港湾の開放実績'?3:s.sourceStatus==='公開釣果掲載・要確認'?5:s.id.startsWith('全国-')?7:0;
       const dataPenalty=localLogs.length?0:2;
       const communityBoost=Math.min(4,localLogs.length*2);
-      const calibrated=50+(base-50)*.8+timeLiftFor(s)*.7-candidatePenalty-dataPenalty+communityBoost;
+      const tempScore=temperatureScoreFor(s),temperatureLift=tempScore===null?0:(tempScore-60)*.12;
+      const calibrated=50+(base-50)*.8+timeLiftFor(s)*.7+temperatureLift-candidatePenalty-dataPenalty+communityBoost;
       return Math.max(25,Math.min(92,Math.round(calibrated)));
     }
     function scoreBreakdownFor(s){
-      const fish=selectedSpecies(),idx=Object.keys(SPECIES).indexOf(state.species),fallback=state.species==='kisu'?(s.type==='サーフ'?76:s.type==='港'?54:42):60,raw=state.species==='rock'&&s.base.length===7?s.base[6]:s.base[idx],base=Number.isFinite(raw)?raw:fallback;
+      const fish=selectedSpecies(),base=baseForSpecies(s);
       const clamp=value=>Math.max(25,Math.min(95,Math.round(value))),motion=tideMotionFor(s),tideHours=s.tide.map(t=>Number(t.split(':')[0])+Number(t.split(':')[1])/60),tideDistance=Math.min(...tideHours.map(h=>hourDistance(state.hour,h)));
       const tide=motion?clamp(48+Math.min(42,Math.abs(motion.rate)*3.1)):clamp(84-Math.min(46,tideDistance*8));
       const time=clamp(42+(timeLiftFor(s)+10)*3.1);
-      const typeMatch={aji:{'港':9,'磯':1,'サーフ':-7},iwashi:{'港':7,'磯':1,'サーフ':-2},hirame:{'港':-8,'磯':-5,'サーフ':12},magochi:{'港':-5,'磯':-9,'サーフ':12},saba:{'港':8,'磯':5,'サーフ':-4},blue:{'港':4,'磯':11,'サーフ':1},kisu:{'港':-9,'磯':-12,'サーフ':14},rock:{'港':3,'磯':13,'サーフ':-12}};
+      const typeMatch={aji:{'港':9,'磯':1,'サーフ':-7},iwashi:{'港':7,'磯':1,'サーフ':-2},hirame:{'港':-8,'磯':-5,'サーフ':12},magochi:{'港':-5,'磯':-9,'サーフ':12},saba:{'港':8,'磯':5,'サーフ':-4},blue:{'港':4,'磯':11,'サーフ':1},kisu:{'港':-9,'磯':-12,'サーフ':14},rock:{'港':3,'磯':13,'サーフ':-12},octopus:{'港':9,'磯':14,'サーフ':-13},squid:{'港':8,'磯':13,'サーフ':-8}};
       const terrain=clamp(base*.62+fish.weights[2]*.38+(typeMatch[state.species]?.[s.type]||0));
-      const baitType=(['aji','iwashi','saba'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi'].includes(state.species)&&s.type!=='港'?4:0);
+      const baitType=(['aji','iwashi','saba'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi'].includes(state.species)&&s.type!=='港'?4:0)+(state.species==='octopus'&&s.type!=='サーフ'?6:0)+(state.species==='squid'&&s.type!=='サーフ'?6:0);
       const bait=clamp(base*.58+fish.weights[1]*.42+baitType);
-      return [['潮の動き',tide],['餌場適性',bait],['地形相性',terrain],['時間帯',time]];
+      const result=[['潮の動き',tide],['餌場適性',bait],['地形相性',terrain],['時間帯',time]],temperature=temperatureScoreFor(s);
+      if(temperature!==null)result.push(['水温相性',temperature]);
+      return result;
     }
     function scoreInsightFor(s,breakdown){
       const best=breakdown.slice().sort((a,b)=>b[1]-a[1]).slice(0,2),profile=profileFor(s),motion=tideMotionFor(s),parts=[];
-      best.forEach(([label,value])=>{if(label==='潮の動き')parts.push(`${motion?motion.label+'で'+motion.strength:'潮止まりとの距離'}が好条件`);if(label==='餌場適性')parts.push(`${s.type}という場所の特徴が${selectedSpecies().name}の採餌傾向と好相性`);if(label==='地形相性')parts.push(`${profile.terrain}が魚種特性と好相性`);if(label==='時間帯')parts.push(`${String(state.hour).padStart(2,'0')}時は活性が上がりやすい時間帯`);});
+      best.forEach(([label,value])=>{if(label==='潮の動き')parts.push(`${motion?motion.label+'で'+motion.strength:'潮止まりとの距離'}が好条件`);if(label==='餌場適性')parts.push(`${s.type}という場所の特徴が${selectedSpecies().name}の採餌傾向と好相性`);if(label==='地形相性')parts.push(`${profile.terrain}が魚種特性と好相性`);if(label==='時間帯')parts.push(`${String(state.hour).padStart(2,'0')}時は活性が上がりやすい時間帯`);if(label==='水温相性')parts.push(`${s.water}が水温目安「${selectedSpecies().temp}」と好相性`);});
       return `${best.map(x=>`${x[0]} ${x[1]}`).join('・')}が得点を押し上げています。${parts.join('。')}。`;
     }
     function dataStatusFor(s){ const count=state.logs.filter(l=>l.spot===s.name).length; return count?`投稿あり ${count}件`:s.sourceStatus==='自治体等で釣り利用確認'?'公式情報確認済み':s.sourceStatus==='港湾の開放実績'?'公的資料掲載・現地確認':s.sourceStatus==='公開釣果掲載・要確認'?'公開釣果あり・現地確認':s.id.startsWith('全国-')?'候補地点・要検証':'基礎地点・投稿待ち'; }
@@ -856,7 +882,7 @@
       const list=visibleSpots().slice().sort((a,b)=>scoreFor(b)-scoreFor(a)),top=list[0]||SPOTS[0];
       state.selected=state.selected&&list.some(s=>s.id===state.selected)?state.selected:top.id;
       const s=spot(state.selected),score=scoreFor(s),fish=selectedSpecies(),profile=profileFor(s),bestTime=bestTimeFor(s),flow=flowFor(s),habitat=habitatFor(),rank=Math.max(1,list.findIndex(x=>x.id===s.id)+1),isSaved=state.favorites.includes(s.id),scoreText=score>=82?'特に条件が合う':score>=72?'候補':'様子見',breakdown=scoreBreakdownFor(s);
-      document.getElementById('recommendCard').innerHTML=`<div class="recommend-top"><div><div class="recommend-label">TODAY'S PICK / ${rank}位</div><h3>${esc(s.name)}</h3><div class="detail-sub">${s.prefecture} ・ ${s.type} ・ ${fish.name}</div></div><button class="heart ${isSaved?'saved':''}" data-action="save-spot" aria-label="お気に入り">${isSaved?'♥':'♡'}</button></div><div class="score-line"><div class="score-ring" style="background:conic-gradient(${fish.color} 0 ${score}%,rgba(255,255,255,.08) ${score}% 100%)"><div class="score-ring-inner"><strong style="color:${fish.color}">${score}</strong><small>/ 100</small></div></div><div class="score-copy"><strong>${scoreText}コンディション</strong><p>この魚種の相対的な予測指数</p></div></div><div class="tag-row"><span class="tag hot">✦ おすすめ ${bestTime.window}</span><span class="tag">${tideStatusFor(s)}</span><span class="tag">水温 ${s.water}</span></div><div class="spot-profile-grid"><div class="spot-profile"><span>地形</span><strong>${esc(profile.terrain)}</strong></div><div class="spot-profile"><span>向く釣り方</span><strong>${esc(profile.method)}</strong></div><div class="spot-profile"><span>狙う時間</span><strong>${esc(profile.best)}</strong></div><div class="spot-profile"><span>足場・アクセス</span><strong>${esc(profile.footing)}</strong></div></div><div class="spot-alert"><b>安全・ルール</b><br>${esc(profile.safety)}<br><span style="color:var(--muted)">${esc(profile.access)}／${esc(profile.status)}</span></div><div class="score-breakdown-head"><strong>なぜこの得点？</strong><small>4条件を100点で比較</small></div><div class="reason-list">${breakdown.map(([label,val])=>`<div class="reason"><span>${label}</span><div class="reason-bar"><i style="width:${val}%;background:${fish.color}"></i></div><b>${val}</b></div>`).join('')}</div><div class="reason-insight"><b>高得点の理由</b><span>${esc(scoreInsightFor(s,breakdown))}</span></div><div class="breakdown-note">総合点は魚種別モデルで重み付けしているため、4項目の単純平均ではありません。</div><div class="confidence"><span>データ状態</span><strong>${esc(dataStatusFor(s))}</strong></div><button class="link-button" data-action="view-catches">この釣り場の釣果情報を見る →</button>`;
+      document.getElementById('recommendCard').innerHTML=`<div class="recommend-top"><div><div class="recommend-label">TODAY'S PICK / ${rank}位</div><h3>${esc(s.name)}</h3><div class="detail-sub">${s.prefecture} ・ ${s.type} ・ ${fish.name}</div></div><button class="heart ${isSaved?'saved':''}" data-action="save-spot" aria-label="お気に入り">${isSaved?'♥':'♡'}</button></div><div class="score-line"><div class="score-ring" style="background:conic-gradient(${fish.color} 0 ${score}%,rgba(255,255,255,.08) ${score}% 100%)"><div class="score-ring-inner"><strong style="color:${fish.color}">${score}</strong><small>/ 100</small></div></div><div class="score-copy"><strong>${scoreText}コンディション</strong><p>この魚種の相対的な予測指数</p></div></div><div class="tag-row"><span class="tag hot">✦ おすすめ ${bestTime.window}</span><span class="tag">${tideStatusFor(s)}</span><span class="tag">水温 ${s.water}</span></div><div class="spot-profile-grid"><div class="spot-profile"><span>地形</span><strong>${esc(profile.terrain)}</strong></div><div class="spot-profile"><span>向く釣り方</span><strong>${esc(profile.method)}</strong></div><div class="spot-profile"><span>狙う時間</span><strong>${esc(profile.best)}</strong></div><div class="spot-profile"><span>足場・アクセス</span><strong>${esc(profile.footing)}</strong></div></div><div class="spot-alert"><b>安全・ルール</b><br>${esc(profile.safety)}<br><span style="color:var(--muted)">${esc(profile.access)}／${esc(profile.status)}</span></div><div class="score-breakdown-head"><strong>なぜこの得点？</strong><small>${breakdown.length}条件を100点で比較</small></div><div class="reason-list">${breakdown.map(([label,val])=>`<div class="reason"><span>${label}</span><div class="reason-bar"><i style="width:${val}%;background:${fish.color}"></i></div><b>${val}</b></div>`).join('')}</div><div class="reason-insight"><b>高得点の理由</b><span>${esc(scoreInsightFor(s,breakdown))}</span></div><div class="breakdown-note">総合点は魚種別モデルで重み付けしているため、${breakdown.length}項目の単純平均ではありません。</div><div class="confidence"><span>データ状態</span><strong>${esc(dataStatusFor(s))}</strong></div><button class="link-button" data-action="view-catches">この釣り場の釣果情報を見る →</button>`;
     }
     function renderList(){ const list=visibleSpots().slice().sort((a,b)=>scoreFor(b)-scoreFor(a)).slice(0,5),area=state.scope==='県'?state.prefecture:state.region; document.getElementById('listCaption').textContent=`${area}・${selectedSpecies().name}`; document.getElementById('spotList').innerHTML=list.map((s,i)=>`<div class="spot-row ${s.id===state.selected?'selected':''}" data-spot="${s.id}"><span class="rank ${i===0?'top':''}">${String(i+1).padStart(2,'0')}</span><div><strong>${esc(s.name)}</strong><small>${s.prefecture} ・ ${s.type} ・ ${tideStatusFor(s)}</small></div><div class="spot-score">${scoreFor(s)}<small> /100</small></div></div>`).join(''); }
     function renderDetail(){ const s=spot(state.selected), fish=selectedSpecies(), score=scoreFor(s),saved=state.favorites.includes(s.id),motion=tideMotionFor(s),bestTime=bestTimeFor(s); const f=fmtDate(state.date); const focus=fish.basis; document.getElementById('detailCard').innerHTML=`<div class="detail-title"><div><div class="card-kicker">SELECTED SPOT / ${f.month}.${f.day}</div><h3>${esc(s.name)}</h3><div class="detail-sub">${s.prefecture} ・ ${s.type} ・ ${fish.name}の予測</div></div><div style="display:flex;align-items:start;gap:4px"><button class="heart ${saved?'saved':''}" data-action="save-spot" aria-label="お気に入り">${saved?'♥':'♡'}</button><div class="detail-score"><strong>${score}</strong><small>予測指数 / 100</small></div></div></div><div class="best-time-card"><div><span>おすすめの時間</span><strong>${bestTime.window}</strong></div><small>${bestTime.period}。${bestTime.reason}</small></div><div class="signal-grid"><div class="signal"><small>水温</small><strong>${s.water}</strong></div><div class="signal"><small>潮位変化</small><strong>${motion?motion.label:'取得中'}</strong></div><div class="signal"><small>${String(state.hour).padStart(2,'0')}時の潮位</small><strong>${motion?motion.height+'cm':'—'}</strong></div></div><div class="science-note"><b>魚種の着き場メモ</b><br>${esc(focus)} ${esc(s.note)}</div><div class="tag-row" style="margin-top:15px"><span class="tag">魚種別モデル</span><span class="tag">現地投稿 ${state.logs.filter(l=>l.spot===s.name).length}件</span><span class="tag">ルール確認が必要</span></div>`; document.getElementById('tideLocation').textContent=`${s.name} / JST`; }
