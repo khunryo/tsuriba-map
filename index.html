@@ -1033,21 +1033,26 @@
           ]}});
           geoMainMap.on('load',function(){
             geoMainMap.addSource('prediction',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-            [
-              {id:'low',min:0,max:56,rgb:'45,148,220'},
-              {id:'fair',min:56,max:64,rgb:'48,202,204'},
-              {id:'good',min:64,max:72,rgb:'101,213,124'},
-              {id:'strong',min:72,max:82,rgb:'247,190,65'},
-              {id:'hot',min:82,max:101,rgb:'245,70,84'}
-            ].forEach(function(band){
-              geoMainMap.addLayer({id:'prediction-'+band.id,type:'heatmap',source:'prediction',maxzoom:14,filter:['all',['>=',['get','score'],band.min],['<',['get','score'],band.max]],paint:{
-                'heatmap-weight':['interpolate',['linear'],['get','weight'],0,0,1,1],
-                'heatmap-intensity':['interpolate',['linear'],['zoom'],4,.56,7,.62,9,.66,11,.7],
-                'heatmap-radius':['interpolate',['linear'],['zoom'],4,17,7,26,9,31,11,35],
-                'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba('+band.rgb+',0)',.12,'rgba('+band.rgb+',.08)',.32,'rgba('+band.rgb+',.34)',.65,'rgba('+band.rgb+',.6)',1,'rgba('+band.rgb+',.8)'],
-                'heatmap-opacity':.88
-              }},'gsi-land-mask');
-            });
+            /*
+             * iOS/WKWebView では複数の heatmap レイヤーを重ねると、メモリ状況に
+             * よってヒート部分だけ描画されないことがある。1 枚に統合し、地点の
+             * 予測指数を weight に含めた標準的な連続ヒートマップとして描画する。
+             */
+            geoMainMap.addLayer({id:'prediction-heat',type:'heatmap',source:'prediction',maxzoom:14,paint:{
+              'heatmap-weight':['interpolate',['linear'],['get','weight'],0,0,1,.08],
+              'heatmap-intensity':['interpolate',['linear'],['zoom'],4,.42,7,.5,9,.56,11,.62],
+              'heatmap-radius':['interpolate',['linear'],['zoom'],4,18,7,27,9,32,11,36],
+              'heatmap-color':['interpolate',['linear'],['heatmap-density'],
+                0,'rgba(39,145,214,0)',
+                .04,'rgba(39,145,214,.22)',
+                .12,'rgba(44,191,207,.52)',
+                .25,'rgba(83,210,145,.68)',
+                .45,'rgba(235,216,85,.76)',
+                .68,'rgba(244,153,66,.82)',
+                1,'rgba(239,82,100,.86)'
+              ],
+              'heatmap-opacity':.9
+            }},'gsi-land-mask');
             geoMainReady=true; geoViewKey=''; drawGeoMap();
           });
         }
@@ -1072,6 +1077,8 @@
       function predictionGeoJSON(list){
         var habitat=habitatFor(), scale=6.2, features=[];
         var alongRange=5,offshoreRange=5;
+        /* 拡大時は画面内の地点数が減るため、密度だけが薄くならないよう正規化する。 */
+        var scopeDensity=state.scope==='県'?2.1:1;
         var offshoreBias=habitat.shape==='pelagic'?2.7:habitat.shape==='bottom'?1.7:.85;
         list.forEach(function(s,spotIndex){
           var score=Math.round(scoreFor(s)),flow=flowFor(s),axis=(flow.offshore+90)%360,scoreNorm=Math.max(0,Math.min(1,(score-45)/40)),base=.12+.88*Math.pow(scoreNorm,1.25);
@@ -1083,7 +1090,7 @@
               var depthFit=Math.exp(-Math.pow((offshore-offshoreBias)/2.25,2));
               var alongFit=Math.exp(-Math.pow(along/4.4,2));
               var currentLift=.88+flow.strength*.14+Math.sin((along+offshore+state.hour)*1.31)*.045;
-              var weight=Math.max(.015,Math.min(1,base*(.22+.78*depthFit)*alongFit*currentLift));
+              var weight=Math.max(.015,Math.min(1,base*(.22+.78*depthFit)*alongFit*currentLift*scopeDensity));
               features.push({type:'Feature',geometry:{type:'Point',coordinates:[p[1],p[0]]},properties:{weight:weight,score:score,spot:s.id}});
             }
           }
