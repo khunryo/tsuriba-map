@@ -3,11 +3,12 @@ import { extname, resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname);
 const out = resolve(root, 'dist', 'server');
-const files = ['index.html', 'manifest.webmanifest', 'sw.js'];
+const files = ['index.html', 'manifest.webmanifest', 'sw.js', 'assets/category-icons.png'];
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.png': 'image/png',
 };
 const assets = {};
 

@@ -45,9 +45,22 @@
     .type-choice h1 { margin:0 0 10px; font-size:clamp(27px,8vw,38px); line-height:1.18; letter-spacing:-.06em; }
     .choice-copy { margin:0 0 26px; color:var(--muted); font-size:13px; }
     .choice-list { display:grid; gap:9px; }
-    .choice-card { display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:12px; width:100%; min-height:72px; padding:11px 14px; border:1px solid var(--line); border-radius:15px; background:var(--surface); box-shadow:0 5px 14px rgba(37,48,67,.05); cursor:pointer; text-align:left; }
+    .choice-card { display:grid; grid-template-columns:44px 1fr auto; align-items:center; gap:12px; width:100%; min-height:78px; padding:10px 14px; border:1px solid var(--line); border-radius:15px; background:var(--surface); box-shadow:0 5px 14px rgba(37,48,67,.05); cursor:pointer; text-align:left; }
     .choice-card:hover, .choice-card:focus-visible { border-color:var(--blue); transform:translateY(-1px); }
-    .choice-icon { display:grid; place-items:center; width:44px; height:44px; border-radius:13px; background:var(--blue-soft); font-size:23px; }
+    .category-icon { flex:0 0 auto; overflow:hidden; background-image:url('./assets/category-icons.png'); background-repeat:no-repeat; background-size:400% 300%; }
+    [data-category-icon="fishing"] { background-position:0 0; }
+    [data-category-icon="outing"] { background-position:33.333% 0; }
+    [data-category-icon="work"] { background-position:66.667% 0; }
+    [data-category-icon="travel"] { background-position:100% 0; }
+    [data-category-icon="camping"] { background-position:0 50%; }
+    [data-category-icon="school"] { background-position:33.333% 50%; }
+    [data-category-icon="clinic"] { background-position:66.667% 50%; }
+    [data-category-icon="shopping"] { background-position:100% 50%; }
+    [data-category-icon="sports"] { background-position:0 100%; }
+    [data-category-icon="child"] { background-position:33.333% 100%; }
+    [data-category-icon="pet"] { background-position:66.667% 100%; }
+    [data-category-icon="emergency"] { background-position:100% 100%; }
+    .choice-icon { width:39px; height:52px; border-radius:11px; }
     .choice-name { font-size:15px; font-weight:900; }
     .choice-count { margin-top:2px; color:var(--muted); font-size:11px; }
     .choice-arrow { color:#a6afbd; font-size:22px; }
@@ -55,7 +68,7 @@
     .app { display:flex; flex-direction:column; min-height:calc(100dvh - 40px); padding-bottom:82px; }
     .app-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0 20px; }
     .current-type { display:flex; align-items:center; gap:8px; min-width:0; }
-    .current-type-icon { display:grid; place-items:center; width:32px; height:32px; border-radius:10px; background:var(--blue-soft); font-size:17px; }
+    .current-type-icon { width:27px; height:36px; border-radius:8px; }
     .current-type-copy { min-width:0; }
     .current-type-label { color:var(--muted); font-size:9px; }
     .current-type-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px; font-weight:900; }
@@ -123,8 +136,7 @@
     .manager-row:last-child { border-bottom:0; }
     .manager-row.selected { background:var(--blue-soft); }
     .manager-main { display:flex; align-items:center; gap:9px; min-width:0; cursor:pointer; }
-    .manager-icon { display:grid; place-items:center; width:29px; height:29px; border-radius:9px; background:#f4f6f9; font-size:15px; }
-    .manager-row.selected .manager-icon { background:#fff; }
+    .manager-icon { width:24px; height:32px; border-radius:7px; }
     .manager-text { min-width:0; }
     .manager-name { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:900; }
     .manager-count { display:block; margin-top:1px; color:var(--muted); font-size:10px; }
@@ -133,11 +145,20 @@
     .mini-button.danger:hover { border-color:#efbbb7; color:var(--red); }
     .editor { padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:0 7px 20px rgba(40,52,73,.05); }
     .editor-heading { display:flex; align-items:center; gap:9px; margin-bottom:13px; }
-    .editor-icon { display:grid; place-items:center; width:35px; height:35px; border-radius:10px; background:var(--blue-soft); font-size:18px; }
+    .editor-icon { width:30px; height:40px; border-radius:9px; }
     .editor-heading h2 { margin:0; font-size:15px; }
     .editor-heading p { margin:2px 0 0; color:var(--muted); font-size:11px; }
     .type-name-form { padding:0 0 13px; border:0; border-bottom:1px solid var(--line); border-radius:0; }
     .type-name-form input { min-height:37px; border:1px solid #ccd2dc; border-radius:8px; background:#fafbfc; }
+    .icon-picker { min-width:0; margin:14px 0 0; padding:0 0 14px; border:0; border-bottom:1px solid var(--line); }
+    .icon-picker legend { margin-bottom:9px; padding:0; font-size:12px; font-weight:900; }
+    .icon-picker-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+    .icon-option { display:grid; justify-items:center; gap:4px; min-width:0; min-height:70px; padding:7px 3px 5px; border:1px solid var(--line); border-radius:10px; background:#fafbfc; cursor:pointer; }
+    .icon-option:hover, .icon-option:focus-visible { border-color:#a9bdf4; }
+    .icon-option.selected { border-color:var(--blue); background:var(--blue-soft); box-shadow:inset 0 0 0 1px var(--blue); }
+    .icon-option-preview { width:30px; height:40px; border-radius:8px; }
+    .icon-option-label { overflow:hidden; max-width:100%; color:#687286; font-size:9px; font-weight:850; text-overflow:ellipsis; white-space:nowrap; }
+    .icon-option.selected .icon-option-label { color:var(--blue); }
     .editor-label { margin:14px 0 8px; font-size:12px; font-weight:900; }
     .edit-item-list { display:grid; gap:6px; }
     .edit-item { display:grid; grid-template-columns:1fr auto auto auto; align-items:center; gap:5px; min-height:40px; padding:5px 6px 5px 10px; border:1px solid var(--line); border-radius:8px; background:#fafbfc; }
@@ -181,7 +202,7 @@
         <header class="templates-heading"><p class="view-kicker">TEMPLATES</p><h1>テンプレートを編集</h1><p>種類を選んで、持ち物の名前や順番を整えられます。</p></header>
         <section class="template-create" aria-labelledby="create-title"><div class="template-step-title"><span class="step-number" aria-hidden="true">＋</span><div><strong id="create-title">新しいテンプレート</strong><small>まず名前を決めるだけで作成できます</small></div></div><form class="new-type-form" id="new-type-form"><label class="sr-only" for="new-type-input">新しいテンプレートの名前</label><input id="new-type-input" type="text" maxlength="24" placeholder="例：キャンプ、旅行、通院" autocomplete="off"><button class="primary-button" type="submit">作成</button></form></section>
         <section class="manager" aria-labelledby="manager-title"><div class="manager-heading"><span class="step-number" aria-hidden="true">1</span><div><h2 id="manager-title">編集する種類を選ぶ</h2><p>選択中の種類は青く表示されます</p></div></div><div id="manager-list"></div></section>
-        <section class="editor" aria-labelledby="editor-title"><div class="editor-heading"><span class="step-number" aria-hidden="true">2</span><span class="editor-icon" id="editor-icon" aria-hidden="true">🎣</span><div><h2 id="editor-title">釣りの設定</h2><p>項目名は直接タップして書き換えられます</p></div></div><form class="type-name-form" id="type-name-form"><label class="sr-only" for="type-name-input">種類名</label><input id="type-name-input" type="text" maxlength="24" autocomplete="off"><button class="primary-button" type="submit">名前を保存</button></form><div class="editor-label">持ち物と並び順</div><div class="edit-item-list" id="edit-item-list"></div><form class="editor-add-form" id="editor-add-form"><label class="sr-only" for="editor-add-input">持ち物を追加</label><input id="editor-add-input" type="text" maxlength="40" placeholder="新しい持ち物を追加" autocomplete="off"><button class="secondary-button" type="submit">追加</button></form></section>
+        <section class="editor" aria-labelledby="editor-title"><div class="editor-heading"><span class="step-number" aria-hidden="true">2</span><span class="editor-icon category-icon" id="editor-icon" data-category-icon="fishing" aria-hidden="true"></span><div><h2 id="editor-title">釣りの設定</h2><p>名前・アイコン・持ち物を自分向けに変更できます</p></div></div><form class="type-name-form" id="type-name-form"><label class="sr-only" for="type-name-input">種類名</label><input id="type-name-input" type="text" maxlength="24" autocomplete="off"><button class="primary-button" type="submit">名前を保存</button></form><fieldset class="icon-picker"><legend>アイコンを選ぶ</legend><div class="icon-picker-grid" id="icon-picker-grid"></div></fieldset><div class="editor-label">持ち物と並び順</div><div class="edit-item-list" id="edit-item-list"></div><form class="editor-add-form" id="editor-add-form"><label class="sr-only" for="editor-add-input">持ち物を追加</label><input id="editor-add-input" type="text" maxlength="40" placeholder="新しい持ち物を追加" autocomplete="off"><button class="secondary-button" type="submit">追加</button></form></section>
       </main>
       <nav class="bottom-nav" aria-label="メインメニュー"><button class="nav-button active" id="check-nav" type="button"><strong aria-hidden="true">✓</strong><span>チェック</span></button><button class="nav-button" id="templates-nav" type="button"><strong aria-hidden="true">☷</strong><span>テンプレート</span></button></nav>
     </div>
@@ -191,14 +212,20 @@
     const STORAGE_KEY = 'forget-check:workspace:v2';
     const OLD_STORAGE_KEY = 'forget-check:list:v1';
     const TEMP_STORAGE_KEY = 'forget-check:temporary:v1';
+    const ICON_OPTIONS = [
+      { id:'fishing', label:'釣り' }, { id:'outing', label:'おでかけ' }, { id:'work', label:'仕事' }, { id:'travel', label:'旅行' },
+      { id:'camping', label:'キャンプ' }, { id:'school', label:'学校' }, { id:'clinic', label:'通院' }, { id:'shopping', label:'買い物' },
+      { id:'sports', label:'スポーツ' }, { id:'child', label:'子ども' }, { id:'pet', label:'ペット' }, { id:'emergency', label:'防災' }
+    ];
+    const LEGACY_ICONS = { '🎣':'fishing', '☀️':'outing', '💼':'work', '📋':'travel' };
     const defaultSets = [
-      { id:'fishing', name:'釣り', icon:'🎣', items:['ロッド・リール','仕掛け・ルアー','エサ・小物ケース','ライフジャケット','帽子・日焼け止め','飲み物','財布・スマートフォン','車の鍵'] },
-      { id:'outing', name:'おでかけ', icon:'☀️', items:['財布・スマートフォン','家の鍵','ハンカチ・ティッシュ','モバイルバッテリー','飲み物','折りたたみ傘'] },
-      { id:'work', name:'仕事', icon:'💼', items:['PC・タブレット','充電器','ノート・ペン','社員証','財布・スマートフォン','ハンカチ'] }
+      { id:'fishing', name:'釣り', icon:'fishing', items:['ロッド・リール','仕掛け・ルアー','エサ・小物ケース','ライフジャケット','帽子・日焼け止め','飲み物','財布・スマートフォン','車の鍵'] },
+      { id:'outing', name:'おでかけ', icon:'outing', items:['財布・スマートフォン','家の鍵','ハンカチ・ティッシュ','モバイルバッテリー','飲み物','折りたたみ傘'] },
+      { id:'work', name:'仕事', icon:'work', items:['PC・タブレット','充電器','ノート・ペン','社員証','財布・スマートフォン','ハンカチ'] }
     ];
     const els = {
       splash:document.querySelector('#splash-screen'), typeScreen:document.querySelector('#type-screen'), appScreen:document.querySelector('#app-screen'), choiceList:document.querySelector('#choice-list'), editBeforeChoice:document.querySelector('#edit-before-choice'), changeType:document.querySelector('#change-type'), currentTypeIcon:document.querySelector('#current-type-icon'), currentTypeName:document.querySelector('#current-type-name'), checkView:document.querySelector('#check-view'), templatesView:document.querySelector('#templates-view'), checkNav:document.querySelector('#check-nav'), templatesNav:document.querySelector('#templates-nav'),
-      checkList:document.querySelector('#check-list'), quickAddForm:document.querySelector('#quick-add-form'), quickAddInput:document.querySelector('#quick-add-input'), checkedCount:document.querySelector('#checked-count'), totalCount:document.querySelector('#total-count'), progressFill:document.querySelector('#progress-fill'), progressTitle:document.querySelector('#progress-title'), progressBar:document.querySelector('[role=progressbar]'), hideCompleted:document.querySelector('#hide-completed'), resetChecks:document.querySelector('#reset-checks'), saveNote:document.querySelector('#save-note'), temporaryStatus:document.querySelector('#temporary-status'), temporarySave:document.querySelector('#temporary-save'), temporaryRestore:document.querySelector('#temporary-restore'), managerList:document.querySelector('#manager-list'), newTypeForm:document.querySelector('#new-type-form'), newTypeInput:document.querySelector('#new-type-input'), editorIcon:document.querySelector('#editor-icon'), editorTitle:document.querySelector('#editor-title'), typeNameForm:document.querySelector('#type-name-form'), typeNameInput:document.querySelector('#type-name-input'), editItemList:document.querySelector('#edit-item-list'), editorAddForm:document.querySelector('#editor-add-form'), editorAddInput:document.querySelector('#editor-add-input')
+      checkList:document.querySelector('#check-list'), quickAddForm:document.querySelector('#quick-add-form'), quickAddInput:document.querySelector('#quick-add-input'), checkedCount:document.querySelector('#checked-count'), totalCount:document.querySelector('#total-count'), progressFill:document.querySelector('#progress-fill'), progressTitle:document.querySelector('#progress-title'), progressBar:document.querySelector('[role=progressbar]'), hideCompleted:document.querySelector('#hide-completed'), resetChecks:document.querySelector('#reset-checks'), saveNote:document.querySelector('#save-note'), temporaryStatus:document.querySelector('#temporary-status'), temporarySave:document.querySelector('#temporary-save'), temporaryRestore:document.querySelector('#temporary-restore'), managerList:document.querySelector('#manager-list'), newTypeForm:document.querySelector('#new-type-form'), newTypeInput:document.querySelector('#new-type-input'), editorIcon:document.querySelector('#editor-icon'), editorTitle:document.querySelector('#editor-title'), iconPicker:document.querySelector('#icon-picker-grid'), typeNameForm:document.querySelector('#type-name-form'), typeNameInput:document.querySelector('#type-name-input'), editItemList:document.querySelector('#edit-item-list'), editorAddForm:document.querySelector('#editor-add-form'), editorAddInput:document.querySelector('#editor-add-input')
     };
     let workspace = loadWorkspace();
     let selectedTypeId = workspace.selectedTypeId || workspace.types[0].id;
@@ -206,10 +233,12 @@
     let activeView = 'check';
     let temporarySnapshot = loadTemporary();
 
+    function normalizeIcon(icon) { const value=String(icon || 'travel'); return ICON_OPTIONS.some((option)=>option.id===value) ? value : (LEGACY_ICONS[value] || 'travel'); }
+    function applyIcon(element, icon) { element.textContent=''; element.classList.add('category-icon'); element.dataset.categoryIcon=normalizeIcon(icon); }
     function normalizeType(raw, index) {
       const id = String(raw.id || `type-${Date.now()}-${index}`);
       const items = Array.isArray(raw.items) ? raw.items.map((item, itemIndex) => typeof item === 'string' ? ({ id:`${id}-item-${itemIndex}`, name:item, checked:false }) : ({ id:String(item.id || `${id}-item-${itemIndex}`), name:String(item.name || '').trim(), checked:Boolean(item.checked) })).filter((item) => item.name) : [];
-      return { id, name:String(raw.name || '無題の種類').trim() || '無題の種類', icon:String(raw.icon || '📋'), items };
+      return { id, name:String(raw.name || '無題の種類').trim() || '無題の種類', icon:normalizeIcon(raw.icon), items };
     }
     function defaultWorkspace() { return { types:defaultSets.map((set) => normalizeType(set, 0)), selectedTypeId:'fishing' }; }
     function loadWorkspace() {
@@ -217,7 +246,7 @@
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
         if (saved && Array.isArray(saved.types) && saved.types.length) return { types:saved.types.map(normalizeType), selectedTypeId:saved.selectedTypeId };
         const old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY));
-        if (Array.isArray(old) && old.length) return { types:[{ id:'my-list', name:'マイリスト', icon:'📋', items:old.map((item,index) => ({ id:String(item.id || `old-${index}`), name:String(item.name || '').trim(), checked:Boolean(item.checked) })).filter((item) => item.name) }], selectedTypeId:'my-list' };
+        if (Array.isArray(old) && old.length) return { types:[{ id:'my-list', name:'マイリスト', icon:'travel', items:old.map((item,index) => ({ id:String(item.id || `old-${index}`), name:String(item.name || '').trim(), checked:Boolean(item.checked) })).filter((item) => item.name) }], selectedTypeId:'my-list' };
       } catch (_) { /* use defaults */ }
       return defaultWorkspace();
     }
@@ -236,7 +265,7 @@
       els.choiceList.innerHTML = '';
       workspace.types.forEach((type) => {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'choice-card'; button.setAttribute('aria-label', `${type.name}を選ぶ`);
-        const icon = document.createElement('span'); icon.className = 'choice-icon'; icon.setAttribute('aria-hidden','true'); icon.textContent = type.icon;
+        const icon = document.createElement('span'); icon.className = 'choice-icon'; icon.setAttribute('aria-hidden','true'); applyIcon(icon,type.icon);
         const copy = document.createElement('span'); const name = document.createElement('span'); name.className = 'choice-name'; name.textContent = type.name; const count = document.createElement('span'); count.className = 'choice-count'; count.textContent = `${type.items.length}個の持ち物`; copy.append(name,count);
         const arrow = document.createElement('span'); arrow.className = 'choice-arrow'; arrow.setAttribute('aria-hidden','true'); arrow.textContent = '›'; button.append(icon,copy,arrow); button.addEventListener('click', () => startType(type.id)); els.choiceList.append(button);
       });
@@ -246,7 +275,7 @@
     }
     function renderCheck() {
       const type = currentType(); if (!type) return;
-      els.currentTypeIcon.textContent = type.icon; els.currentTypeName.textContent = type.name;
+      applyIcon(els.currentTypeIcon,type.icon); els.currentTypeName.textContent = type.name;
       const visibleItems = hideCompleted ? type.items.filter((item) => !item.checked) : type.items; els.checkList.innerHTML = '';
       if (!visibleItems.length) { const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = type.items.length && hideCompleted ? 'チェック済みです。すべて確認できました。' : 'この種類にはまだ持ち物がありません。下から追加できます。'; els.checkList.append(empty); }
       visibleItems.forEach((item) => {
@@ -261,12 +290,14 @@
       const type = currentType(); if (!type) return; els.managerList.innerHTML = '';
       workspace.types.forEach((candidate) => {
         const row = document.createElement('div'); row.className=`manager-row${candidate.id === selectedTypeId ? ' selected' : ''}`;
-        const main = document.createElement('div'); main.className='manager-main'; main.setAttribute('role','button'); main.tabIndex=0; main.innerHTML=`<span class="manager-icon" aria-hidden="true">${candidate.icon}</span><span class="manager-text"><span class="manager-name">${escapeHtml(candidate.name)}</span><span class="manager-count">${candidate.items.length}個の持ち物</span></span>`;
+        const main = document.createElement('div'); main.className='manager-main'; main.setAttribute('role','button'); main.tabIndex=0; main.innerHTML=`<span class="manager-icon category-icon" data-category-icon="${candidate.icon}" aria-hidden="true"></span><span class="manager-text"><span class="manager-name">${escapeHtml(candidate.name)}</span><span class="manager-count">${candidate.items.length}個の持ち物</span></span>`;
         const choose = () => { selectedTypeId=candidate.id; saveWorkspace(); renderTemplates(); }; main.addEventListener('click',choose); main.addEventListener('keydown',(event) => { if(event.key==='Enter' || event.key===' '){event.preventDefault(); choose();} });
         const use = document.createElement('button'); use.type='button'; use.className='mini-button'; use.textContent='使う'; use.setAttribute('aria-label',`${candidate.name}を使う`); use.addEventListener('click',() => startType(candidate.id));
         const remove = document.createElement('button'); remove.type='button'; remove.className='mini-button danger'; remove.textContent='削除'; remove.setAttribute('aria-label',`${candidate.name}を削除`); remove.disabled=workspace.types.length<=1; remove.addEventListener('click',() => { if(workspace.types.length<=1)return; workspace.types=workspace.types.filter((entry)=>entry.id!==candidate.id); if(selectedTypeId===candidate.id)selectedTypeId=workspace.types[0].id; saveWorkspace(); renderTemplates(); }); row.append(main,use,remove); els.managerList.append(row);
       });
-      els.editorIcon.textContent=type.icon; els.editorTitle.textContent=`${type.name}の設定`; els.typeNameInput.value=type.name; els.editItemList.innerHTML='';
+      applyIcon(els.editorIcon,type.icon); els.editorTitle.textContent=`${type.name}の設定`; els.typeNameInput.value=type.name; els.iconPicker.innerHTML='';
+      ICON_OPTIONS.forEach((option)=>{const button=document.createElement('button');button.type='button';button.className=`icon-option${option.id===type.icon?' selected':''}`;button.setAttribute('aria-label',`${option.label}のアイコンを選ぶ`);button.setAttribute('aria-pressed',String(option.id===type.icon));const preview=document.createElement('span');preview.className='icon-option-preview';preview.setAttribute('aria-hidden','true');applyIcon(preview,option.id);const label=document.createElement('span');label.className='icon-option-label';label.textContent=option.label;button.append(preview,label);button.addEventListener('click',()=>{if(type.icon===option.id)return;type.icon=option.id;saveWorkspace('アイコンを保存しました');renderTemplates();});els.iconPicker.append(button);});
+      els.editItemList.innerHTML='';
       if(!type.items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='持ち物がありません。下から追加してください。';els.editItemList.append(empty);}
       type.items.forEach((item,index) => { const row=document.createElement('div');row.className='edit-item';const name=document.createElement('input');name.type='text';name.className='edit-item-input';name.value=item.name;name.maxLength=40;name.setAttribute('aria-label',`${item.name}の名前を編集`);const commitName=()=>{const next=name.value.trim();if(!next||type.items.some((candidate)=>candidate.id!==item.id&&candidate.name===next)){name.value=item.name;return;}if(next===item.name)return;item.name=next;saveWorkspace('項目名を保存しました');renderTemplates();};name.addEventListener('keydown',(event)=>{if(event.key==='Enter'){event.preventDefault();commitName();}});name.addEventListener('change',commitName);const up=document.createElement('button');up.type='button';up.className='mini-button';up.textContent='↑';up.setAttribute('aria-label',`${item.name}を上へ`);up.disabled=index===0;up.addEventListener('click',()=>moveItem(type,index,-1));const down=document.createElement('button');down.type='button';down.className='mini-button';down.textContent='↓';down.setAttribute('aria-label',`${item.name}を下へ`);down.disabled=index===type.items.length-1;down.addEventListener('click',()=>moveItem(type,index,1));const remove=document.createElement('button');remove.type='button';remove.className='mini-button danger';remove.textContent='×';remove.setAttribute('aria-label',`${item.name}を削除`);remove.addEventListener('click',()=>{type.items.splice(index,1);saveWorkspace();renderTemplates();});row.append(name,up,down,remove);els.editItemList.append(row); });
     }
@@ -275,7 +306,7 @@
     els.checkNav.addEventListener('click',()=>setView('check')); els.templatesNav.addEventListener('click',()=>setView('templates')); els.changeType.addEventListener('click',showTypeChoice); els.editBeforeChoice.addEventListener('click',()=>{openApp();setView('templates');});
     els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.temporarySave.addEventListener('click',saveTemporary); els.temporaryRestore.addEventListener('click',restoreTemporary); els.resetChecks.addEventListener('click',()=>{currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace(temporarySnapshot ? 'クリアしました。一時保存から復元できます' : 'チェックをクリアしました');renderCheck();});
     els.quickAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.quickAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.quickAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.quickAddInput.value='';saveWorkspace();renderCheck();els.quickAddInput.focus();});
-    els.newTypeForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.newTypeInput.value.trim();if(!name||workspace.types.some((type)=>type.name===name)){els.newTypeInput.focus();return;}const type={id:makeId('type'),name,icon:'📋',items:[]};workspace.types.push(type);selectedTypeId=type.id;els.newTypeInput.value='';saveWorkspace();renderTemplates();els.typeNameInput.focus();});
+    els.newTypeForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.newTypeInput.value.trim();if(!name||workspace.types.some((type)=>type.name===name)){els.newTypeInput.focus();return;}const type={id:makeId('type'),name,icon:'travel',items:[]};workspace.types.push(type);selectedTypeId=type.id;els.newTypeInput.value='';saveWorkspace();renderTemplates();els.typeNameInput.focus();});
     els.typeNameForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.typeNameInput.value.trim();const type=currentType();if(!name||workspace.types.some((candidate)=>candidate.id!==type.id&&candidate.name===name))return;type.name=name;saveWorkspace();renderTemplates();});
     els.editorAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.editorAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.editorAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.editorAddInput.value='';saveWorkspace();renderTemplates();els.editorAddInput.focus();});
     renderTypeChoice();
