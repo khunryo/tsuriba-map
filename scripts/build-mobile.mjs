@@ -36,9 +36,13 @@ await cp(
   resolve(root, "node_modules/@capacitor-community/admob/dist/plugin.js"),
   resolve(out, "assets/admob-plugin.js"),
 );
-await cp(
-  resolve(root, "scripts/admob-mobile.js"),
+const androidBannerId = process.env.ADMOB_ANDROID_BANNER_ID
+  || "ca-app-pub-3940256099942544/6300978111";
+const admobScript = await readFile(resolve(root, "scripts/admob-mobile.js"), "utf8");
+await writeFile(
   resolve(out, "assets/admob-mobile.js"),
+  admobScript.replaceAll("__ADMOB_ANDROID_BANNER_ID__", androidBannerId),
+  "utf8",
 );
 
 const indexPath = resolve(out, "index.html");

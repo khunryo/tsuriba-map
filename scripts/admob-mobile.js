@@ -1,6 +1,7 @@
 (() => {
   const capacitor = window.capacitorExports?.Capacitor || window.Capacitor;
   const admob = window.capacitorStripe?.AdMob;
+  const platform = capacitor?.getPlatform?.() || "web";
 
   if (!capacitor?.isNativePlatform?.() || !admob) return;
 
@@ -41,13 +42,17 @@
       }
       if (!consent.canRequestAds) return;
 
+      const bannerAdId = platform === "android"
+        ? "__ADMOB_ANDROID_BANNER_ID__"
+        : "ca-app-pub-6124353053548665/5394977614";
+
       await admob.showBanner({
-        adId: "ca-app-pub-6124353053548665/5394977614",
+        adId: bannerAdId,
         adSize: "ADAPTIVE_BANNER",
         position: "BOTTOM_CENTER",
         margin: 78,
         npa: true,
-        isTesting: Boolean(capacitor.DEBUG),
+        isTesting: Boolean(capacitor.DEBUG) || bannerAdId.startsWith("ca-app-pub-3940256099942544/"),
       });
     } catch (error) {
       console.warn("AdMob could not be started", error);

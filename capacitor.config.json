@@ -5,5 +5,8 @@
   "backgroundColor": "#07131f",
   "ios": {
     "preferredContentMode": "mobile"
+  },
+  "android": {
+    "backgroundColor": "#07131f"
   }
 }
