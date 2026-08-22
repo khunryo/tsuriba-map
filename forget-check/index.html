@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111b2d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="忘れ物チェック">
   <meta name="description" content="種類ごとに自分の持ち物を設定できる、端末内保存のチェックリスト">
+  <link rel="apple-touch-icon" href="./assets/app-icon-180.png">
   <link rel="manifest" href="./manifest.webmanifest">
   <title>忘れ物チェック</title>
   <style>
@@ -33,7 +37,7 @@
     .float-bag { bottom:18%; left:10%; background:#e8f7e9; animation-delay:-1.4s; transform:rotate(7deg); }
     .float-phone { right:10%; bottom:16%; background:#f3e8ff; animation-delay:-2s; transform:rotate(-6deg); }
     @keyframes floaty { 0%,100%{translate:0 0;} 50%{translate:0 -8px;} }
-    .stage { width:min(100%,600px); min-height:100dvh; margin:0 auto; padding:20px 17px 30px; }
+    .stage { width:min(100%,600px); min-height:100dvh; margin:0 auto; padding:calc(20px + env(safe-area-inset-top)) 17px calc(30px + env(safe-area-inset-bottom)); }
     .stage-header { display:flex; align-items:center; justify-content:space-between; min-height:40px; }
     .brand { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:900; }
     .brand-mark { display:grid; place-items:center; width:28px; height:28px; border-radius:9px; background:var(--navy); color:#fff; }
@@ -234,6 +238,7 @@
     let temporarySnapshot = loadTemporary();
 
     function normalizeIcon(icon) { const value=String(icon || 'travel'); return ICON_OPTIONS.some((option)=>option.id===value) ? value : (LEGACY_ICONS[value] || 'travel'); }
+    function nativeImpact(style='Light') { const haptics=window.Capacitor?.Plugins?.Haptics; if(haptics)haptics.impact({style}).catch(()=>{}); }
     function applyIcon(element, icon) { element.textContent=''; element.classList.add('category-icon'); element.dataset.categoryIcon=normalizeIcon(icon); }
     function normalizeType(raw, index) {
       const id = String(raw.id || `type-${Date.now()}-${index}`);
@@ -280,7 +285,7 @@
       if (!visibleItems.length) { const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = type.items.length && hideCompleted ? 'チェック済みです。すべて確認できました。' : 'この種類にはまだ持ち物がありません。下から追加できます。'; els.checkList.append(empty); }
       visibleItems.forEach((item) => {
         const row = document.createElement('div'); row.className = `item-row${item.checked ? ' checked' : ''}`;
-        const check = document.createElement('button'); check.type='button'; check.className='check-button'; check.setAttribute('aria-label', `${item.name}を${item.checked ? '未チェックに戻す' : 'チェックする'}`); check.setAttribute('aria-pressed', String(item.checked)); check.addEventListener('click', () => { item.checked = !item.checked; saveWorkspace(); renderCheck(); });
+        const check = document.createElement('button'); check.type='button'; check.className='check-button'; check.setAttribute('aria-label', `${item.name}を${item.checked ? '未チェックに戻す' : 'チェックする'}`); check.setAttribute('aria-pressed', String(item.checked)); check.addEventListener('click', () => { item.checked = !item.checked; nativeImpact('Light'); saveWorkspace(); renderCheck(); });
         const name = document.createElement('div'); name.className='item-name'; name.textContent=item.name;
         const remove = document.createElement('button'); remove.type='button'; remove.className='remove-button'; remove.textContent='×'; remove.setAttribute('aria-label', `${item.name}を削除`); remove.addEventListener('click', () => { type.items = type.items.filter((candidate) => candidate.id !== item.id); saveWorkspace(); renderCheck(); }); row.append(check,name,remove); els.checkList.append(row);
       });
@@ -296,7 +301,7 @@
         const remove = document.createElement('button'); remove.type='button'; remove.className='mini-button danger'; remove.textContent='削除'; remove.setAttribute('aria-label',`${candidate.name}を削除`); remove.disabled=workspace.types.length<=1; remove.addEventListener('click',() => { if(workspace.types.length<=1)return; workspace.types=workspace.types.filter((entry)=>entry.id!==candidate.id); if(selectedTypeId===candidate.id)selectedTypeId=workspace.types[0].id; saveWorkspace(); renderTemplates(); }); row.append(main,use,remove); els.managerList.append(row);
       });
       applyIcon(els.editorIcon,type.icon); els.editorTitle.textContent=`${type.name}の設定`; els.typeNameInput.value=type.name; els.iconPicker.innerHTML='';
-      ICON_OPTIONS.forEach((option)=>{const button=document.createElement('button');button.type='button';button.className=`icon-option${option.id===type.icon?' selected':''}`;button.setAttribute('aria-label',`${option.label}のアイコンを選ぶ`);button.setAttribute('aria-pressed',String(option.id===type.icon));const preview=document.createElement('span');preview.className='icon-option-preview';preview.setAttribute('aria-hidden','true');applyIcon(preview,option.id);const label=document.createElement('span');label.className='icon-option-label';label.textContent=option.label;button.append(preview,label);button.addEventListener('click',()=>{if(type.icon===option.id)return;type.icon=option.id;saveWorkspace('アイコンを保存しました');renderTemplates();});els.iconPicker.append(button);});
+      ICON_OPTIONS.forEach((option)=>{const button=document.createElement('button');button.type='button';button.className=`icon-option${option.id===type.icon?' selected':''}`;button.setAttribute('aria-label',`${option.label}のアイコンを選ぶ`);button.setAttribute('aria-pressed',String(option.id===type.icon));const preview=document.createElement('span');preview.className='icon-option-preview';preview.setAttribute('aria-hidden','true');applyIcon(preview,option.id);const label=document.createElement('span');label.className='icon-option-label';label.textContent=option.label;button.append(preview,label);button.addEventListener('click',()=>{if(type.icon===option.id)return;type.icon=option.id;nativeImpact('Light');saveWorkspace('アイコンを保存しました');renderTemplates();});els.iconPicker.append(button);});
       els.editItemList.innerHTML='';
       if(!type.items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='持ち物がありません。下から追加してください。';els.editItemList.append(empty);}
       type.items.forEach((item,index) => { const row=document.createElement('div');row.className='edit-item';const name=document.createElement('input');name.type='text';name.className='edit-item-input';name.value=item.name;name.maxLength=40;name.setAttribute('aria-label',`${item.name}の名前を編集`);const commitName=()=>{const next=name.value.trim();if(!next||type.items.some((candidate)=>candidate.id!==item.id&&candidate.name===next)){name.value=item.name;return;}if(next===item.name)return;item.name=next;saveWorkspace('項目名を保存しました');renderTemplates();};name.addEventListener('keydown',(event)=>{if(event.key==='Enter'){event.preventDefault();commitName();}});name.addEventListener('change',commitName);const up=document.createElement('button');up.type='button';up.className='mini-button';up.textContent='↑';up.setAttribute('aria-label',`${item.name}を上へ`);up.disabled=index===0;up.addEventListener('click',()=>moveItem(type,index,-1));const down=document.createElement('button');down.type='button';down.className='mini-button';down.textContent='↓';down.setAttribute('aria-label',`${item.name}を下へ`);down.disabled=index===type.items.length-1;down.addEventListener('click',()=>moveItem(type,index,1));const remove=document.createElement('button');remove.type='button';remove.className='mini-button danger';remove.textContent='×';remove.setAttribute('aria-label',`${item.name}を削除`);remove.addEventListener('click',()=>{type.items.splice(index,1);saveWorkspace();renderTemplates();});row.append(name,up,down,remove);els.editItemList.append(row); });
@@ -304,14 +309,14 @@
     function moveItem(type,index,amount){const target=index+amount;if(target<0||target>=type.items.length)return;[type.items[index],type.items[target]]=[type.items[target],type.items[index]];saveWorkspace();renderTemplates();}
 
     els.checkNav.addEventListener('click',()=>setView('check')); els.templatesNav.addEventListener('click',()=>setView('templates')); els.changeType.addEventListener('click',showTypeChoice); els.editBeforeChoice.addEventListener('click',()=>{openApp();setView('templates');});
-    els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.temporarySave.addEventListener('click',saveTemporary); els.temporaryRestore.addEventListener('click',restoreTemporary); els.resetChecks.addEventListener('click',()=>{currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace(temporarySnapshot ? 'クリアしました。一時保存から復元できます' : 'チェックをクリアしました');renderCheck();});
+    els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.temporarySave.addEventListener('click',()=>{nativeImpact('Medium');saveTemporary();}); els.temporaryRestore.addEventListener('click',()=>{nativeImpact('Medium');restoreTemporary();}); els.resetChecks.addEventListener('click',()=>{nativeImpact('Medium');currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace(temporarySnapshot ? 'クリアしました。一時保存から復元できます' : 'チェックをクリアしました');renderCheck();});
     els.quickAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.quickAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.quickAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.quickAddInput.value='';saveWorkspace();renderCheck();els.quickAddInput.focus();});
     els.newTypeForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.newTypeInput.value.trim();if(!name||workspace.types.some((type)=>type.name===name)){els.newTypeInput.focus();return;}const type={id:makeId('type'),name,icon:'travel',items:[]};workspace.types.push(type);selectedTypeId=type.id;els.newTypeInput.value='';saveWorkspace();renderTemplates();els.typeNameInput.focus();});
     els.typeNameForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.typeNameInput.value.trim();const type=currentType();if(!name||workspace.types.some((candidate)=>candidate.id!==type.id&&candidate.name===name))return;type.name=name;saveWorkspace();renderTemplates();});
     els.editorAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.editorAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.editorAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.editorAddInput.value='';saveWorkspace();renderTemplates();els.editorAddInput.focus();});
     renderTypeChoice();
     window.setTimeout(()=>{els.splash.hidden=true;els.typeScreen.hidden=false;},2000);
-    if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    if(!document.body.dataset.nativeShell && 'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   </script>
 </body>
 </html>

@@ -1,5 +1,14 @@
-const CACHE = 'forget-check-v5';
-const CORE = ['./', './index.html', './manifest.webmanifest', './sw.js', './assets/category-icons.png'];
+const CACHE = 'forget-check-v6';
+const CORE = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './sw.js',
+  './assets/category-icons.png',
+  './assets/app-icon-180.png',
+  './assets/app-icon-192.png',
+  './assets/app-icon-512.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CORE)));

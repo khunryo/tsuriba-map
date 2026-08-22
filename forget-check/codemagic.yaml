@@ -1,0 +1,103 @@
+workflows:
+  ios-debug-unsigned:
+    name: Forget Check iOS / Unsigned debug IPA
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'forget-check-ios-build-*'
+          include: true
+
+    environment:
+      xcode: 26.4
+      node: 22.14.0
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+
+    scripts:
+      - name: Install JavaScript dependencies
+        script: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Build web app and sync Capacitor
+        script: pnpm run ios:sync
+
+      - name: Build unsigned app
+        script: |
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios/derived" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            build
+
+      - name: Package unsigned IPA for Sideloadly
+        script: |
+          APP_PATH="$CM_BUILD_DIR/build/ios/derived/Build/Products/Release-iphoneos/App.app"
+          OUT_DIR="$CM_BUILD_DIR/build/ios/ipa"
+          test -d "$APP_PATH"
+          rm -rf "$OUT_DIR"
+          mkdir -p "$OUT_DIR/Payload"
+          cp -R "$APP_PATH" "$OUT_DIR/Payload/ForgetCheck.app"
+          cd "$OUT_DIR"
+          zip -qry "ForgetCheck-unsigned.ipa" Payload
+          rm -rf Payload
+          ls -lh "$OUT_DIR"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+  ios-testflight:
+    name: Forget Check iOS / TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    environment:
+      xcode: 26.4
+      node: 22.14.0
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: jp.khunryo.forgetcheck
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+
+    scripts:
+      - name: Install JavaScript dependencies
+        script: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Build web app and sync Capacitor
+        script: pnpm run ios:sync
+
+      - name: Apply App Store signing profiles
+        script: xcode-project use-profiles
+
+      - name: Set iOS build number
+        script: |
+          cd "$CM_BUILD_DIR/ios/App"
+          agvtool new-version -all "$PROJECT_BUILD_NUMBER"
+
+      - name: Build signed IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --ipa-directory "$CM_BUILD_DIR/build/ios/ipa"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM

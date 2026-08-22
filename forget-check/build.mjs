@@ -3,7 +3,15 @@ import { extname, resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname);
 const out = resolve(root, 'dist', 'server');
-const files = ['index.html', 'manifest.webmanifest', 'sw.js', 'assets/category-icons.png'];
+const files = [
+  'index.html',
+  'manifest.webmanifest',
+  'sw.js',
+  'assets/category-icons.png',
+  'assets/app-icon-180.png',
+  'assets/app-icon-192.png',
+  'assets/app-icon-512.png',
+];
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',

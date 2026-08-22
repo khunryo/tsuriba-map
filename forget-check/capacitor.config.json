@@ -1,0 +1,10 @@
+{
+  "appId": "jp.khunryo.forgetcheck",
+  "appName": "忘れ物チェック",
+  "webDir": "www",
+  "backgroundColor": "#fff7ee",
+  "ios": {
+    "preferredContentMode": "mobile",
+    "contentInset": "automatic"
+  }
+}
