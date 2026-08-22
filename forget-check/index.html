@@ -16,14 +16,23 @@
     button { color:inherit; }
     button:focus-visible, input:focus-visible { outline:3px solid rgba(43,108,246,.28); outline-offset:2px; }
     [hidden] { display:none !important; }
-    .splash { position:fixed; inset:0; z-index:20; display:grid; place-items:center; overflow:hidden; background:var(--navy); color:#fff; }
-    .splash::before, .splash::after { content:""; position:absolute; border:1px solid rgba(255,255,255,.1); border-radius:50%; }
-    .splash::before { width:330px; height:330px; transform:translate(34%,-31%); }
-    .splash::after { width:470px; height:470px; transform:translate(-40%,37%); }
-    .splash-content { position:relative; z-index:1; display:grid; justify-items:center; gap:14px; text-align:center; }
-    .splash-mark { display:grid; place-items:center; width:72px; height:72px; border-radius:22px; background:var(--blue); box-shadow:0 12px 26px rgba(0,0,0,.25); font-size:35px; font-weight:900; }
-    .splash-title { margin:0; font-size:30px; letter-spacing:.08em; }
-    .splash-subtitle { margin:0; color:#aeb8cb; font-size:12px; letter-spacing:.13em; }
+    .splash { position:fixed; inset:0; z-index:20; display:grid; place-items:center; overflow:hidden; background:linear-gradient(155deg,#fff7ee 0%,#f3f4ff 52%,#e9f7f2 100%); color:var(--navy); }
+    .splash::before, .splash::after { content:""; position:absolute; border-radius:50%; filter:blur(1px); }
+    .splash::before { width:310px; height:310px; top:-155px; right:-120px; background:rgba(255,177,167,.32); }
+    .splash::after { width:370px; height:370px; bottom:-230px; left:-165px; background:rgba(125,164,255,.2); }
+    .splash-content { position:relative; z-index:2; display:grid; justify-items:center; gap:11px; padding:30px; text-align:center; }
+    .splash-mark-wrap { position:relative; margin-bottom:7px; }
+    .splash-mark { display:grid; place-items:center; width:82px; height:82px; border:5px solid #fff; border-radius:27px; background:linear-gradient(145deg,#ff9e8f,#ff7d72); color:#fff; box-shadow:0 16px 34px rgba(224,115,103,.25); font-size:37px; font-weight:900; transform:rotate(-4deg); }
+    .splash-spark { position:absolute; display:grid; place-items:center; width:29px; height:29px; border:3px solid #fff; border-radius:50%; background:#ffd86b; right:-12px; bottom:-7px; color:#765718; font-size:13px; }
+    .splash-title { margin:0; font-size:30px; letter-spacing:.03em; }
+    .splash-message { margin:0; color:#697285; font-size:13px; font-weight:700; }
+    .splash-subtitle { margin:5px 0 0; padding:5px 11px; border-radius:99px; background:rgba(255,255,255,.7); color:#8790a2; font-size:9px; font-weight:900; letter-spacing:.15em; }
+    .float-item { position:absolute; z-index:1; display:grid; place-items:center; width:48px; height:48px; border:3px solid rgba(255,255,255,.85); border-radius:16px; box-shadow:0 9px 24px rgba(74,84,106,.09); font-size:23px; animation:floaty 3s ease-in-out infinite; }
+    .float-wallet { top:15%; left:9%; background:#fff0c8; transform:rotate(-8deg); }
+    .float-key { top:21%; right:8%; background:#e2f2ff; animation-delay:-.7s; transform:rotate(8deg); }
+    .float-bag { bottom:18%; left:10%; background:#e8f7e9; animation-delay:-1.4s; transform:rotate(7deg); }
+    .float-phone { right:10%; bottom:16%; background:#f3e8ff; animation-delay:-2s; transform:rotate(-6deg); }
+    @keyframes floaty { 0%,100%{translate:0 0;} 50%{translate:0 -8px;} }
     .stage { width:min(100%,600px); min-height:100dvh; margin:0 auto; padding:20px 17px 30px; }
     .stage-header { display:flex; align-items:center; justify-content:space-between; min-height:40px; }
     .brand { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:900; }
@@ -85,18 +94,32 @@
     .primary-button:hover { background:#1955d5; }
     .secondary-button { min-height:35px; padding:7px 11px; border:1px solid #cbd2dd; border-radius:8px; background:transparent; cursor:pointer; font-size:11px; font-weight:850; }
     .secondary-button:hover { border-color:var(--blue); color:var(--blue); }
-    .check-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }
+    .session-card { margin-top:16px; padding:13px; border:1px solid #dce1ea; border-radius:13px; background:var(--surface); }
+    .session-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .session-title { font-size:12px; font-weight:900; }
+    .session-status { color:var(--muted); font-size:10px; text-align:right; }
+    .session-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+    .session-button { min-height:38px; padding:6px; border:1px solid #cfd6e1; border-radius:9px; background:#fafbfc; cursor:pointer; font-size:10px; font-weight:900; }
+    .session-button.save { border-color:#b9cafa; background:var(--blue-soft); color:var(--blue); }
+    .session-button.restore:disabled { opacity:.42; cursor:not-allowed; }
+    .session-button.clear { color:var(--red); }
+    .check-footer { display:flex; align-items:center; justify-content:flex-start; gap:12px; margin-top:11px; }
     .save-note { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:10px; }
     .save-note::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--green); }
     .templates-heading { margin:2px 0 19px; }
     .templates-heading h1 { margin:0 0 7px; font-size:clamp(25px,7vw,33px); line-height:1.18; letter-spacing:-.06em; }
     .templates-heading p { margin:0; color:var(--muted); font-size:13px; }
-    .new-type-form { margin-bottom:14px; background:#f9faff; border-style:dashed; }
+    .template-create { padding:13px; margin-bottom:14px; border:1px solid #d8e0f5; border-radius:14px; background:linear-gradient(145deg,#f9fbff,#f3f6ff); }
+    .template-step-title { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+    .step-number { display:grid; place-items:center; flex:0 0 auto; width:25px; height:25px; border-radius:8px; background:var(--blue); color:#fff; font-size:11px; font-weight:900; }
+    .template-step-title strong { display:block; font-size:13px; }
+    .template-step-title small { display:block; margin-top:1px; color:var(--muted); font-size:10px; }
+    .new-type-form { margin:0; background:#fff; }
     .manager { overflow:hidden; margin-bottom:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
-    .manager-heading { padding:13px 14px 10px; border-bottom:1px solid var(--line); }
+    .manager-heading { display:flex; align-items:center; gap:9px; padding:13px 14px 10px; border-bottom:1px solid var(--line); }
     .manager-heading h2 { margin:0; font-size:13px; }
     .manager-heading p { margin:3px 0 0; color:var(--muted); font-size:11px; }
-    .manager-row { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:7px; padding:10px 12px 10px 14px; border:0; border-bottom:1px solid var(--line); background:var(--surface); text-align:left; }
+    .manager-row { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:7px; padding:12px 12px 12px 14px; border:0; border-bottom:1px solid var(--line); background:var(--surface); text-align:left; }
     .manager-row:last-child { border-bottom:0; }
     .manager-row.selected { background:var(--blue-soft); }
     .manager-main { display:flex; align-items:center; gap:9px; min-width:0; cursor:pointer; }
@@ -108,7 +131,7 @@
     .mini-button { min-width:30px; min-height:30px; padding:5px; border:1px solid var(--line); border-radius:7px; background:var(--surface); color:var(--muted); cursor:pointer; font-size:10px; font-weight:850; }
     .mini-button:hover { border-color:var(--blue); color:var(--blue); }
     .mini-button.danger:hover { border-color:#efbbb7; color:var(--red); }
-    .editor { padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .editor { padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:0 7px 20px rgba(40,52,73,.05); }
     .editor-heading { display:flex; align-items:center; gap:9px; margin-bottom:13px; }
     .editor-icon { display:grid; place-items:center; width:35px; height:35px; border-radius:10px; background:var(--blue-soft); font-size:18px; }
     .editor-heading h2 { margin:0; font-size:15px; }
@@ -118,7 +141,8 @@
     .editor-label { margin:14px 0 8px; font-size:12px; font-weight:900; }
     .edit-item-list { display:grid; gap:6px; }
     .edit-item { display:grid; grid-template-columns:1fr auto auto auto; align-items:center; gap:5px; min-height:40px; padding:5px 6px 5px 10px; border:1px solid var(--line); border-radius:8px; background:#fafbfc; }
-    .edit-item-name { min-width:0; overflow-wrap:anywhere; font-size:12px; font-weight:750; }
+    .edit-item-input { min-width:0; width:100%; padding:5px 4px; border:0; border-bottom:1px solid transparent; outline:0; background:transparent; color:var(--ink); font-size:12px; font-weight:750; }
+    .edit-item-input:focus { border-bottom-color:var(--blue); }
     .edit-item .mini-button { min-width:27px; min-height:27px; padding:3px; }
     .editor-add-form { margin-top:9px; padding:0; border:0; }
     .editor-add-form input { min-height:36px; border:1px solid #ccd2dc; border-radius:8px; }
@@ -132,7 +156,8 @@
 </head>
 <body>
   <section class="splash" id="splash-screen" aria-label="忘れ物チェック 起動画面">
-    <div class="splash-content"><div class="splash-mark" aria-hidden="true">✓</div><h1 class="splash-title">忘れ物チェック</h1><p class="splash-subtitle">BEFORE YOU GO</p></div>
+    <span class="float-item float-wallet" aria-hidden="true">👛</span><span class="float-item float-key" aria-hidden="true">🔑</span><span class="float-item float-bag" aria-hidden="true">🎒</span><span class="float-item float-phone" aria-hidden="true">📱</span>
+    <div class="splash-content"><div class="splash-mark-wrap"><div class="splash-mark" aria-hidden="true">✓</div><span class="splash-spark" aria-hidden="true">✦</span></div><h1 class="splash-title">忘れ物チェック</h1><p class="splash-message">今日も安心して、いってらっしゃい。</p><p class="splash-subtitle">BEFORE YOU GO</p></div>
   </section>
 
   <section class="stage" id="type-screen" hidden>
@@ -148,14 +173,15 @@
         <header class="check-heading"><p class="view-kicker">CHECK LIST</p><h1>持ち物を確認</h1><p>忘れたくないものを、ひとつずつタップ。</p></header>
         <section class="progress-card" aria-live="polite"><div class="progress-top"><div><div class="progress-label">チェックの進み具合</div><div class="progress-title" id="progress-title">まずはひとつチェック</div></div><div class="progress-number"><span id="checked-count">0</span><small> / <span id="total-count">0</span></small></div></div><div class="progress-track" role="progressbar" aria-label="チェック進捗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div></section>
         <section aria-labelledby="items-title"><div class="section-heading"><h2 id="items-title">持ち物</h2><button class="quiet-button" id="hide-completed" type="button" aria-pressed="false">完了を隠す</button></div><div class="check-list" id="check-list"></div><form class="add-form" id="quick-add-form"><label class="sr-only" for="quick-add-input">持ち物を追加</label><input id="quick-add-input" type="text" maxlength="40" placeholder="この種類に持ち物を追加" autocomplete="off"><button class="primary-button" type="submit">追加</button></form></section>
-        <div class="check-footer"><span class="save-note" id="save-note">自動保存しています</span><button class="secondary-button" id="reset-checks" type="button">チェックを全部外す</button></div>
+        <section class="session-card" aria-labelledby="session-title"><div class="session-top"><div class="session-title" id="session-title">チェック状態</div><div class="session-status" id="temporary-status">一時保存はまだありません</div></div><div class="session-actions"><button class="session-button save" id="temporary-save" type="button">一時保存</button><button class="session-button restore" id="temporary-restore" type="button" disabled>復元</button><button class="session-button clear" id="reset-checks" type="button">クリア</button></div></section>
+        <div class="check-footer"><span class="save-note" id="save-note">自動保存しています</span></div>
       </main>
 
       <main class="view" id="templates-view" hidden>
-        <header class="templates-heading"><p class="view-kicker">TEMPLATES</p><h1>テンプレートを編集</h1><p>種類ごとに、使う持ち物を自分向けに整えられます。</p></header>
-        <form class="new-type-form" id="new-type-form"><label class="sr-only" for="new-type-input">新しいテンプレートの名前</label><input id="new-type-input" type="text" maxlength="24" placeholder="新しい種類を作る（例：キャンプ）" autocomplete="off"><button class="primary-button" type="submit">作成</button></form>
-        <section class="manager" aria-labelledby="manager-title"><div class="manager-heading"><h2 id="manager-title">登録したテンプレート</h2><p>編集したい種類を選んでください。</p></div><div id="manager-list"></div></section>
-        <section class="editor" aria-labelledby="editor-title"><div class="editor-heading"><span class="editor-icon" id="editor-icon" aria-hidden="true">🎣</span><div><h2 id="editor-title">釣りの設定</h2><p>種類名と持ち物を変更できます。</p></div></div><form class="type-name-form" id="type-name-form"><label class="sr-only" for="type-name-input">種類名</label><input id="type-name-input" type="text" maxlength="24" autocomplete="off"><button class="primary-button" type="submit">名前を保存</button></form><div class="editor-label">この種類の持ち物</div><div class="edit-item-list" id="edit-item-list"></div><form class="editor-add-form" id="editor-add-form"><label class="sr-only" for="editor-add-input">持ち物を追加</label><input id="editor-add-input" type="text" maxlength="40" placeholder="持ち物を追加" autocomplete="off"><button class="secondary-button" type="submit">追加</button></form></section>
+        <header class="templates-heading"><p class="view-kicker">TEMPLATES</p><h1>テンプレートを編集</h1><p>種類を選んで、持ち物の名前や順番を整えられます。</p></header>
+        <section class="template-create" aria-labelledby="create-title"><div class="template-step-title"><span class="step-number" aria-hidden="true">＋</span><div><strong id="create-title">新しいテンプレート</strong><small>まず名前を決めるだけで作成できます</small></div></div><form class="new-type-form" id="new-type-form"><label class="sr-only" for="new-type-input">新しいテンプレートの名前</label><input id="new-type-input" type="text" maxlength="24" placeholder="例：キャンプ、旅行、通院" autocomplete="off"><button class="primary-button" type="submit">作成</button></form></section>
+        <section class="manager" aria-labelledby="manager-title"><div class="manager-heading"><span class="step-number" aria-hidden="true">1</span><div><h2 id="manager-title">編集する種類を選ぶ</h2><p>選択中の種類は青く表示されます</p></div></div><div id="manager-list"></div></section>
+        <section class="editor" aria-labelledby="editor-title"><div class="editor-heading"><span class="step-number" aria-hidden="true">2</span><span class="editor-icon" id="editor-icon" aria-hidden="true">🎣</span><div><h2 id="editor-title">釣りの設定</h2><p>項目名は直接タップして書き換えられます</p></div></div><form class="type-name-form" id="type-name-form"><label class="sr-only" for="type-name-input">種類名</label><input id="type-name-input" type="text" maxlength="24" autocomplete="off"><button class="primary-button" type="submit">名前を保存</button></form><div class="editor-label">持ち物と並び順</div><div class="edit-item-list" id="edit-item-list"></div><form class="editor-add-form" id="editor-add-form"><label class="sr-only" for="editor-add-input">持ち物を追加</label><input id="editor-add-input" type="text" maxlength="40" placeholder="新しい持ち物を追加" autocomplete="off"><button class="secondary-button" type="submit">追加</button></form></section>
       </main>
       <nav class="bottom-nav" aria-label="メインメニュー"><button class="nav-button active" id="check-nav" type="button"><strong aria-hidden="true">✓</strong><span>チェック</span></button><button class="nav-button" id="templates-nav" type="button"><strong aria-hidden="true">☷</strong><span>テンプレート</span></button></nav>
     </div>
@@ -164,6 +190,7 @@
   <script>
     const STORAGE_KEY = 'forget-check:workspace:v2';
     const OLD_STORAGE_KEY = 'forget-check:list:v1';
+    const TEMP_STORAGE_KEY = 'forget-check:temporary:v1';
     const defaultSets = [
       { id:'fishing', name:'釣り', icon:'🎣', items:['ロッド・リール','仕掛け・ルアー','エサ・小物ケース','ライフジャケット','帽子・日焼け止め','飲み物','財布・スマートフォン','車の鍵'] },
       { id:'outing', name:'おでかけ', icon:'☀️', items:['財布・スマートフォン','家の鍵','ハンカチ・ティッシュ','モバイルバッテリー','飲み物','折りたたみ傘'] },
@@ -171,12 +198,13 @@
     ];
     const els = {
       splash:document.querySelector('#splash-screen'), typeScreen:document.querySelector('#type-screen'), appScreen:document.querySelector('#app-screen'), choiceList:document.querySelector('#choice-list'), editBeforeChoice:document.querySelector('#edit-before-choice'), changeType:document.querySelector('#change-type'), currentTypeIcon:document.querySelector('#current-type-icon'), currentTypeName:document.querySelector('#current-type-name'), checkView:document.querySelector('#check-view'), templatesView:document.querySelector('#templates-view'), checkNav:document.querySelector('#check-nav'), templatesNav:document.querySelector('#templates-nav'),
-      checkList:document.querySelector('#check-list'), quickAddForm:document.querySelector('#quick-add-form'), quickAddInput:document.querySelector('#quick-add-input'), checkedCount:document.querySelector('#checked-count'), totalCount:document.querySelector('#total-count'), progressFill:document.querySelector('#progress-fill'), progressTitle:document.querySelector('#progress-title'), progressBar:document.querySelector('[role=progressbar]'), hideCompleted:document.querySelector('#hide-completed'), resetChecks:document.querySelector('#reset-checks'), saveNote:document.querySelector('#save-note'), managerList:document.querySelector('#manager-list'), newTypeForm:document.querySelector('#new-type-form'), newTypeInput:document.querySelector('#new-type-input'), editorIcon:document.querySelector('#editor-icon'), editorTitle:document.querySelector('#editor-title'), typeNameForm:document.querySelector('#type-name-form'), typeNameInput:document.querySelector('#type-name-input'), editItemList:document.querySelector('#edit-item-list'), editorAddForm:document.querySelector('#editor-add-form'), editorAddInput:document.querySelector('#editor-add-input')
+      checkList:document.querySelector('#check-list'), quickAddForm:document.querySelector('#quick-add-form'), quickAddInput:document.querySelector('#quick-add-input'), checkedCount:document.querySelector('#checked-count'), totalCount:document.querySelector('#total-count'), progressFill:document.querySelector('#progress-fill'), progressTitle:document.querySelector('#progress-title'), progressBar:document.querySelector('[role=progressbar]'), hideCompleted:document.querySelector('#hide-completed'), resetChecks:document.querySelector('#reset-checks'), saveNote:document.querySelector('#save-note'), temporaryStatus:document.querySelector('#temporary-status'), temporarySave:document.querySelector('#temporary-save'), temporaryRestore:document.querySelector('#temporary-restore'), managerList:document.querySelector('#manager-list'), newTypeForm:document.querySelector('#new-type-form'), newTypeInput:document.querySelector('#new-type-input'), editorIcon:document.querySelector('#editor-icon'), editorTitle:document.querySelector('#editor-title'), typeNameForm:document.querySelector('#type-name-form'), typeNameInput:document.querySelector('#type-name-input'), editItemList:document.querySelector('#edit-item-list'), editorAddForm:document.querySelector('#editor-add-form'), editorAddInput:document.querySelector('#editor-add-input')
     };
     let workspace = loadWorkspace();
     let selectedTypeId = workspace.selectedTypeId || workspace.types[0].id;
     let hideCompleted = false;
     let activeView = 'check';
+    let temporarySnapshot = loadTemporary();
 
     function normalizeType(raw, index) {
       const id = String(raw.id || `type-${Date.now()}-${index}`);
@@ -196,6 +224,10 @@
     function currentType() { return workspace.types.find((type) => type.id === selectedTypeId) || workspace.types[0]; }
     function makeId(prefix) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`; }
     function saveWorkspace(note = '自動保存しています') { workspace.selectedTypeId = selectedTypeId; try { localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace)); els.saveNote.textContent = note; } catch (_) { els.saveNote.textContent = '端末に保存できませんでした'; } }
+    function loadTemporary() { try { const saved = JSON.parse(localStorage.getItem(TEMP_STORAGE_KEY)); return saved && saved.typeId && Array.isArray(saved.checkedIds) ? saved : null; } catch (_) { return null; } }
+    function saveTemporary() { const type = currentType(); temporarySnapshot = { typeId:type.id, typeName:type.name, checkedIds:type.items.filter((item) => item.checked).map((item) => item.id), savedAt:Date.now() }; try { localStorage.setItem(TEMP_STORAGE_KEY, JSON.stringify(temporarySnapshot)); } catch (_) {} renderTemporaryStatus(); }
+    function restoreTemporary() { if (!temporarySnapshot) return; const type = workspace.types.find((candidate) => candidate.id === temporarySnapshot.typeId); if (!type) return; selectedTypeId = type.id; const checkedIds = new Set(temporarySnapshot.checkedIds); type.items.forEach((item) => { item.checked = checkedIds.has(item.id); }); hideCompleted = false; saveWorkspace('一時保存から復元しました'); setView('check'); }
+    function renderTemporaryStatus() { const valid = temporarySnapshot && workspace.types.some((type) => type.id === temporarySnapshot.typeId); els.temporaryRestore.disabled = !valid; if (!valid) { els.temporaryStatus.textContent = '一時保存はまだありません'; return; } const time = new Date(temporarySnapshot.savedAt); els.temporaryStatus.textContent = `${temporarySnapshot.typeName}・${time.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}保存`; }
     function escapeHtml(value) { return String(value).replace(/[&<>\"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;' }[character])); }
     function openApp() { els.typeScreen.hidden = true; els.appScreen.hidden = false; setView(activeView); }
     function showTypeChoice() { els.appScreen.hidden = true; els.typeScreen.hidden = false; renderTypeChoice(); }
@@ -223,7 +255,7 @@
         const name = document.createElement('div'); name.className='item-name'; name.textContent=item.name;
         const remove = document.createElement('button'); remove.type='button'; remove.className='remove-button'; remove.textContent='×'; remove.setAttribute('aria-label', `${item.name}を削除`); remove.addEventListener('click', () => { type.items = type.items.filter((candidate) => candidate.id !== item.id); saveWorkspace(); renderCheck(); }); row.append(check,name,remove); els.checkList.append(row);
       });
-      const checked = type.items.filter((item) => item.checked).length; const total = type.items.length; const percent = total ? Math.round(checked / total * 100) : 0; els.checkedCount.textContent=checked; els.totalCount.textContent=total; els.progressFill.style.width=`${percent}%`; els.progressBar.setAttribute('aria-valuenow', String(percent)); els.progressTitle.textContent = total && checked === total ? '準備できました。いってらっしゃい！' : checked ? `あと${total - checked}個です` : 'まずはひとつチェック'; els.hideCompleted.textContent=hideCompleted ? 'すべて表示' : '完了を隠す'; els.hideCompleted.setAttribute('aria-pressed', String(hideCompleted));
+      const checked = type.items.filter((item) => item.checked).length; const total = type.items.length; const percent = total ? Math.round(checked / total * 100) : 0; els.checkedCount.textContent=checked; els.totalCount.textContent=total; els.progressFill.style.width=`${percent}%`; els.progressBar.setAttribute('aria-valuenow', String(percent)); els.progressTitle.textContent = total && checked === total ? '準備できました。いってらっしゃい！' : checked ? `あと${total - checked}個です` : 'まずはひとつチェック'; els.hideCompleted.textContent=hideCompleted ? 'すべて表示' : '完了を隠す'; els.hideCompleted.setAttribute('aria-pressed', String(hideCompleted)); renderTemporaryStatus();
     }
     function renderTemplates() {
       const type = currentType(); if (!type) return; els.managerList.innerHTML = '';
@@ -236,12 +268,12 @@
       });
       els.editorIcon.textContent=type.icon; els.editorTitle.textContent=`${type.name}の設定`; els.typeNameInput.value=type.name; els.editItemList.innerHTML='';
       if(!type.items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='持ち物がありません。下から追加してください。';els.editItemList.append(empty);}
-      type.items.forEach((item,index) => { const row=document.createElement('div');row.className='edit-item';const name=document.createElement('div');name.className='edit-item-name';name.textContent=item.name;const up=document.createElement('button');up.type='button';up.className='mini-button';up.textContent='↑';up.setAttribute('aria-label',`${item.name}を上へ`);up.disabled=index===0;up.addEventListener('click',()=>moveItem(type,index,-1));const down=document.createElement('button');down.type='button';down.className='mini-button';down.textContent='↓';down.setAttribute('aria-label',`${item.name}を下へ`);down.disabled=index===type.items.length-1;down.addEventListener('click',()=>moveItem(type,index,1));const remove=document.createElement('button');remove.type='button';remove.className='mini-button danger';remove.textContent='×';remove.setAttribute('aria-label',`${item.name}を削除`);remove.addEventListener('click',()=>{type.items.splice(index,1);saveWorkspace();renderTemplates();});row.append(name,up,down,remove);els.editItemList.append(row); });
+      type.items.forEach((item,index) => { const row=document.createElement('div');row.className='edit-item';const name=document.createElement('input');name.type='text';name.className='edit-item-input';name.value=item.name;name.maxLength=40;name.setAttribute('aria-label',`${item.name}の名前を編集`);const commitName=()=>{const next=name.value.trim();if(!next||type.items.some((candidate)=>candidate.id!==item.id&&candidate.name===next)){name.value=item.name;return;}if(next===item.name)return;item.name=next;saveWorkspace('項目名を保存しました');renderTemplates();};name.addEventListener('keydown',(event)=>{if(event.key==='Enter'){event.preventDefault();commitName();}});name.addEventListener('change',commitName);const up=document.createElement('button');up.type='button';up.className='mini-button';up.textContent='↑';up.setAttribute('aria-label',`${item.name}を上へ`);up.disabled=index===0;up.addEventListener('click',()=>moveItem(type,index,-1));const down=document.createElement('button');down.type='button';down.className='mini-button';down.textContent='↓';down.setAttribute('aria-label',`${item.name}を下へ`);down.disabled=index===type.items.length-1;down.addEventListener('click',()=>moveItem(type,index,1));const remove=document.createElement('button');remove.type='button';remove.className='mini-button danger';remove.textContent='×';remove.setAttribute('aria-label',`${item.name}を削除`);remove.addEventListener('click',()=>{type.items.splice(index,1);saveWorkspace();renderTemplates();});row.append(name,up,down,remove);els.editItemList.append(row); });
     }
     function moveItem(type,index,amount){const target=index+amount;if(target<0||target>=type.items.length)return;[type.items[index],type.items[target]]=[type.items[target],type.items[index]];saveWorkspace();renderTemplates();}
 
     els.checkNav.addEventListener('click',()=>setView('check')); els.templatesNav.addEventListener('click',()=>setView('templates')); els.changeType.addEventListener('click',showTypeChoice); els.editBeforeChoice.addEventListener('click',()=>{openApp();setView('templates');});
-    els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.resetChecks.addEventListener('click',()=>{currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace();renderCheck();});
+    els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.temporarySave.addEventListener('click',saveTemporary); els.temporaryRestore.addEventListener('click',restoreTemporary); els.resetChecks.addEventListener('click',()=>{currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace(temporarySnapshot ? 'クリアしました。一時保存から復元できます' : 'チェックをクリアしました');renderCheck();});
     els.quickAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.quickAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.quickAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.quickAddInput.value='';saveWorkspace();renderCheck();els.quickAddInput.focus();});
     els.newTypeForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.newTypeInput.value.trim();if(!name||workspace.types.some((type)=>type.name===name)){els.newTypeInput.focus();return;}const type={id:makeId('type'),name,icon:'📋',items:[]};workspace.types.push(type);selectedTypeId=type.id;els.newTypeInput.value='';saveWorkspace();renderTemplates();els.typeNameInput.focus();});
     els.typeNameForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.typeNameInput.value.trim();const type=currentType();if(!name||workspace.types.some((candidate)=>candidate.id!==type.id&&candidate.name===name))return;type.name=name;saveWorkspace();renderTemplates();});
