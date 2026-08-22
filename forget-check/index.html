@@ -38,7 +38,8 @@
     .float-bag { bottom:18%; left:10%; background:#e8f7e9; animation-delay:-1.4s; transform:rotate(7deg); }
     .float-phone { right:10%; bottom:16%; background:#f3e8ff; animation-delay:-2s; transform:rotate(-6deg); }
     @keyframes floaty { 0%,100%{translate:0 0;} 50%{translate:0 -8px;} }
-    .stage { width:min(100%,600px); min-height:100dvh; margin:0 auto; padding:calc(20px + env(safe-area-inset-top)) 17px calc(30px + env(safe-area-inset-bottom)); }
+    .stage { width:min(100%,600px); min-height:100dvh; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 17px calc(30px + env(safe-area-inset-bottom)); }
+    body[data-native-shell="capacitor"] .stage { padding-top:calc(6px + env(safe-area-inset-top)); }
     .stage-header { display:flex; align-items:center; justify-content:space-between; min-height:40px; }
     .brand { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:900; }
     .brand-mark { display:grid; place-items:center; width:28px; height:28px; border-radius:9px; background:var(--navy); color:#fff; }
