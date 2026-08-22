@@ -1,0 +1,11 @@
+{
+  "name": "忘れ物チェック",
+  "short_name": "忘れ物チェック",
+  "description": "出発前の持ち物を端末内だけで確認するチェックリスト",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f2e9",
+  "theme_color": "#17252b",
+  "lang": "ja",
+  "icons": []
+}
