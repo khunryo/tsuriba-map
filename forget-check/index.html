@@ -9,7 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="忘れ物チェック">
   <meta name="description" content="種類ごとに自分の持ち物を設定できる、端末内保存のチェックリスト">
   <link rel="apple-touch-icon" href="./assets/app-icon-180.png">
-  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="manifest" id="app-manifest" href="./manifest.webmanifest">
+  <script>if(!(navigator.languages?.[0]||navigator.language||'en').toLowerCase().startsWith('ja'))document.querySelector('#app-manifest').href='./manifest-en.webmanifest';</script>
   <title>忘れ物チェック</title>
   <style>
     :root { --navy:#111b2d; --blue:#2b6cf6; --blue-soft:#eaf0ff; --ink:#202633; --muted:#7b8494; --paper:#f5f6f8; --surface:#fff; --line:#e5e8ed; --green:#2f9b67; --red:#d05c58; }
@@ -213,19 +214,64 @@
   </section>
 
   <script>
+    const DEVICE_LANGUAGE = navigator.languages?.[0] || navigator.language || 'en';
+    const UI_LANGUAGE = DEVICE_LANGUAGE.toLowerCase().startsWith('ja') ? 'ja' : 'en';
+    const UI_LOCALE = UI_LANGUAGE === 'ja' ? 'ja-JP' : 'en-US';
+    const STRINGS = {
+      ja:{
+        appName:'忘れ物チェック', appDescription:'種類ごとに自分の持ち物を設定できる、端末内保存のチェックリスト', untitled:'無題の種類', myList:'マイリスト',
+        fishing:'釣り', outing:'おでかけ', work:'仕事', travel:'旅行', camping:'キャンプ', school:'学校', clinic:'通院', shopping:'買い物', sports:'スポーツ', child:'子ども', pet:'ペット', emergency:'防災',
+        fishingItems:['ロッド・リール','仕掛け・ルアー','エサ・小物ケース','ライフジャケット','帽子・日焼け止め','飲み物','財布・スマートフォン','車の鍵'],
+        outingItems:['財布・スマートフォン','家の鍵','ハンカチ・ティッシュ','モバイルバッテリー','飲み物','折りたたみ傘'],
+        workItems:['PC・タブレット','充電器','ノート・ペン','社員証','財布・スマートフォン','ハンカチ'],
+        autoSaved:'自動保存しています', saveFailed:'端末に保存できませんでした', restored:'一時保存から復元しました', noSnapshot:'一時保存はまだありません', savedAt:'{name}・{time}保存',
+        selectType:'{name}を選ぶ', itemCount:'{count}個の持ち物', completeEmpty:'チェック済みです。すべて確認できました。', listEmpty:'この種類にはまだ持ち物がありません。下から追加できます。',
+        uncheckItem:'{name}を未チェックに戻す', checkItem:'{name}をチェックする', removeItem:'{name}を削除', ready:'準備できました。いってらっしゃい！', remaining:'あと{count}個です', start:'まずはひとつチェック', showAll:'すべて表示', hideDone:'完了を隠す',
+        use:'使う', useType:'{name}を使う', delete:'削除', settings:'{name}の設定', chooseIcon:'{name}のアイコンを選ぶ', iconSaved:'アイコンを保存しました', noItems:'持ち物がありません。下から追加してください。', editName:'{name}の名前を編集', itemNameSaved:'項目名を保存しました', moveUp:'{name}を上へ', moveDown:'{name}を下へ',
+        clearedRestorable:'クリアしました。一時保存から復元できます', cleared:'チェックをクリアしました'
+      },
+      en:{
+        appName:'Forget Check', appDescription:'A private, device-only checklist with customizable packing templates.', untitled:'Untitled list', myList:'My List',
+        fishing:'Fishing', outing:'Day Out', work:'Work', travel:'Travel', camping:'Camping', school:'School', clinic:'Clinic', shopping:'Shopping', sports:'Sports', child:'Kids', pet:'Pets', emergency:'Emergency',
+        fishingItems:['Rod & reel','Tackle & lures','Bait & accessory case','Life jacket','Hat & sunscreen','Drink','Wallet & phone','Car key'],
+        outingItems:['Wallet & phone','House key','Handkerchief & tissues','Portable charger','Drink','Folding umbrella'],
+        workItems:['Laptop or tablet','Charger','Notebook & pen','Employee ID','Wallet & phone','Handkerchief'],
+        autoSaved:'Saved automatically', saveFailed:'Could not save on this device', restored:'Restored from snapshot', noSnapshot:'No temporary save yet', savedAt:'{name} · saved at {time}',
+        selectType:'Choose {name}', itemCount:'{count} items', completeEmpty:'Everything is checked. You are ready to go!', listEmpty:'This list has no items yet. Add one below.',
+        uncheckItem:'Mark {name} unchecked', checkItem:'Check {name}', removeItem:'Remove {name}', ready:'All set. Have a great trip!', remaining:'{count} left', start:'Start with one item', showAll:'Show all', hideDone:'Hide checked',
+        use:'Use', useType:'Use {name}', delete:'Delete', settings:'{name} settings', chooseIcon:'Choose the {name} icon', iconSaved:'Icon saved', noItems:'No items yet. Add one below.', editName:'Edit the name of {name}', itemNameSaved:'Item name saved', moveUp:'Move {name} up', moveDown:'Move {name} down',
+        clearedRestorable:'Cleared. You can restore the saved snapshot.', cleared:'Checklist cleared'
+      }
+    };
+    function tr(key, values={}) { const value=STRINGS[UI_LANGUAGE][key] ?? STRINGS.ja[key] ?? key; if(Array.isArray(value))return value; return Object.entries(values).reduce((text,[name,replacement])=>text.replaceAll(`{${name}}`,String(replacement)),value); }
+    const STATIC_EN = {
+      '忘れ物チェック 起動画面':'Forget Check launch screen', '忘れ物チェック':'Forget Check', '今日も安心して、いってらっしゃい。':'Ready, set, don’t forget.', '端末だけに保存':'Saved only on this device',
+      '今日は何の':'What are you', '持ち物を確認しますか？':'packing for?', '使う種類を選ぶと、チェックを始められます。':'Choose a list to start checking.', 'テンプレートを編集する':'Edit templates',
+      'チェック中の種類':'Current list', '種類を変更':'Change', '持ち物を確認':'Check your items', '忘れたくないものを、ひとつずつタップ。':'Tap each item before you go.', 'チェックの進み具合':'Progress', 'まずはひとつチェック':'Start with one item', 'チェック進捗':'Checklist progress',
+      '持ち物':'Items', '完了を隠す':'Hide checked', '持ち物を追加':'Add item', 'この種類に持ち物を追加':'Add an item to this list', '追加':'Add', 'チェック状態':'Check status', '一時保存はまだありません':'No temporary save yet', '一時保存':'Save snapshot', '復元':'Restore', 'クリア':'Clear', '自動保存しています':'Saved automatically',
+      'テンプレートを編集':'Edit templates', '種類を選んで、持ち物の名前や順番を整えられます。':'Choose a list and edit its items or order.', '新しいテンプレート':'New template', 'まず名前を決めるだけで作成できます':'Start by choosing a name', '新しいテンプレートの名前':'New template name', '例：キャンプ、旅行、通院':'e.g. Camping, Travel, Clinic', '作成':'Create',
+      '編集する種類を選ぶ':'Choose a template', '選択中の種類は青く表示されます':'The selected template is highlighted', '釣りの設定':'Fishing settings', '名前・アイコン・持ち物を自分向けに変更できます':'Customize the name, icon, and items.', '種類名':'Template name', '名前を保存':'Save name', 'アイコンを選ぶ':'Choose an icon', '持ち物と並び順':'Items and order', '新しい持ち物を追加':'Add a new item',
+      'メインメニュー':'Main menu', 'チェック':'Checklist', 'テンプレート':'Templates'
+    };
+    function applyStaticLanguage() {
+      document.documentElement.lang=UI_LANGUAGE; document.title=tr('appName'); const description=document.querySelector('meta[name="description"]'); if(description)description.content=tr('appDescription'); const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]'); if(appleTitle)appleTitle.content=tr('appName');
+      if(UI_LANGUAGE!=='en')return;
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); const nodes=[]; while(walker.nextNode())nodes.push(walker.currentNode); nodes.forEach((node)=>{const value=node.nodeValue.trim();if(STATIC_EN[value])node.nodeValue=node.nodeValue.replace(value,STATIC_EN[value]);});
+      document.querySelectorAll('[aria-label],[placeholder]').forEach((element)=>['aria-label','placeholder'].forEach((attribute)=>{const value=element.getAttribute(attribute);if(STATIC_EN[value])element.setAttribute(attribute,STATIC_EN[value]);}));
+    }
     const STORAGE_KEY = 'forget-check:workspace:v2';
     const OLD_STORAGE_KEY = 'forget-check:list:v1';
     const TEMP_STORAGE_KEY = 'forget-check:temporary:v1';
     const ICON_OPTIONS = [
-      { id:'fishing', label:'釣り' }, { id:'outing', label:'おでかけ' }, { id:'work', label:'仕事' }, { id:'travel', label:'旅行' },
-      { id:'camping', label:'キャンプ' }, { id:'school', label:'学校' }, { id:'clinic', label:'通院' }, { id:'shopping', label:'買い物' },
-      { id:'sports', label:'スポーツ' }, { id:'child', label:'子ども' }, { id:'pet', label:'ペット' }, { id:'emergency', label:'防災' }
+      { id:'fishing', label:tr('fishing') }, { id:'outing', label:tr('outing') }, { id:'work', label:tr('work') }, { id:'travel', label:tr('travel') },
+      { id:'camping', label:tr('camping') }, { id:'school', label:tr('school') }, { id:'clinic', label:tr('clinic') }, { id:'shopping', label:tr('shopping') },
+      { id:'sports', label:tr('sports') }, { id:'child', label:tr('child') }, { id:'pet', label:tr('pet') }, { id:'emergency', label:tr('emergency') }
     ];
     const LEGACY_ICONS = { '🎣':'fishing', '☀️':'outing', '💼':'work', '📋':'travel' };
     const defaultSets = [
-      { id:'fishing', name:'釣り', icon:'fishing', items:['ロッド・リール','仕掛け・ルアー','エサ・小物ケース','ライフジャケット','帽子・日焼け止め','飲み物','財布・スマートフォン','車の鍵'] },
-      { id:'outing', name:'おでかけ', icon:'outing', items:['財布・スマートフォン','家の鍵','ハンカチ・ティッシュ','モバイルバッテリー','飲み物','折りたたみ傘'] },
-      { id:'work', name:'仕事', icon:'work', items:['PC・タブレット','充電器','ノート・ペン','社員証','財布・スマートフォン','ハンカチ'] }
+      { id:'fishing', name:tr('fishing'), icon:'fishing', items:tr('fishingItems') },
+      { id:'outing', name:tr('outing'), icon:'outing', items:tr('outingItems') },
+      { id:'work', name:tr('work'), icon:'work', items:tr('workItems') }
     ];
     const els = {
       splash:document.querySelector('#splash-screen'), typeScreen:document.querySelector('#type-screen'), appScreen:document.querySelector('#app-screen'), choiceList:document.querySelector('#choice-list'), editBeforeChoice:document.querySelector('#edit-before-choice'), changeType:document.querySelector('#change-type'), currentTypeIcon:document.querySelector('#current-type-icon'), currentTypeName:document.querySelector('#current-type-name'), checkView:document.querySelector('#check-view'), templatesView:document.querySelector('#templates-view'), checkNav:document.querySelector('#check-nav'), templatesNav:document.querySelector('#templates-nav'),
@@ -243,7 +289,7 @@
     function normalizeType(raw, index) {
       const id = String(raw.id || `type-${Date.now()}-${index}`);
       const items = Array.isArray(raw.items) ? raw.items.map((item, itemIndex) => typeof item === 'string' ? ({ id:`${id}-item-${itemIndex}`, name:item, checked:false }) : ({ id:String(item.id || `${id}-item-${itemIndex}`), name:String(item.name || '').trim(), checked:Boolean(item.checked) })).filter((item) => item.name) : [];
-      return { id, name:String(raw.name || '無題の種類').trim() || '無題の種類', icon:normalizeIcon(raw.icon), items };
+      return { id, name:String(raw.name || tr('untitled')).trim() || tr('untitled'), icon:normalizeIcon(raw.icon), items };
     }
     function defaultWorkspace() { return { types:defaultSets.map((set) => normalizeType(set, 0)), selectedTypeId:'fishing' }; }
     function loadWorkspace() {
@@ -251,17 +297,17 @@
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
         if (saved && Array.isArray(saved.types) && saved.types.length) return { types:saved.types.map(normalizeType), selectedTypeId:saved.selectedTypeId };
         const old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY));
-        if (Array.isArray(old) && old.length) return { types:[{ id:'my-list', name:'マイリスト', icon:'travel', items:old.map((item,index) => ({ id:String(item.id || `old-${index}`), name:String(item.name || '').trim(), checked:Boolean(item.checked) })).filter((item) => item.name) }], selectedTypeId:'my-list' };
+        if (Array.isArray(old) && old.length) return { types:[{ id:'my-list', name:tr('myList'), icon:'travel', items:old.map((item,index) => ({ id:String(item.id || `old-${index}`), name:String(item.name || '').trim(), checked:Boolean(item.checked) })).filter((item) => item.name) }], selectedTypeId:'my-list' };
       } catch (_) { /* use defaults */ }
       return defaultWorkspace();
     }
     function currentType() { return workspace.types.find((type) => type.id === selectedTypeId) || workspace.types[0]; }
     function makeId(prefix) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`; }
-    function saveWorkspace(note = '自動保存しています') { workspace.selectedTypeId = selectedTypeId; try { localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace)); els.saveNote.textContent = note; } catch (_) { els.saveNote.textContent = '端末に保存できませんでした'; } }
+    function saveWorkspace(note = tr('autoSaved')) { workspace.selectedTypeId = selectedTypeId; try { localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace)); els.saveNote.textContent = note; } catch (_) { els.saveNote.textContent = tr('saveFailed'); } }
     function loadTemporary() { try { const saved = JSON.parse(localStorage.getItem(TEMP_STORAGE_KEY)); return saved && saved.typeId && Array.isArray(saved.checkedIds) ? saved : null; } catch (_) { return null; } }
     function saveTemporary() { const type = currentType(); temporarySnapshot = { typeId:type.id, typeName:type.name, checkedIds:type.items.filter((item) => item.checked).map((item) => item.id), savedAt:Date.now() }; try { localStorage.setItem(TEMP_STORAGE_KEY, JSON.stringify(temporarySnapshot)); } catch (_) {} renderTemporaryStatus(); }
-    function restoreTemporary() { if (!temporarySnapshot) return; const type = workspace.types.find((candidate) => candidate.id === temporarySnapshot.typeId); if (!type) return; selectedTypeId = type.id; const checkedIds = new Set(temporarySnapshot.checkedIds); type.items.forEach((item) => { item.checked = checkedIds.has(item.id); }); hideCompleted = false; saveWorkspace('一時保存から復元しました'); setView('check'); }
-    function renderTemporaryStatus() { const valid = temporarySnapshot && workspace.types.some((type) => type.id === temporarySnapshot.typeId); els.temporaryRestore.disabled = !valid; if (!valid) { els.temporaryStatus.textContent = '一時保存はまだありません'; return; } const time = new Date(temporarySnapshot.savedAt); els.temporaryStatus.textContent = `${temporarySnapshot.typeName}・${time.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}保存`; }
+    function restoreTemporary() { if (!temporarySnapshot) return; const type = workspace.types.find((candidate) => candidate.id === temporarySnapshot.typeId); if (!type) return; selectedTypeId = type.id; const checkedIds = new Set(temporarySnapshot.checkedIds); type.items.forEach((item) => { item.checked = checkedIds.has(item.id); }); hideCompleted = false; saveWorkspace(tr('restored')); setView('check'); }
+    function renderTemporaryStatus() { const valid = temporarySnapshot && workspace.types.some((type) => type.id === temporarySnapshot.typeId); els.temporaryRestore.disabled = !valid; if (!valid) { els.temporaryStatus.textContent = tr('noSnapshot'); return; } const time = new Date(temporarySnapshot.savedAt); els.temporaryStatus.textContent = tr('savedAt',{name:temporarySnapshot.typeName,time:time.toLocaleTimeString(UI_LOCALE,{hour:'2-digit',minute:'2-digit'})}); }
     function escapeHtml(value) { return String(value).replace(/[&<>\"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;' }[character])); }
     function openApp() { els.typeScreen.hidden = true; els.appScreen.hidden = false; setView(activeView); }
     function showTypeChoice() { els.appScreen.hidden = true; els.typeScreen.hidden = false; renderTypeChoice(); }
@@ -269,9 +315,9 @@
     function renderTypeChoice() {
       els.choiceList.innerHTML = '';
       workspace.types.forEach((type) => {
-        const button = document.createElement('button'); button.type = 'button'; button.className = 'choice-card'; button.setAttribute('aria-label', `${type.name}を選ぶ`);
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'choice-card'; button.setAttribute('aria-label', tr('selectType',{name:type.name}));
         const icon = document.createElement('span'); icon.className = 'choice-icon'; icon.setAttribute('aria-hidden','true'); applyIcon(icon,type.icon);
-        const copy = document.createElement('span'); const name = document.createElement('span'); name.className = 'choice-name'; name.textContent = type.name; const count = document.createElement('span'); count.className = 'choice-count'; count.textContent = `${type.items.length}個の持ち物`; copy.append(name,count);
+        const copy = document.createElement('span'); const name = document.createElement('span'); name.className = 'choice-name'; name.textContent = type.name; const count = document.createElement('span'); count.className = 'choice-count'; count.textContent = tr('itemCount',{count:type.items.length}); copy.append(name,count);
         const arrow = document.createElement('span'); arrow.className = 'choice-arrow'; arrow.setAttribute('aria-hidden','true'); arrow.textContent = '›'; button.append(icon,copy,arrow); button.addEventListener('click', () => startType(type.id)); els.choiceList.append(button);
       });
     }
@@ -282,39 +328,39 @@
       const type = currentType(); if (!type) return;
       applyIcon(els.currentTypeIcon,type.icon); els.currentTypeName.textContent = type.name;
       const visibleItems = hideCompleted ? type.items.filter((item) => !item.checked) : type.items; els.checkList.innerHTML = '';
-      if (!visibleItems.length) { const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = type.items.length && hideCompleted ? 'チェック済みです。すべて確認できました。' : 'この種類にはまだ持ち物がありません。下から追加できます。'; els.checkList.append(empty); }
+      if (!visibleItems.length) { const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = type.items.length && hideCompleted ? tr('completeEmpty') : tr('listEmpty'); els.checkList.append(empty); }
       visibleItems.forEach((item) => {
         const row = document.createElement('div'); row.className = `item-row${item.checked ? ' checked' : ''}`;
-        const check = document.createElement('button'); check.type='button'; check.className='check-button'; check.setAttribute('aria-label', `${item.name}を${item.checked ? '未チェックに戻す' : 'チェックする'}`); check.setAttribute('aria-pressed', String(item.checked)); check.addEventListener('click', () => { item.checked = !item.checked; nativeImpact('Light'); saveWorkspace(); renderCheck(); });
+        const check = document.createElement('button'); check.type='button'; check.className='check-button'; check.setAttribute('aria-label', tr(item.checked?'uncheckItem':'checkItem',{name:item.name})); check.setAttribute('aria-pressed', String(item.checked)); check.addEventListener('click', () => { item.checked = !item.checked; nativeImpact('Light'); saveWorkspace(); renderCheck(); });
         const name = document.createElement('div'); name.className='item-name'; name.textContent=item.name;
-        const remove = document.createElement('button'); remove.type='button'; remove.className='remove-button'; remove.textContent='×'; remove.setAttribute('aria-label', `${item.name}を削除`); remove.addEventListener('click', () => { type.items = type.items.filter((candidate) => candidate.id !== item.id); saveWorkspace(); renderCheck(); }); row.append(check,name,remove); els.checkList.append(row);
+        const remove = document.createElement('button'); remove.type='button'; remove.className='remove-button'; remove.textContent='×'; remove.setAttribute('aria-label', tr('removeItem',{name:item.name})); remove.addEventListener('click', () => { type.items = type.items.filter((candidate) => candidate.id !== item.id); saveWorkspace(); renderCheck(); }); row.append(check,name,remove); els.checkList.append(row);
       });
-      const checked = type.items.filter((item) => item.checked).length; const total = type.items.length; const percent = total ? Math.round(checked / total * 100) : 0; els.checkedCount.textContent=checked; els.totalCount.textContent=total; els.progressFill.style.width=`${percent}%`; els.progressBar.setAttribute('aria-valuenow', String(percent)); els.progressTitle.textContent = total && checked === total ? '準備できました。いってらっしゃい！' : checked ? `あと${total - checked}個です` : 'まずはひとつチェック'; els.hideCompleted.textContent=hideCompleted ? 'すべて表示' : '完了を隠す'; els.hideCompleted.setAttribute('aria-pressed', String(hideCompleted)); renderTemporaryStatus();
+      const checked = type.items.filter((item) => item.checked).length; const total = type.items.length; const percent = total ? Math.round(checked / total * 100) : 0; els.checkedCount.textContent=checked; els.totalCount.textContent=total; els.progressFill.style.width=`${percent}%`; els.progressBar.setAttribute('aria-valuenow', String(percent)); els.progressTitle.textContent = total && checked === total ? tr('ready') : checked ? tr('remaining',{count:total-checked}) : tr('start'); els.hideCompleted.textContent=hideCompleted ? tr('showAll') : tr('hideDone'); els.hideCompleted.setAttribute('aria-pressed', String(hideCompleted)); renderTemporaryStatus();
     }
     function renderTemplates() {
       const type = currentType(); if (!type) return; els.managerList.innerHTML = '';
       workspace.types.forEach((candidate) => {
         const row = document.createElement('div'); row.className=`manager-row${candidate.id === selectedTypeId ? ' selected' : ''}`;
-        const main = document.createElement('div'); main.className='manager-main'; main.setAttribute('role','button'); main.tabIndex=0; main.innerHTML=`<span class="manager-icon category-icon" data-category-icon="${candidate.icon}" aria-hidden="true"></span><span class="manager-text"><span class="manager-name">${escapeHtml(candidate.name)}</span><span class="manager-count">${candidate.items.length}個の持ち物</span></span>`;
+        const main = document.createElement('div'); main.className='manager-main'; main.setAttribute('role','button'); main.tabIndex=0; main.innerHTML=`<span class="manager-icon category-icon" data-category-icon="${candidate.icon}" aria-hidden="true"></span><span class="manager-text"><span class="manager-name">${escapeHtml(candidate.name)}</span><span class="manager-count">${tr('itemCount',{count:candidate.items.length})}</span></span>`;
         const choose = () => { selectedTypeId=candidate.id; saveWorkspace(); renderTemplates(); }; main.addEventListener('click',choose); main.addEventListener('keydown',(event) => { if(event.key==='Enter' || event.key===' '){event.preventDefault(); choose();} });
-        const use = document.createElement('button'); use.type='button'; use.className='mini-button'; use.textContent='使う'; use.setAttribute('aria-label',`${candidate.name}を使う`); use.addEventListener('click',() => startType(candidate.id));
-        const remove = document.createElement('button'); remove.type='button'; remove.className='mini-button danger'; remove.textContent='削除'; remove.setAttribute('aria-label',`${candidate.name}を削除`); remove.disabled=workspace.types.length<=1; remove.addEventListener('click',() => { if(workspace.types.length<=1)return; workspace.types=workspace.types.filter((entry)=>entry.id!==candidate.id); if(selectedTypeId===candidate.id)selectedTypeId=workspace.types[0].id; saveWorkspace(); renderTemplates(); }); row.append(main,use,remove); els.managerList.append(row);
+        const use = document.createElement('button'); use.type='button'; use.className='mini-button'; use.textContent=tr('use'); use.setAttribute('aria-label',tr('useType',{name:candidate.name})); use.addEventListener('click',() => startType(candidate.id));
+        const remove = document.createElement('button'); remove.type='button'; remove.className='mini-button danger'; remove.textContent=tr('delete'); remove.setAttribute('aria-label',tr('removeItem',{name:candidate.name})); remove.disabled=workspace.types.length<=1; remove.addEventListener('click',() => { if(workspace.types.length<=1)return; workspace.types=workspace.types.filter((entry)=>entry.id!==candidate.id); if(selectedTypeId===candidate.id)selectedTypeId=workspace.types[0].id; saveWorkspace(); renderTemplates(); }); row.append(main,use,remove); els.managerList.append(row);
       });
-      applyIcon(els.editorIcon,type.icon); els.editorTitle.textContent=`${type.name}の設定`; els.typeNameInput.value=type.name; els.iconPicker.innerHTML='';
-      ICON_OPTIONS.forEach((option)=>{const button=document.createElement('button');button.type='button';button.className=`icon-option${option.id===type.icon?' selected':''}`;button.setAttribute('aria-label',`${option.label}のアイコンを選ぶ`);button.setAttribute('aria-pressed',String(option.id===type.icon));const preview=document.createElement('span');preview.className='icon-option-preview';preview.setAttribute('aria-hidden','true');applyIcon(preview,option.id);const label=document.createElement('span');label.className='icon-option-label';label.textContent=option.label;button.append(preview,label);button.addEventListener('click',()=>{if(type.icon===option.id)return;type.icon=option.id;nativeImpact('Light');saveWorkspace('アイコンを保存しました');renderTemplates();});els.iconPicker.append(button);});
+      applyIcon(els.editorIcon,type.icon); els.editorTitle.textContent=tr('settings',{name:type.name}); els.typeNameInput.value=type.name; els.iconPicker.innerHTML='';
+      ICON_OPTIONS.forEach((option)=>{const button=document.createElement('button');button.type='button';button.className=`icon-option${option.id===type.icon?' selected':''}`;button.setAttribute('aria-label',tr('chooseIcon',{name:option.label}));button.setAttribute('aria-pressed',String(option.id===type.icon));const preview=document.createElement('span');preview.className='icon-option-preview';preview.setAttribute('aria-hidden','true');applyIcon(preview,option.id);const label=document.createElement('span');label.className='icon-option-label';label.textContent=option.label;button.append(preview,label);button.addEventListener('click',()=>{if(type.icon===option.id)return;type.icon=option.id;nativeImpact('Light');saveWorkspace(tr('iconSaved'));renderTemplates();});els.iconPicker.append(button);});
       els.editItemList.innerHTML='';
-      if(!type.items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='持ち物がありません。下から追加してください。';els.editItemList.append(empty);}
-      type.items.forEach((item,index) => { const row=document.createElement('div');row.className='edit-item';const name=document.createElement('input');name.type='text';name.className='edit-item-input';name.value=item.name;name.maxLength=40;name.setAttribute('aria-label',`${item.name}の名前を編集`);const commitName=()=>{const next=name.value.trim();if(!next||type.items.some((candidate)=>candidate.id!==item.id&&candidate.name===next)){name.value=item.name;return;}if(next===item.name)return;item.name=next;saveWorkspace('項目名を保存しました');renderTemplates();};name.addEventListener('keydown',(event)=>{if(event.key==='Enter'){event.preventDefault();commitName();}});name.addEventListener('change',commitName);const up=document.createElement('button');up.type='button';up.className='mini-button';up.textContent='↑';up.setAttribute('aria-label',`${item.name}を上へ`);up.disabled=index===0;up.addEventListener('click',()=>moveItem(type,index,-1));const down=document.createElement('button');down.type='button';down.className='mini-button';down.textContent='↓';down.setAttribute('aria-label',`${item.name}を下へ`);down.disabled=index===type.items.length-1;down.addEventListener('click',()=>moveItem(type,index,1));const remove=document.createElement('button');remove.type='button';remove.className='mini-button danger';remove.textContent='×';remove.setAttribute('aria-label',`${item.name}を削除`);remove.addEventListener('click',()=>{type.items.splice(index,1);saveWorkspace();renderTemplates();});row.append(name,up,down,remove);els.editItemList.append(row); });
+      if(!type.items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=tr('noItems');els.editItemList.append(empty);}
+      type.items.forEach((item,index) => { const row=document.createElement('div');row.className='edit-item';const name=document.createElement('input');name.type='text';name.className='edit-item-input';name.value=item.name;name.maxLength=40;name.setAttribute('aria-label',tr('editName',{name:item.name}));const commitName=()=>{const next=name.value.trim();if(!next||type.items.some((candidate)=>candidate.id!==item.id&&candidate.name===next)){name.value=item.name;return;}if(next===item.name)return;item.name=next;saveWorkspace(tr('itemNameSaved'));renderTemplates();};name.addEventListener('keydown',(event)=>{if(event.key==='Enter'){event.preventDefault();commitName();}});name.addEventListener('change',commitName);const up=document.createElement('button');up.type='button';up.className='mini-button';up.textContent='↑';up.setAttribute('aria-label',tr('moveUp',{name:item.name}));up.disabled=index===0;up.addEventListener('click',()=>moveItem(type,index,-1));const down=document.createElement('button');down.type='button';down.className='mini-button';down.textContent='↓';down.setAttribute('aria-label',tr('moveDown',{name:item.name}));down.disabled=index===type.items.length-1;down.addEventListener('click',()=>moveItem(type,index,1));const remove=document.createElement('button');remove.type='button';remove.className='mini-button danger';remove.textContent='×';remove.setAttribute('aria-label',tr('removeItem',{name:item.name}));remove.addEventListener('click',()=>{type.items.splice(index,1);saveWorkspace();renderTemplates();});row.append(name,up,down,remove);els.editItemList.append(row); });
     }
     function moveItem(type,index,amount){const target=index+amount;if(target<0||target>=type.items.length)return;[type.items[index],type.items[target]]=[type.items[target],type.items[index]];saveWorkspace();renderTemplates();}
 
     els.checkNav.addEventListener('click',()=>setView('check')); els.templatesNav.addEventListener('click',()=>setView('templates')); els.changeType.addEventListener('click',showTypeChoice); els.editBeforeChoice.addEventListener('click',()=>{openApp();setView('templates');});
-    els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.temporarySave.addEventListener('click',()=>{nativeImpact('Medium');saveTemporary();}); els.temporaryRestore.addEventListener('click',()=>{nativeImpact('Medium');restoreTemporary();}); els.resetChecks.addEventListener('click',()=>{nativeImpact('Medium');currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace(temporarySnapshot ? 'クリアしました。一時保存から復元できます' : 'チェックをクリアしました');renderCheck();});
+    els.hideCompleted.addEventListener('click',()=>{hideCompleted=!hideCompleted;renderCheck();}); els.temporarySave.addEventListener('click',()=>{nativeImpact('Medium');saveTemporary();}); els.temporaryRestore.addEventListener('click',()=>{nativeImpact('Medium');restoreTemporary();}); els.resetChecks.addEventListener('click',()=>{nativeImpact('Medium');currentType().items.forEach((item)=>{item.checked=false;});hideCompleted=false;saveWorkspace(temporarySnapshot ? tr('clearedRestorable') : tr('cleared'));renderCheck();});
     els.quickAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.quickAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.quickAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.quickAddInput.value='';saveWorkspace();renderCheck();els.quickAddInput.focus();});
     els.newTypeForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.newTypeInput.value.trim();if(!name||workspace.types.some((type)=>type.name===name)){els.newTypeInput.focus();return;}const type={id:makeId('type'),name,icon:'travel',items:[]};workspace.types.push(type);selectedTypeId=type.id;els.newTypeInput.value='';saveWorkspace();renderTemplates();els.typeNameInput.focus();});
     els.typeNameForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.typeNameInput.value.trim();const type=currentType();if(!name||workspace.types.some((candidate)=>candidate.id!==type.id&&candidate.name===name))return;type.name=name;saveWorkspace();renderTemplates();});
     els.editorAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.editorAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.editorAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.editorAddInput.value='';saveWorkspace();renderTemplates();els.editorAddInput.focus();});
-    renderTypeChoice();
+    renderTypeChoice(); applyStaticLanguage();
     window.setTimeout(()=>{els.splash.hidden=true;els.typeScreen.hidden=false;},2000);
     if(!document.body.dataset.nativeShell && 'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   </script>

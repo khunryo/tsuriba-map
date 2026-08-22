@@ -1,0 +1,23 @@
+{
+  "name": "Forget Check",
+  "short_name": "Forget Check",
+  "description": "A private, device-only checklist with customizable packing templates.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f2e9",
+  "theme_color": "#17252b",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "./assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

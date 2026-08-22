@@ -5,7 +5,9 @@ const root = resolve(import.meta.dirname, '..');
 const out = resolve(root, 'www');
 const files = [
   'index.html',
+  'privacy.html',
   'manifest.webmanifest',
+  'manifest-en.webmanifest',
   'assets/category-icons.png',
   'assets/app-icon-180.png',
   'assets/app-icon-192.png',

@@ -1,8 +1,10 @@
-const CACHE = 'forget-check-v6';
+const CACHE = 'forget-check-v7';
 const CORE = [
   './',
   './index.html',
+  './privacy.html',
   './manifest.webmanifest',
+  './manifest-en.webmanifest',
   './sw.js',
   './assets/category-icons.png',
   './assets/app-icon-180.png',
