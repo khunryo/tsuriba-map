@@ -1,4 +1,4 @@
-const CACHE = 'forget-check-v2';
+const CACHE = 'forget-check-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './sw.js'];
 
 self.addEventListener('install', (event) => {
