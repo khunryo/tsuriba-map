@@ -14,14 +14,16 @@
 - Availability: 148地域で配信（EU加盟27か国は配信不可、今後の自動追加なし）
 - Privacy policy: `https://forget-check-jp.khunryo.chatgpt.site/privacy.html`
 - Support URL: `https://forget-check-jp.khunryo.chatgpt.site/`
-- App Privacy: Data Not Collected
+- App Privacy: 広告SDKの収集内容を申告（広告導入版の提出前に最終確認）
 
 ## 無料公開方針
 
 - 初期リリースは無料
-- 広告、広告SDK、外部解析SDK、サブスクリプション、アプリ内課金なし
+- 広告あり（種類選択・テンプレート編集画面のみの小型バナー）
+- 広告SDKは非パーソナライズ広告に限定し、外部解析SDK、サブスクリプション、アプリ内課金は追加しない
+- 持ち物・テンプレート・チェック状態は広告事業者へ送信しない
 - ログイン、アカウント、クラウド同期、不要な外部通信なし
-- 将来の広告や広告削除課金は、別リリースで設計・承認する
+- 課金による追加機能は今回実装しない
 
 ## English (U.S.)
 
@@ -42,7 +44,9 @@ Features:
 - 12 selectable category icons
 - Works offline
 - Free at initial release
-- No account, ads, advertising SDK, analytics SDK, in-app purchases, subscriptions, or cloud sync
+- Free app with a small banner ad only on list selection and template editing screens
+- No personalized advertising request, analytics SDK, in-app purchases, subscriptions, account, or cloud sync
+- Checklist content stays on the device and is not sent to the advertising provider
 - Your lists stay on your device
 
 ## 日本語
@@ -64,5 +68,7 @@ Features:
 - 12種類のカテゴリ用アイコン
 - オフライン動作
 - 初期リリースは無料
-- アカウント、広告、広告SDK、アクセス解析SDK、アプリ内課金、サブスクリプション、クラウド同期なし
+- 種類選択とテンプレート編集画面だけに小型バナー広告を表示
+- パーソナライズ広告の要求、アクセス解析SDK、アプリ内課金、サブスクリプション、アカウント、クラウド同期なし
+- 持ち物・テンプレート・チェック状態は端末内だけに保存
 - リストは端末内だけに保存

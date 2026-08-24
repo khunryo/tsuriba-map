@@ -46,6 +46,7 @@
     .local-note { display:flex; align-items:center; gap:5px; color:var(--muted); font-size:10px; }
     .local-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
     .type-choice { display:grid; align-content:center; min-height:calc(100dvh - 50px); padding-bottom:30px; }
+    body.ads-on .type-choice { padding-bottom:112px; }
     .choice-kicker, .view-kicker { margin:0 0 8px; color:var(--blue); font-size:10px; font-weight:900; letter-spacing:.14em; }
     h1, h2, h3, p { margin-top:0; }
     .type-choice h1 { margin:0 0 10px; font-size:clamp(27px,8vw,38px); line-height:1.18; letter-spacing:-.06em; }
@@ -72,6 +73,7 @@
     .choice-arrow { color:#a6afbd; font-size:22px; }
     .choice-edit { margin-top:18px; padding:9px; border:0; background:transparent; color:var(--blue); cursor:pointer; font-size:12px; font-weight:800; }
     .app { display:flex; flex-direction:column; min-height:calc(100dvh - 40px); padding-bottom:82px; }
+    body.ads-on .app { padding-bottom:164px; }
     .app-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0 20px; }
     .current-type { display:flex; align-items:center; gap:8px; min-width:0; }
     .current-type-icon { width:27px; height:36px; border-radius:8px; }
@@ -254,6 +256,12 @@
       '編集する種類を選ぶ':'Choose a template', '選択中の種類は青く表示されます':'The selected template is highlighted', '釣りの設定':'Fishing settings', '名前・アイコン・持ち物を自分向けに変更できます':'Customize the name, icon, and items.', '種類名':'Template name', '名前を保存':'Save name', 'アイコンを選ぶ':'Choose an icon', '持ち物と並び順':'Items and order', '新しい持ち物を追加':'Add a new item',
       'メインメニュー':'Main menu', 'チェック':'Checklist', 'テンプレート':'Templates'
     };
+    const AD_CONFIG = {
+      enabled: true,
+      testing: true,
+      appId: 'ca-app-pub-3940256099942544~1458002511',
+      bannerId: 'ca-app-pub-3940256099942544/2934735716'
+    };
     function applyStaticLanguage() {
       document.documentElement.lang=UI_LANGUAGE; document.title=tr('appName'); const description=document.querySelector('meta[name="description"]'); if(description)description.content=tr('appDescription'); const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]'); if(appleTitle)appleTitle.content=tr('appName');
       if(UI_LANGUAGE!=='en')return;
@@ -283,9 +291,44 @@
     let hideCompleted = false;
     let activeView = 'check';
     let temporarySnapshot = loadTemporary();
+    let adMobReady = false;
+    let adMobConsentReady = false;
 
     function normalizeIcon(icon) { const value=String(icon || 'travel'); return ICON_OPTIONS.some((option)=>option.id===value) ? value : (LEGACY_ICONS[value] || 'travel'); }
     function nativeImpact(style='Light') { const haptics=window.Capacitor?.Plugins?.Haptics; if(haptics)haptics.impact({style}).catch(()=>{}); }
+    function nativeAdMob() { return window.Capacitor?.Plugins?.AdMob || null; }
+    async function prepareAds() {
+      const admob = nativeAdMob();
+      if (!AD_CONFIG.enabled || !admob) return null;
+      if (adMobReady) return admob;
+      try {
+        await admob.initialize({ initializeForTesting: AD_CONFIG.testing, maxAdContentRating: 'G' });
+        let consent = await admob.requestConsentInfo();
+        if (!consent.canRequestAds && consent.isConsentFormAvailable) consent = await admob.showConsentForm();
+        adMobConsentReady = Boolean(consent.canRequestAds);
+        if (!adMobConsentReady) return null;
+        adMobReady = true;
+        return admob;
+      } catch (_) {
+        return null;
+      }
+    }
+    async function hideAds() {
+      const admob = nativeAdMob();
+      document.body.classList.remove('ads-on');
+      if (admob) await admob.removeBanner().catch(() => {});
+    }
+    async function syncAds(surface) {
+      if (!AD_CONFIG.enabled || !document.body.dataset.nativeShell || !['type', 'templates'].includes(surface)) { await hideAds(); return; }
+      const admob = await prepareAds();
+      if (!admob || !adMobConsentReady) { await hideAds(); return; }
+      try {
+        await admob.showBanner({ adId:AD_CONFIG.bannerId, adSize:'ADAPTIVE_BANNER', position:'BOTTOM_CENTER', margin:surface === 'templates' ? 82 : 0, isTesting:AD_CONFIG.testing, npa:true });
+        document.body.classList.add('ads-on');
+      } catch (_) {
+        await hideAds();
+      }
+    }
     function applyIcon(element, icon) { element.textContent=''; element.classList.add('category-icon'); element.dataset.categoryIcon=normalizeIcon(icon); }
     function normalizeType(raw, index) {
       const id = String(raw.id || `type-${Date.now()}-${index}`);
@@ -311,7 +354,7 @@
     function renderTemporaryStatus() { const valid = temporarySnapshot && workspace.types.some((type) => type.id === temporarySnapshot.typeId); els.temporaryRestore.disabled = !valid; if (!valid) { els.temporaryStatus.textContent = tr('noSnapshot'); return; } const time = new Date(temporarySnapshot.savedAt); els.temporaryStatus.textContent = tr('savedAt',{name:temporarySnapshot.typeName,time:time.toLocaleTimeString(UI_LOCALE,{hour:'2-digit',minute:'2-digit'})}); }
     function escapeHtml(value) { return String(value).replace(/[&<>\"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;' }[character])); }
     function openApp() { els.typeScreen.hidden = true; els.appScreen.hidden = false; setView(activeView); }
-    function showTypeChoice() { els.appScreen.hidden = true; els.typeScreen.hidden = false; renderTypeChoice(); }
+    function showTypeChoice() { els.appScreen.hidden = true; els.typeScreen.hidden = false; renderTypeChoice(); void syncAds('type'); }
     function startType(typeId) { selectedTypeId = typeId; hideCompleted = false; saveWorkspace(); openApp(); setView('check'); }
     function renderTypeChoice() {
       els.choiceList.innerHTML = '';
@@ -323,7 +366,7 @@
       });
     }
     function setView(nextView) {
-      activeView = nextView; const templates = nextView === 'templates'; els.checkView.hidden = templates; els.templatesView.hidden = !templates; els.checkNav.classList.toggle('active', !templates); els.templatesNav.classList.toggle('active', templates); if (templates) renderTemplates(); else renderCheck();
+      activeView = nextView; const templates = nextView === 'templates'; els.checkView.hidden = templates; els.templatesView.hidden = !templates; els.checkNav.classList.toggle('active', !templates); els.templatesNav.classList.toggle('active', templates); if (templates) renderTemplates(); else renderCheck(); void syncAds(templates ? 'templates' : 'check');
     }
     function renderCheck() {
       const type = currentType(); if (!type) return;
@@ -362,7 +405,7 @@
     els.typeNameForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.typeNameInput.value.trim();const type=currentType();if(!name||workspace.types.some((candidate)=>candidate.id!==type.id&&candidate.name===name))return;type.name=name;saveWorkspace();renderTemplates();});
     els.editorAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.editorAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.editorAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.editorAddInput.value='';saveWorkspace();renderTemplates();els.editorAddInput.focus();});
     renderTypeChoice(); applyStaticLanguage();
-    window.setTimeout(()=>{els.splash.hidden=true;els.typeScreen.hidden=false;},2000);
+    window.setTimeout(()=>{els.splash.hidden=true;els.typeScreen.hidden=false;void syncAds('type');},2000);
     if(!document.body.dataset.nativeShell && 'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   </script>
 </body>
