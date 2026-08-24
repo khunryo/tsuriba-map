@@ -14,7 +14,7 @@
 - Availability: 148地域で配信（EU加盟27か国は配信不可、今後の自動追加なし）
 - Privacy policy: `https://forget-check-jp.khunryo.chatgpt.site/privacy.html`
 - Support URL: `https://forget-check-jp.khunryo.chatgpt.site/`
-- App Privacy: 広告SDKの収集内容を申告（広告導入版の提出前に最終確認）
+- App Privacy: Google Mobile Ads SDK（AdMob）の実設定に合わせて申告済み内容を最終確認
 
 ## 無料公開方針
 
