@@ -10,12 +10,18 @@
 - Primary category: Productivity
 - Secondary category: Travel
 - Age rating: 4+
-- Price base storefront: Japan
-- Base customer price: ¥100
-- Availability: Appleの自動換算価格を使用できる国・地域
+- Price: Free
+- Availability: 148地域で配信（EU加盟27か国は配信不可、今後の自動追加なし）
 - Privacy policy: `https://forget-check-jp.khunryo.chatgpt.site/privacy.html`
 - Support URL: `https://forget-check-jp.khunryo.chatgpt.site/`
 - App Privacy: Data Not Collected
+
+## 無料公開方針
+
+- 初期リリースは無料
+- 広告、広告SDK、外部解析SDK、サブスクリプション、アプリ内課金なし
+- ログイン、アカウント、クラウド同期、不要な外部通信なし
+- 将来の広告や広告削除課金は、別リリースで設計・承認する
 
 ## English (U.S.)
 
@@ -35,7 +41,8 @@ Features:
 - Temporary save, clear, and restore
 - 12 selectable category icons
 - Works offline
-- No account, ads, analytics, or cloud sync
+- Free at initial release
+- No account, ads, advertising SDK, analytics SDK, in-app purchases, subscriptions, or cloud sync
 - Your lists stay on your device
 
 ## 日本語
@@ -56,5 +63,6 @@ Features:
 - 一時保存、クリア、復元
 - 12種類のカテゴリ用アイコン
 - オフライン動作
-- アカウント、広告、アクセス解析、クラウド同期なし
+- 初期リリースは無料
+- アカウント、広告、広告SDK、アクセス解析SDK、アプリ内課金、サブスクリプション、クラウド同期なし
 - リストは端末内だけに保存
