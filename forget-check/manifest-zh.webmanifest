@@ -1,0 +1,14 @@
+{
+  "name": "忘带检查",
+  "short_name": "忘带检查",
+  "description": "只保存在设备上的私密物品检查清单。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f2e9",
+  "theme_color": "#17252b",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "./assets/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./assets/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

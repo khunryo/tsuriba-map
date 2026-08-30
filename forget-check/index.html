@@ -10,7 +10,11 @@
   <meta name="description" content="種類ごとに自分の持ち物を設定できる、端末内保存のチェックリスト">
   <link rel="apple-touch-icon" href="./assets/app-icon-180.png">
   <link rel="manifest" id="app-manifest" href="./manifest.webmanifest">
-  <script>if(!(navigator.languages?.[0]||navigator.language||'en').toLowerCase().startsWith('ja'))document.querySelector('#app-manifest').href='./manifest-en.webmanifest';</script>
+  <script>
+    const HEAD_LANGUAGE = (navigator.languages?.[0] || navigator.language || 'en').toLowerCase();
+    const HEAD_MANIFEST = HEAD_LANGUAGE.startsWith('ja') ? 'manifest.webmanifest' : HEAD_LANGUAGE.startsWith('zh') ? 'manifest-zh.webmanifest' : HEAD_LANGUAGE.startsWith('ko') ? 'manifest-ko.webmanifest' : HEAD_LANGUAGE.startsWith('es') ? 'manifest-es.webmanifest' : 'manifest-en.webmanifest';
+    document.querySelector('#app-manifest').href = `./${HEAD_MANIFEST}`;
+  </script>
   <title>忘れ物チェック</title>
   <style>
     :root { --navy:#111b2d; --blue:#2b6cf6; --blue-soft:#eaf0ff; --ink:#202633; --muted:#7b8494; --paper:#f5f6f8; --surface:#fff; --line:#e5e8ed; --green:#2f9b67; --red:#d05c58; }
@@ -218,8 +222,9 @@
 
   <script>
     const DEVICE_LANGUAGE = navigator.languages?.[0] || navigator.language || 'en';
-    const UI_LANGUAGE = DEVICE_LANGUAGE.toLowerCase().startsWith('ja') ? 'ja' : 'en';
-    const UI_LOCALE = UI_LANGUAGE === 'ja' ? 'ja-JP' : 'en-US';
+    const DEVICE_LANGUAGE_TAG = DEVICE_LANGUAGE.toLowerCase();
+    const UI_LANGUAGE = DEVICE_LANGUAGE_TAG.startsWith('ja') ? 'ja' : DEVICE_LANGUAGE_TAG.startsWith('zh') ? 'zh' : DEVICE_LANGUAGE_TAG.startsWith('ko') ? 'ko' : DEVICE_LANGUAGE_TAG.startsWith('es') ? 'es' : 'en';
+    const UI_LOCALE = { ja:'ja-JP', en:'en-US', zh:'zh-CN', ko:'ko-KR', es:'es-ES' }[UI_LANGUAGE];
     const STRINGS = {
       ja:{
         appName:'忘れ物チェック', appDescription:'種類ごとに自分の持ち物を設定できる、端末内保存のチェックリスト', untitled:'無題の種類', myList:'マイリスト',
@@ -244,6 +249,42 @@
         uncheckItem:'Mark {name} unchecked', checkItem:'Check {name}', removeItem:'Remove {name}', ready:'All set. Have a great trip!', remaining:'{count} left', start:'Start with one item', showAll:'Show all', hideDone:'Hide checked',
         use:'Use', useType:'Use {name}', delete:'Delete', settings:'{name} settings', chooseIcon:'Choose the {name} icon', iconSaved:'Icon saved', noItems:'No items yet. Add one below.', editName:'Edit the name of {name}', itemNameSaved:'Item name saved', moveUp:'Move {name} up', moveDown:'Move {name} down',
         clearedRestorable:'Cleared. You can restore the saved snapshot.', cleared:'Checklist cleared'
+      },
+      zh:{
+        appName:'忘带检查', appDescription:'一款只保存在设备上的私密清单，可自定义不同场景的物品模板。', untitled:'未命名清单', myList:'我的清单',
+        fishing:'钓鱼', outing:'外出', work:'工作', travel:'旅行', camping:'露营', school:'上学', clinic:'就医', shopping:'购物', sports:'运动', child:'孩子', pet:'宠物', emergency:'防灾',
+        fishingItems:['鱼竿和渔轮','钓组和路亚','鱼饵及配件盒','救生衣','帽子和防晒霜','饮料','钱包和手机','车钥匙'],
+        outingItems:['钱包和手机','家门钥匙','手帕和纸巾','移动电源','饮料','折叠伞'],
+        workItems:['电脑或平板','充电器','笔记本和笔','工牌','钱包和手机','手帕'],
+        autoSaved:'已自动保存', saveFailed:'无法保存到此设备', restored:'已从临时保存恢复', noSnapshot:'还没有临时保存', savedAt:'{name} · 保存于 {time}',
+        selectType:'选择{name}', itemCount:'{count}件物品', completeEmpty:'全部检查完毕，可以出发了！', listEmpty:'此清单还没有物品，请在下方添加。',
+        uncheckItem:'将{name}设为未检查', checkItem:'检查{name}', removeItem:'删除{name}', ready:'准备好了，出发吧！', remaining:'还剩{count}件', start:'先检查一件物品', showAll:'显示全部', hideDone:'隐藏已完成',
+        use:'使用', useType:'使用{name}', delete:'删除', settings:'{name}设置', chooseIcon:'选择{name}图标', iconSaved:'图标已保存', noItems:'还没有物品，请在下方添加。', editName:'编辑{name}的名称', itemNameSaved:'物品名称已保存', moveUp:'将{name}上移', moveDown:'将{name}下移',
+        clearedRestorable:'已清除，可以从临时保存中恢复。', cleared:'清单已清除'
+      },
+      ko:{
+        appName:'잊은 물건 체크', appDescription:'기기에만 저장되는 비공개 체크리스트입니다. 상황별 준비물 템플릿을 직접 만들 수 있습니다.', untitled:'이름 없는 목록', myList:'내 목록',
+        fishing:'낚시', outing:'외출', work:'업무', travel:'여행', camping:'캠핑', school:'학교', clinic:'병원', shopping:'쇼핑', sports:'운동', child:'아이', pet:'반려동물', emergency:'재난 대비',
+        fishingItems:['낚싯대와 릴','채비와 루어','미끼·소품 케이스','구명조끼','모자와 자외선 차단제','음료','지갑과 휴대폰','차 열쇠'],
+        outingItems:['지갑과 휴대폰','집 열쇠','손수건과 티슈','보조 배터리','음료','접이식 우산'],
+        workItems:['노트북 또는 태블릿','충전기','노트와 펜','사원증','지갑과 휴대폰','손수건'],
+        autoSaved:'자동 저장됨', saveFailed:'이 기기에 저장할 수 없습니다', restored:'임시 저장에서 복원했습니다', noSnapshot:'임시 저장이 없습니다', savedAt:'{name} · {time} 저장',
+        selectType:'{name} 선택', itemCount:'준비물 {count}개', completeEmpty:'모두 확인했습니다. 이제 출발해도 좋아요!', listEmpty:'이 목록에는 아직 준비물이 없습니다. 아래에서 추가하세요.',
+        uncheckItem:'{name} 체크 해제', checkItem:'{name} 체크하기', removeItem:'{name} 삭제', ready:'준비 완료! 다녀오세요!', remaining:'{count}개 남음', start:'먼저 하나를 체크해 보세요', showAll:'모두 표시', hideDone:'완료 항목 숨기기',
+        use:'사용', useType:'{name} 사용', delete:'삭제', settings:'{name} 설정', chooseIcon:'{name} 아이콘 선택', iconSaved:'아이콘을 저장했습니다', noItems:'준비물이 없습니다. 아래에서 추가하세요.', editName:'{name} 이름 편집', itemNameSaved:'준비물 이름을 저장했습니다', moveUp:'{name} 위로 이동', moveDown:'{name} 아래로 이동',
+        clearedRestorable:'삭제했습니다. 임시 저장에서 복원할 수 있습니다.', cleared:'체크 목록을 초기화했습니다'
+      },
+      es:{
+        appName:'Lista de olvidos', appDescription:'Una lista privada que se guarda solo en tu dispositivo, con plantillas personalizables.', untitled:'Lista sin nombre', myList:'Mi lista',
+        fishing:'Pesca', outing:'Salida', work:'Trabajo', travel:'Viaje', camping:'Acampada', school:'Colegio', clinic:'Médico', shopping:'Compras', sports:'Deporte', child:'Niños', pet:'Mascotas', emergency:'Emergencias',
+        fishingItems:['Caña y carrete','Accesorios y señuelos','Caja de cebos y accesorios','Chaleco salvavidas','Gorra y protector solar','Bebida','Cartera y teléfono','Llave del coche'],
+        outingItems:['Cartera y teléfono','Llaves de casa','Pañuelo y pañuelos de papel','Batería portátil','Bebida','Paraguas plegable'],
+        workItems:['Ordenador o tableta','Cargador','Cuaderno y bolígrafo','Identificación laboral','Cartera y teléfono','Pañuelo'],
+        autoSaved:'Guardado automáticamente', saveFailed:'No se pudo guardar en este dispositivo', restored:'Restaurado desde la copia temporal', noSnapshot:'Aún no hay una copia temporal', savedAt:'{name} · guardado a las {time}',
+        selectType:'Elegir {name}', itemCount:'{count} artículos', completeEmpty:'Todo está comprobado. ¡Listo para salir!', listEmpty:'Esta lista aún no tiene artículos. Añade uno abajo.',
+        uncheckItem:'Desmarcar {name}', checkItem:'Marcar {name}', removeItem:'Eliminar {name}', ready:'Todo listo. ¡Buen viaje!', remaining:'Quedan {count}', start:'Empieza por un artículo', showAll:'Mostrar todo', hideDone:'Ocultar completados',
+        use:'Usar', useType:'Usar {name}', delete:'Eliminar', settings:'Ajustes de {name}', chooseIcon:'Elegir el icono de {name}', iconSaved:'Icono guardado', noItems:'Aún no hay artículos. Añade uno abajo.', editName:'Editar el nombre de {name}', itemNameSaved:'Nombre guardado', moveUp:'Subir {name}', moveDown:'Bajar {name}',
+        clearedRestorable:'Se ha borrado. Puedes restaurar la copia temporal.', cleared:'Lista borrada'
       }
     };
     function tr(key, values={}) { const value=STRINGS[UI_LANGUAGE][key] ?? STRINGS.ja[key] ?? key; if(Array.isArray(value))return value; return Object.entries(values).reduce((text,[name,replacement])=>text.replaceAll(`{${name}}`,String(replacement)),value); }
@@ -256,6 +297,34 @@
       '編集する種類を選ぶ':'Choose a template', '選択中の種類は青く表示されます':'The selected template is highlighted', '釣りの設定':'Fishing settings', '名前・アイコン・持ち物を自分向けに変更できます':'Customize the name, icon, and items.', '種類名':'Template name', '名前を保存':'Save name', 'アイコンを選ぶ':'Choose an icon', '持ち物と並び順':'Items and order', '新しい持ち物を追加':'Add a new item',
       'メインメニュー':'Main menu', 'チェック':'Checklist', 'テンプレート':'Templates'
     };
+    const STATIC_ZH = {
+      '忘れ物チェック 起動画面':'忘带检查启动画面', '忘れ物チェック':'忘带检查', '今日も安心して、いってらっしゃい。':'准备好了吗？安心出发。', '端末だけに保存':'仅保存在此设备',
+      '今日は何の':'今天要检查', '持ち物を確認しますか？':'什么物品？', '使う種類を選ぶと、チェックを始められます。':'选择一个清单，开始检查。', 'テンプレートを編集する':'编辑模板',
+      'チェック中の種類':'当前清单', '種類を変更':'更换', '持ち物を確認':'检查物品', '忘れたくないものを、ひとつずつタップ。':'出发前逐项点击确认。', 'チェックの進み具合':'检查进度', 'まずはひとつチェック':'先检查一件', 'チェック進捗':'清单进度',
+      '持ち物':'物品', '完了を隠す':'隐藏已完成', '持ち物を追加':'添加物品', 'この種類に持ち物を追加':'为此清单添加物品', '追加':'添加', 'チェック状態':'检查状态', '一時保存はまだありません':'还没有临时保存', '一時保存':'临时保存', '復元':'恢复', 'クリア':'清除', '自動保存しています':'正在自动保存',
+      'テンプレートを編集':'编辑模板', '種類を選んで、持ち物の名前や順番を整えられます。':'选择清单，编辑物品名称和顺序。', '新しいテンプレート':'新建模板', 'まず名前を決めるだけで作成できます':'先为模板取个名字', '新しいテンプレートの名前':'新模板名称', '例：キャンプ、旅行、通院':'例如：露营、旅行、就医', '作成':'创建',
+      '編集する種類を選ぶ':'选择要编辑的模板', '選択中の種類は青く表示されます':'当前选择的模板会显示为蓝色', '釣りの設定':'钓鱼设置', '名前・アイコン・持ち物を自分向けに変更できます':'自定义名称、图标和物品。', '種類名':'模板名称', '名前を保存':'保存名称', 'アイコンを選ぶ':'选择图标', '持ち物と並び順':'物品和顺序', '新しい持ち物を追加':'添加新物品',
+      'メインメニュー':'主菜单', 'チェック':'清单', 'テンプレート':'模板'
+    };
+    const STATIC_KO = {
+      '忘れ物チェック 起動画面':'잊은 물건 체크 시작 화면', '忘れ物チェック':'잊은 물건 체크', '今日も安心して、いってらっしゃい。':'준비 완료! 안심하고 다녀오세요.', '端末だけに保存':'이 기기에만 저장',
+      '今日は何の':'오늘은 무엇을', '持ち物を確認しますか？':'확인할까요?', '使う種類を選ぶと、チェックを始められます。':'목록을 선택하면 체크를 시작할 수 있어요.', 'テンプレートを編集する':'템플릿 편집',
+      'チェック中の種類':'현재 목록', '種類を変更':'변경', '持ち物を確認':'준비물 확인', '忘れたくないものを、ひとつずつタップ。':'출발 전 하나씩 눌러 확인하세요.', 'チェックの進み具合':'체크 진행 상황', 'まずはひとつチェック':'하나부터 체크해 보세요', 'チェック進捗':'체크리스트 진행률',
+      '持ち物':'준비물', '完了を隠す':'완료 항목 숨기기', '持ち物を追加':'준비물 추가', 'この種類に持ち物を追加':'이 목록에 준비물 추가', '追加':'추가', 'チェック状態':'체크 상태', '一時保存はまだありません':'임시 저장이 없습니다', '一時保存':'임시 저장', '復元':'복원', 'クリア':'초기화', '自動保存しています':'자동 저장 중',
+      'テンプレートを編集':'템플릿 편집', '種類を選んで、持ち物の名前や順番を整えられます。':'목록을 선택해 준비물 이름과 순서를 편집하세요.', '新しいテンプレート':'새 템플릿', 'まず名前を決めるだけで作成できます':'먼저 이름만 정하면 만들 수 있어요', '新しいテンプレートの名前':'새 템플릿 이름', '例：キャンプ、旅行、通院':'예: 캠핑, 여행, 병원', '作成':'만들기',
+      '編集する種類を選ぶ':'편집할 템플릿 선택', '選択中の種類は青く表示されます':'선택한 템플릿은 파란색으로 표시됩니다', '釣りの設定':'낚시 설정', '名前・アイコン・持ち物を自分向けに変更できます':'이름, 아이콘, 준비물을 원하는 대로 바꿀 수 있어요.', '種類名':'템플릿 이름', '名前を保存':'이름 저장', 'アイコンを選ぶ':'아이콘 선택', '持ち物と並び順':'준비물과 순서', '新しい持ち物を追加':'새 준비물 추가',
+      'メインメニュー':'메인 메뉴', 'チェック':'체크', 'テンプレート':'템플릿'
+    };
+    const STATIC_ES = {
+      '忘れ物チェック 起動画面':'Pantalla de inicio de Lista de olvidos', '忘れ物チェック':'Lista de olvidos', '今日も安心して、いってらっしゃい。':'Todo listo, sal con tranquilidad.', '端末だけに保存':'Guardado solo en este dispositivo',
+      '今日は何の':'¿Qué vas a', '持ち物を確認しますか？':'comprobar hoy?', '使う種類を選ぶと、チェックを始められます。':'Elige una lista para empezar a comprobar.', 'テンプレートを編集する':'Editar plantillas',
+      'チェック中の種類':'Lista actual', '種類を変更':'Cambiar', '持ち物を確認':'Comprobar artículos', '忘れたくないものを、ひとつずつタップ。':'Toca cada artículo antes de salir.', 'チェックの進み具合':'Progreso', 'まずはひとつチェック':'Comprueba un artículo', 'チェック進捗':'Progreso de la lista',
+      '持ち物':'Artículos', '完了を隠す':'Ocultar completados', '持ち物を追加':'Añadir artículo', 'この種類に持ち物を追加':'Añade un artículo a esta lista', '追加':'Añadir', 'チェック状態':'Estado de la lista', '一時保存はまだありません':'Aún no hay copia temporal', '一時保存':'Guardar copia', '復元':'Restaurar', 'クリア':'Borrar', '自動保存しています':'Guardando automáticamente',
+      'テンプレートを編集':'Editar plantillas', '種類を選んで、持ち物の名前や順番を整えられます。':'Elige una lista y edita sus artículos o su orden.', '新しいテンプレート':'Nueva plantilla', 'まず名前を決めるだけで作成できます':'Empieza eligiendo un nombre', '新しいテンプレートの名前':'Nombre de la nueva plantilla', '例：キャンプ、旅行、通院':'p. ej., acampada, viaje, médico', '作成':'Crear',
+      '編集する種類を選ぶ':'Elegir una plantilla', '選択中の種類は青く表示されます':'La plantilla seleccionada aparece en azul', '釣りの設定':'Ajustes de pesca', '名前・アイコン・持ち物を自分向けに変更できます':'Personaliza el nombre, el icono y los artículos.', '種類名':'Nombre de la plantilla', '名前を保存':'Guardar nombre', 'アイコンを選ぶ':'Elegir un icono', '持ち物と並び順':'Artículos y orden', '新しい持ち物を追加':'Añadir un artículo nuevo',
+      'メインメニュー':'Menú principal', 'チェック':'Lista', 'テンプレート':'Plantillas'
+    };
+    const STATIC_BY_LANGUAGE = { en:STATIC_EN, zh:STATIC_ZH, ko:STATIC_KO, es:STATIC_ES };
     const AD_CONFIG = {
       enabled: true,
       testing: false,
@@ -264,9 +333,9 @@
     };
     function applyStaticLanguage() {
       document.documentElement.lang=UI_LANGUAGE; document.title=tr('appName'); const description=document.querySelector('meta[name="description"]'); if(description)description.content=tr('appDescription'); const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]'); if(appleTitle)appleTitle.content=tr('appName');
-      if(UI_LANGUAGE!=='en')return;
-      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); const nodes=[]; while(walker.nextNode())nodes.push(walker.currentNode); nodes.forEach((node)=>{const value=node.nodeValue.trim();if(STATIC_EN[value])node.nodeValue=node.nodeValue.replace(value,STATIC_EN[value]);});
-      document.querySelectorAll('[aria-label],[placeholder]').forEach((element)=>['aria-label','placeholder'].forEach((attribute)=>{const value=element.getAttribute(attribute);if(STATIC_EN[value])element.setAttribute(attribute,STATIC_EN[value]);}));
+      const staticMap = STATIC_BY_LANGUAGE[UI_LANGUAGE]; if(!staticMap)return;
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); const nodes=[]; while(walker.nextNode())nodes.push(walker.currentNode); nodes.forEach((node)=>{const value=node.nodeValue.trim();if(staticMap[value])node.nodeValue=node.nodeValue.replace(value,staticMap[value]);});
+      document.querySelectorAll('[aria-label],[placeholder]').forEach((element)=>['aria-label','placeholder'].forEach((attribute)=>{const value=element.getAttribute(attribute);if(staticMap[value])element.setAttribute(attribute,staticMap[value]);}));
     }
     const STORAGE_KEY = 'forget-check:workspace:v2';
     const OLD_STORAGE_KEY = 'forget-check:list:v1';

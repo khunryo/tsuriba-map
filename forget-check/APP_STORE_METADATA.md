@@ -7,6 +7,7 @@
 - SKU: `forget-check-ios-2026`
 - Primary language: English (U.S.)
 - Japanese localization: 日本語
+- In-app languages: English, Japanese, Simplified Chinese, Korean, Spanish
 - Primary category: Productivity
 - Secondary category: Travel
 - Age rating: 4+
