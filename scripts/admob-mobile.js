@@ -5,6 +5,40 @@
 
   if (!capacitor?.isNativePlatform?.() || !admob) return;
 
+  const defaultBannerHeight = 50;
+
+  const setBannerLayout = (height = defaultBannerHeight) => {
+    const measuredHeight = Number(height);
+    const bannerHeight = Number.isFinite(measuredHeight) && measuredHeight > 0
+      ? Math.ceil(measuredHeight)
+      : defaultBannerHeight;
+
+    document.body.style.setProperty("--native-ad-height", `${bannerHeight}px`);
+    document.body.classList.add("has-native-banner");
+  };
+
+  const clearBannerLayout = () => {
+    document.body.classList.remove("has-native-banner");
+    document.body.style.removeProperty("--native-ad-height");
+  };
+
+  const listenForBannerLayout = async () => {
+    try {
+      await Promise.all([
+        admob.addListener("bannerAdSizeChanged", ({ height }) => {
+          if (Number(height) > 0) setBannerLayout(height);
+          else clearBannerLayout();
+        }),
+        admob.addListener("bannerAdLoaded", () => {
+          if (!document.body.classList.contains("has-native-banner")) setBannerLayout();
+        }),
+        admob.addListener("bannerAdFailedToLoad", clearBannerLayout),
+      ]);
+    } catch (error) {
+      console.warn("AdMob banner layout events are unavailable", error);
+    }
+  };
+
   const addPrivacyOptions = () => {
     const legalLinks = document.querySelector(".legal-links");
     if (!legalLinks || document.querySelector("[data-ad-privacy]")) return;
@@ -46,11 +80,12 @@
         ? "__ADMOB_ANDROID_BANNER_ID__"
         : "ca-app-pub-6124353053548665/5394977614";
 
+      await listenForBannerLayout();
       await admob.showBanner({
         adId: bannerAdId,
         adSize: "ADAPTIVE_BANNER",
         position: "BOTTOM_CENTER",
-        margin: 78,
+        margin: 0,
         npa: true,
         isTesting: Boolean(capacitor.DEBUG) || bannerAdId.startsWith("ca-app-pub-3940256099942544/"),
       });

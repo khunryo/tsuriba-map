@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $fileList = @(
   'index.html',
+  'nationwide_ports.generated.js',
   'bait_live.json',
   'tide_stations.json',
   'manifest.webmanifest',

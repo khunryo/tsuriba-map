@@ -5,6 +5,7 @@ const root = resolve(import.meta.dirname, "..");
 const out = resolve(root, "dist", "server");
 const files = [
   "index.html",
+  "nationwide_ports.generated.js",
   "manifest.webmanifest",
   "sw.js",
   "bait_live.json",

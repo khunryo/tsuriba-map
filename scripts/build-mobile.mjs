@@ -5,6 +5,7 @@ const root = resolve(import.meta.dirname, "..");
 const out = resolve(root, "www");
 const files = [
   "index.html",
+  "nationwide_ports.generated.js",
   "manifest.webmanifest",
   "bait_live.json",
   "bathy.json",
@@ -50,8 +51,8 @@ const html = await readFile(indexPath, "utf8");
 await writeFile(
   indexPath,
   html.replace(
-    "<body>",
-    '<body data-native-shell="capacitor">',
+    /<body(?![^>]*\bdata-native-shell=)/,
+    '<body data-native-shell="capacitor"',
   ).replace(
     "</body>",
     '<script src="assets/capacitor-runtime.js"></script><script src="assets/admob-plugin.js"></script><script src="assets/admob-mobile.js"></script></body>',
