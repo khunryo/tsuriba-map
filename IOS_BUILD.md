@@ -45,6 +45,14 @@ iOSプロジェクト、カメラ・写真権限、プライバシーマニフ�
 - 投稿型サービスとして不適切投稿の通報・非表示・管理者対応を実装する
 - App Storeのプライバシー申告を `mobile/PrivacyInfo.xcprivacy` と一致させる
 
+## App Store申請前の必須ゲート
+
+新規申請、再申請、アップデート申請では、共通ルール
+`APP_STORE_COMMON_SUBMISSION_RULES.md` と潮先専用の
+`SHIOME_APP_STORE_RELEASE_CHECKLIST.md` を使用する。
+
+最新ビルドの掲載用スクリーンショット、審査説明用画像、審査用デモ動画を準備してApp Store Connectへ登録し、表示・再生確認とユーザーの最終確認が完了するまでは審査へ提出しない。App Preview（ストア掲載用動画）は審査用デモ動画とは別資料として扱う。
+
 ## Macでのアーカイブと提出
 
 Xcodeで `Any iOS Device (arm64)` を選び、Product → Archiveを実行する。Organizerで検証後、App Store Connectへアップロードし、まずTestFlightで実機テストを行う。
