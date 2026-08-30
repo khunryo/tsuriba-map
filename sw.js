@@ -1,5 +1,5 @@
 /* 釣り場マップ PWA service worker */
-const CACHE = 'shiome-v42';
+const CACHE = 'shiome-v43';
 const SHELL = ['./','./index.html','./nationwide_ports.generated.js','./manifest.webmanifest','./tide_stations.json','./icon-192.png','./icon-512.png','./icon-512-maskable.png','./apple-touch-icon-180.png','./assets/fish-species-sprite-v1.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import math
 import re
 import tempfile
@@ -51,7 +52,8 @@ def fetch(url: str) -> bytes:
     return response.content
 
 def normalize(name: str) -> str:
-    return re.sub(r"[・･\s]|漁港周辺|漁港|港周辺|海岸|浜$", "", name)
+    compact = re.sub(r"[・･\s]", "", name)
+    return re.sub(r"(?:漁港周辺|港周辺|海岸周辺|周辺|漁港|海岸|港)$", "", compact)
 
 def distance_km(a: tuple[float, float], b: tuple[float, float]) -> float:
     lat1, lon1, lat2, lon2 = map(math.radians, (a[0], a[1], b[0], b[1]))
@@ -71,7 +73,7 @@ def existing_spots() -> dict[str, list[tuple[str, float, float]]]:
                 result[pref].append((name, float(lat), float(lon)))
     return result
 
-def current_jfa_codes(work: Path) -> dict[str, set[str]]:
+def current_jfa_ports(work: Path) -> dict[str, dict[str, str]]:
     page = fetch(JFA_LIST).decode("utf-8", errors="replace")
     links: dict[str, str] = {}
     for href, label in re.findall(r'<a[^>]+href="([^"]+\.pdf)"[^>]*>(.*?)</a>', page, re.I | re.S):
@@ -79,7 +81,7 @@ def current_jfa_codes(work: Path) -> dict[str, set[str]]:
         pref = next((item for item in COASTAL_PREFS if text.startswith(item)), None)
         if pref:
             links[pref] = urllib.parse.urljoin(JFA_LIST, href)
-    result: dict[str, set[str]] = {}
+    result: dict[str, dict[str, str]] = {}
     for pref in COASTAL_PREFS:
         if pref not in links:
             raise RuntimeError(f"Current JFA list was not found for {pref}")
@@ -87,9 +89,14 @@ def current_jfa_codes(work: Path) -> dict[str, set[str]]:
         if not path.exists():
             path.write_bytes(fetch(links[pref]))
         extracted = "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
-        result[pref] = set(re.findall(r"(?<!\d)(\d{7})(?!\d)", extracted))
+        result[pref] = {}
+        for line in extracted.splitlines():
+            match = re.match(r"\s*(\d{7})\s+([^\s]+)", line)
+            if match:
+                code, name = match.groups()
+                result[pref][code] = name.strip()
         if not result[pref]:
-            raise RuntimeError(f"No fishing-port codes could be extracted for {pref}")
+            raise RuntimeError(f"No fishing-port records could be extracted for {pref}")
     return result
 
 def c09_ports(work: Path) -> list[dict[str, object]]:
@@ -155,63 +162,57 @@ def c02_ports(work: Path) -> list[dict[str, object]]:
                           "lat": point[0], "lon": point[1], "source": "mlit-c02"})
     return ports
 
-def select_ports(existing, candidates, current_codes, harbor_candidates):
+def select_ports(existing, candidates, current_ports, harbor_candidates):
     selected: list[dict[str, object]] = []
     for pref in COASTAL_PREFS:
-        # Long coastlines and island prefectures receive a denser baseline.
-        target = 30 if pref in {"北海道", "東京都", "長崎県", "鹿児島県", "沖縄県"} else 24
         known = list(existing[pref])
         known_names = {normalize(item[0]) for item in known}
-        pool = []
-        for item in candidates:
-            if item["pref"] != pref or item["code"] not in current_codes[pref]:
+        current_names = {normalize(name): name for name in current_ports[pref].values()}
+        # Include every current fishing port that has an official coordinate.
+        # The previous per-prefecture target silently dropped valid ports in long
+        # coastlines such as Niigata and its offshore islands.
+        for raw_item in sorted(candidates, key=lambda item: (-float(item["lat"]), float(item["lon"]))):
+            if raw_item["pref"] != pref:
                 continue
+            current_name = current_ports[pref].get(str(raw_item["code"]))
+            if not current_name:
+                current_name = current_names.get(normalize(str(raw_item["name"])))
+            if not current_name:
+                continue
+            item = dict(raw_item)
+            item["name"] = current_name
             normalized = normalize(str(item["name"]))
             point = (float(item["lat"]), float(item["lon"]))
             if not normalized or normalized in known_names:
                 continue
-            if any(distance_km(point, (lat, lon)) < 1.2 for _, lat, lon in known):
+            if any(distance_km(point, (lat, lon)) < 0.25 for _, lat, lon in known):
                 continue
-            pool.append(item)
-        while len(known) < target and pool:
-            def separation(item):
-                point = (float(item["lat"]), float(item["lon"]))
-                return min((distance_km(point, (lat, lon)) for _, lat, lon in known), default=9999)
-            best = max(pool, key=lambda item: (separation(item), str(item["name"])))
-            pool.remove(best)
-            name = f"{best['name']}漁港周辺"
-            known.append((name, float(best["lat"]), float(best["lon"])))
+            name = f"{item['name']}漁港周辺"
+            known.append((name, float(item["lat"]), float(item["lon"])))
             known_names.add(normalize(name))
-            selected.append(best)
-        # Some prefectures have fewer current fishing ports than the display baseline.
-        # Fill only with named national port records, maintaining geographic separation.
-        harbor_pool = []
-        for item in harbor_candidates:
+            selected.append(item)
+
+        # Add every named national port that is not already represented by a
+        # fishing-port or hand-verified coastal point.
+        for item in sorted(harbor_candidates, key=lambda item: (-float(item["lat"]), float(item["lon"]))):
             if item["pref"] != pref:
                 continue
             normalized = normalize(str(item["name"]))
             point = (float(item["lat"]), float(item["lon"]))
             if not normalized or normalized in known_names:
                 continue
-            if any(distance_km(point, (lat, lon)) < 1.2 for _, lat, lon in known):
+            if any(distance_km(point, (lat, lon)) < 0.8 for _, lat, lon in known):
                 continue
-            harbor_pool.append(item)
-        while len(known) < target and harbor_pool:
-            def harbor_separation(item):
-                point = (float(item["lat"]), float(item["lon"]))
-                return min((distance_km(point, (lat, lon)) for _, lat, lon in known), default=9999)
-            best = max(harbor_pool, key=lambda item: (harbor_separation(item), str(item["name"])))
-            harbor_pool.remove(best)
-            name = f"{best['name']}港周辺"
-            known.append((name, float(best["lat"]), float(best["lon"])))
+            name = f"{item['name']}港周辺"
+            known.append((name, float(item["lat"]), float(item["lon"])))
             known_names.add(normalize(name))
-            selected.append(best)
+            selected.append(item)
     return selected
 
 def write_output(selected):
     selected.sort(key=lambda item: (PREF_ORDER.index(str(item["pref"])), -float(item["lat"]), float(item["lon"])))
     lines = [
-        "/* Generated from current Fisheries Agency fishing-port codes and MLIT C09/C02 positions.",
+        "/* Generated by cross-checking current Fisheries Agency fishing-port records with MLIT C09/C02 positions.",
         " * A name is a representative coastal candidate, not permission to fish across the port. */",
         "window.NATIONWIDE_OFFICIAL_PORT_SEEDS = [",
     ]
@@ -229,17 +230,55 @@ def main():
     with tempfile.TemporaryDirectory(prefix="shiome-ports-") as temp:
         work = Path(temp)
         existing = existing_spots()
-        current_codes = current_jfa_codes(work)
+        current_ports = current_jfa_ports(work)
         candidates = c09_ports(work)
         harbor_candidates = c02_ports(work)
-        selected = select_ports(existing, candidates, current_codes, harbor_candidates)
+        selected = select_ports(existing, candidates, current_ports, harbor_candidates)
         write_output(selected)
         final_counts = {pref: len(existing[pref]) for pref in COASTAL_PREFS}
         for item in selected:
             final_counts[str(item["pref"])] += 1
+        c09_codes = {str(item["code"]) for item in candidates}
+        c09_names = {
+            str(item["pref"]): set()
+            for item in candidates
+        }
+        for item in candidates:
+            c09_names[str(item["pref"])].add(normalize(str(item["name"])))
+        missing_positions = {
+            pref: sum(
+                1
+                for code, name in current_ports[pref].items()
+                if code not in c09_codes and normalize(name) not in c09_names.get(pref, set())
+            )
+            for pref in COASTAL_PREFS
+            if any(
+                code not in c09_codes and normalize(name) not in c09_names.get(pref, set())
+                for code, name in current_ports[pref].items()
+            )
+        }
+        represented_names = {
+            pref: {normalize(name) for name, _, _ in existing[pref]}
+            for pref in COASTAL_PREFS
+        }
+        for item in selected:
+            represented_names[str(item["pref"])].add(normalize(str(item["name"])))
+        unrepresented_current = {
+            pref: [
+                name for name in current_ports[pref].values()
+                if normalize(name) not in represented_names[pref]
+            ]
+            for pref in COASTAL_PREFS
+            if any(
+                normalize(name) not in represented_names[pref]
+                for name in current_ports[pref].values()
+            )
+        }
         print(f"Generated {len(selected)} official coastal candidates")
         print("Minimum final count:", min(final_counts.values()))
-        print("Below target:", {key: value for key, value in final_counts.items() if value < 24})
+        print("Final counts:", json.dumps(final_counts, ensure_ascii=True, sort_keys=True))
+        print("Current JFA ports without C09 position:", json.dumps(missing_positions, ensure_ascii=True, sort_keys=True))
+        print("Current JFA ports not represented:", json.dumps(unrepresented_current, ensure_ascii=True, sort_keys=True))
 
 if __name__ == "__main__":
     main()
