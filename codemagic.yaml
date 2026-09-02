@@ -226,14 +226,22 @@ workflows:
           FORGET_CHECK_SIM_APP="$CM_BUILD_DIR/build/forget-check-ios/simulator/Build/Products/Release-iphonesimulator/App.app"
           test -d "$FORGET_CHECK_SIM_APP"
           xcrun simctl install "$FORGET_CHECK_SIM_UDID" "$FORGET_CHECK_SIM_APP"
-          xcrun simctl launch "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck
-          sleep 8
-
+          open -a Simulator --args -CurrentDeviceUDID "$FORGET_CHECK_SIM_UDID"
+          sleep 4
+          xcrun simctl terminate "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck || true
+          xcrun simctl launch --terminate-running "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck
           mkdir -p "$CM_BUILD_DIR/build/forget-check-ios/screenshots"
+          sleep 8
           xcrun simctl io "$FORGET_CHECK_SIM_UDID" screenshot --type=png \
-            "$CM_BUILD_DIR/build/forget-check-ios/screenshots/ForgetCheck_iPad_13inch_CategorySelection.png"
+            "$CM_BUILD_DIR/build/forget-check-ios/screenshots/ForgetCheck_iPad_13inch_08s.png"
+          sleep 12
+          xcrun simctl io "$FORGET_CHECK_SIM_UDID" screenshot --type=png \
+            "$CM_BUILD_DIR/build/forget-check-ios/screenshots/ForgetCheck_iPad_13inch_20s.png"
+          sleep 20
+          xcrun simctl io "$FORGET_CHECK_SIM_UDID" screenshot --type=png \
+            "$CM_BUILD_DIR/build/forget-check-ios/screenshots/ForgetCheck_iPad_13inch_40s.png"
           sips -g pixelWidth -g pixelHeight \
-            "$CM_BUILD_DIR/build/forget-check-ios/screenshots/ForgetCheck_iPad_13inch_CategorySelection.png"
+            "$CM_BUILD_DIR/build/forget-check-ios/screenshots/ForgetCheck_iPad_13inch_40s.png"
 
     artifacts:
       - build/forget-check-ios/ipa/*.ipa
