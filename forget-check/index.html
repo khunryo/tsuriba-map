@@ -76,6 +76,19 @@
     .choice-count { margin-top:2px; color:var(--muted); font-size:11px; }
     .choice-arrow { color:#a6afbd; font-size:22px; }
     .choice-edit { margin-top:18px; padding:9px; border:0; background:transparent; color:var(--blue); cursor:pointer; font-size:12px; font-weight:800; }
+    .purchase-card { margin-top:14px; padding:14px; border:1px solid #d7def0; border-radius:15px; background:linear-gradient(145deg,#fff,#f4f7ff); box-shadow:0 6px 18px rgba(37,48,67,.05); }
+    .purchase-copy { display:flex; align-items:flex-start; gap:10px; }
+    .purchase-mark { display:grid; place-items:center; flex:0 0 auto; width:31px; height:31px; border-radius:10px; background:var(--navy); color:#fff; font-size:13px; }
+    .purchase-copy strong { display:block; font-size:13px; }
+    .purchase-copy p { margin:2px 0 0; color:var(--muted); font-size:10px; }
+    .purchase-copy small { display:inline-block; margin-top:5px; padding:2px 7px; border-radius:99px; background:#edf2ff; color:#52658f; font-size:9px; font-weight:800; }
+    .purchase-actions { display:grid; grid-template-columns:1fr auto; gap:7px; margin-top:11px; }
+    .purchase-button, .restore-purchase-button { min-height:39px; }
+    .purchase-status { margin:8px 1px 0; color:var(--muted); font-size:10px; }
+    .purchase-status:empty { display:none; }
+    .purchase-card.is-active { border-color:#c7e3d2; background:linear-gradient(145deg,#fff,#f0faf4); }
+    .purchase-card.is-active .purchase-mark { background:var(--green); }
+    .purchase-card.is-active .purchase-status { color:#257a52; font-weight:800; }
     .app { display:flex; flex-direction:column; min-height:calc(100dvh - 40px); padding-bottom:82px; }
     body.ads-on .app { padding-bottom:164px; }
     .app-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0 20px; }
@@ -185,6 +198,7 @@
     .nav-button strong { font-size:19px; line-height:1; font-weight:500; }
     .nav-button.active { background:var(--blue-soft); color:var(--blue); }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media (max-width:360px) { .purchase-actions { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -195,7 +209,7 @@
 
   <section class="stage" id="type-screen" hidden>
     <header class="stage-header"><div class="brand"><span class="brand-mark" aria-hidden="true">✓</span><span>忘れ物チェック</span></div><div class="local-note"><span class="local-dot" aria-hidden="true"></span>端末だけに保存</div></header>
-    <main class="type-choice"><p class="choice-kicker">STEP 1</p><h1>今日は何の<br>持ち物を確認しますか？</h1><p class="choice-copy">使う種類を選ぶと、チェックを始められます。</p><div class="choice-list" id="choice-list"></div><button class="choice-edit" id="edit-before-choice" type="button">テンプレートを編集する</button></main>
+    <main class="type-choice"><p class="choice-kicker">STEP 1</p><h1>今日は何の<br>持ち物を確認しますか？</h1><p class="choice-copy">使う種類を選ぶと、チェックを始められます。</p><div class="choice-list" id="choice-list"></div><button class="choice-edit" id="edit-before-choice" type="button">テンプレートを編集する</button><section class="purchase-card" data-purchase-card hidden><div class="purchase-copy"><span class="purchase-mark" aria-hidden="true">✦</span><div><strong>広告なしで使う</strong><p>一度の購入で、バナー広告を削除できます。</p><small>買い切り・追加料金なし</small></div></div><div class="purchase-actions"><button class="primary-button purchase-button" type="button" disabled>価格を確認しています…</button><button class="secondary-button restore-purchase-button" type="button">購入を復元</button></div><p class="purchase-status" role="status" aria-live="polite"></p></section></main>
   </section>
 
   <section class="stage" id="app-screen" hidden>
@@ -215,6 +229,7 @@
         <section class="template-create" aria-labelledby="create-title"><div class="template-step-title"><span class="step-number" aria-hidden="true">＋</span><div><strong id="create-title">新しいテンプレート</strong><small>まず名前を決めるだけで作成できます</small></div></div><form class="new-type-form" id="new-type-form"><label class="sr-only" for="new-type-input">新しいテンプレートの名前</label><input id="new-type-input" type="text" maxlength="24" placeholder="例：キャンプ、旅行、通院" autocomplete="off"><button class="primary-button" type="submit">作成</button></form></section>
         <section class="manager" aria-labelledby="manager-title"><div class="manager-heading"><span class="step-number" aria-hidden="true">1</span><div><h2 id="manager-title">編集する種類を選ぶ</h2><p>選択中の種類は青く表示されます</p></div></div><div id="manager-list"></div></section>
         <section class="editor" aria-labelledby="editor-title"><div class="editor-heading"><span class="step-number" aria-hidden="true">2</span><span class="editor-icon category-icon" id="editor-icon" data-category-icon="fishing" aria-hidden="true"></span><div><h2 id="editor-title">釣りの設定</h2><p>名前・アイコン・持ち物を自分向けに変更できます</p></div></div><form class="type-name-form" id="type-name-form"><label class="sr-only" for="type-name-input">種類名</label><input id="type-name-input" type="text" maxlength="24" autocomplete="off"><button class="primary-button" type="submit">名前を保存</button></form><fieldset class="icon-picker"><legend>アイコンを選ぶ</legend><div class="icon-picker-grid" id="icon-picker-grid"></div></fieldset><div class="editor-label">持ち物と並び順</div><div class="edit-item-list" id="edit-item-list"></div><form class="editor-add-form" id="editor-add-form"><label class="sr-only" for="editor-add-input">持ち物を追加</label><input id="editor-add-input" type="text" maxlength="40" placeholder="新しい持ち物を追加" autocomplete="off"><button class="secondary-button" type="submit">追加</button></form></section>
+        <section class="purchase-card" data-purchase-card hidden><div class="purchase-copy"><span class="purchase-mark" aria-hidden="true">✦</span><div><strong>広告なしで使う</strong><p>一度の購入で、バナー広告を削除できます。</p><small>買い切り・追加料金なし</small></div></div><div class="purchase-actions"><button class="primary-button purchase-button" type="button" disabled>価格を確認しています…</button><button class="secondary-button restore-purchase-button" type="button">購入を復元</button></div><p class="purchase-status" role="status" aria-live="polite"></p></section>
       </main>
       <nav class="bottom-nav" aria-label="メインメニュー"><button class="nav-button active" id="check-nav" type="button"><strong aria-hidden="true">✓</strong><span>チェック</span></button><button class="nav-button" id="templates-nav" type="button"><strong aria-hidden="true">☷</strong><span>テンプレート</span></button></nav>
     </div>
@@ -236,7 +251,8 @@
         selectType:'{name}を選ぶ', itemCount:'{count}個の持ち物', completeEmpty:'チェック済みです。すべて確認できました。', listEmpty:'この種類にはまだ持ち物がありません。下から追加できます。',
         uncheckItem:'{name}を未チェックに戻す', checkItem:'{name}をチェックする', removeItem:'{name}を削除', ready:'準備できました。いってらっしゃい！', remaining:'あと{count}個です', start:'まずはひとつチェック', showAll:'すべて表示', hideDone:'完了を隠す',
         use:'使う', useType:'{name}を使う', delete:'削除', settings:'{name}の設定', chooseIcon:'{name}のアイコンを選ぶ', iconSaved:'アイコンを保存しました', noItems:'持ち物がありません。下から追加してください。', editName:'{name}の名前を編集', itemNameSaved:'項目名を保存しました', moveUp:'{name}を上へ', moveDown:'{name}を下へ',
-        clearedRestorable:'クリアしました。一時保存から復元できます', cleared:'チェックをクリアしました'
+        clearedRestorable:'クリアしました。一時保存から復元できます', cleared:'チェックをクリアしました',
+        removeAdsTitle:'広告なしで使う', removeAdsDescription:'一度の購入で、バナー広告を削除できます。', oneTimePurchase:'買い切り・追加料金なし', removeAdsLoading:'価格を確認しています…', removeAdsButton:'広告を削除（{price}）', restoreAdsPurchase:'購入を復元', adFreeActive:'広告は削除されています', purchaseUnavailable:'現在、購入情報を取得できません', purchaseWorking:'購入手続きを開いています…', purchaseSuccess:'広告を削除しました', purchasePending:'購入は保留中です。承認後に反映されます', restoreWorking:'購入履歴を確認しています…', restoreSuccess:'購入を復元し、広告を削除しました', restoreNotFound:'復元できる購入はありませんでした', purchaseError:'購入を完了できませんでした。時間をおいてお試しください', restoreError:'購入履歴を復元できませんでした'
       },
       en:{
         appName:'Forget Check', appDescription:'A private, device-only checklist with customizable packing templates.', untitled:'Untitled list', myList:'My List',
@@ -248,7 +264,8 @@
         selectType:'Choose {name}', itemCount:'{count} items', completeEmpty:'Everything is checked. You are ready to go!', listEmpty:'This list has no items yet. Add one below.',
         uncheckItem:'Mark {name} unchecked', checkItem:'Check {name}', removeItem:'Remove {name}', ready:'All set. Have a great trip!', remaining:'{count} left', start:'Start with one item', showAll:'Show all', hideDone:'Hide checked',
         use:'Use', useType:'Use {name}', delete:'Delete', settings:'{name} settings', chooseIcon:'Choose the {name} icon', iconSaved:'Icon saved', noItems:'No items yet. Add one below.', editName:'Edit the name of {name}', itemNameSaved:'Item name saved', moveUp:'Move {name} up', moveDown:'Move {name} down',
-        clearedRestorable:'Cleared. You can restore the saved snapshot.', cleared:'Checklist cleared'
+        clearedRestorable:'Cleared. You can restore the saved snapshot.', cleared:'Checklist cleared',
+        removeAdsTitle:'Use without ads', removeAdsDescription:'A one-time purchase removes banner ads from the app.', oneTimePurchase:'One-time purchase · no recurring charge', removeAdsLoading:'Checking price…', removeAdsButton:'Remove ads ({price})', restoreAdsPurchase:'Restore purchase', adFreeActive:'Ads have been removed', purchaseUnavailable:'Purchase information is currently unavailable', purchaseWorking:'Opening purchase…', purchaseSuccess:'Ads removed', purchasePending:'Purchase is pending and will apply after approval.', restoreWorking:'Checking purchase history…', restoreSuccess:'Purchase restored and ads removed', restoreNotFound:'No purchase was found to restore', purchaseError:'The purchase could not be completed. Please try again later.', restoreError:'Purchase history could not be restored'
       },
       zh:{
         appName:'忘带检查', appDescription:'一款只保存在设备上的私密清单，可自定义不同场景的物品模板。', untitled:'未命名清单', myList:'我的清单',
@@ -260,7 +277,8 @@
         selectType:'选择{name}', itemCount:'{count}件物品', completeEmpty:'全部检查完毕，可以出发了！', listEmpty:'此清单还没有物品，请在下方添加。',
         uncheckItem:'将{name}设为未检查', checkItem:'检查{name}', removeItem:'删除{name}', ready:'准备好了，出发吧！', remaining:'还剩{count}件', start:'先检查一件物品', showAll:'显示全部', hideDone:'隐藏已完成',
         use:'使用', useType:'使用{name}', delete:'删除', settings:'{name}设置', chooseIcon:'选择{name}图标', iconSaved:'图标已保存', noItems:'还没有物品，请在下方添加。', editName:'编辑{name}的名称', itemNameSaved:'物品名称已保存', moveUp:'将{name}上移', moveDown:'将{name}下移',
-        clearedRestorable:'已清除，可以从临时保存中恢复。', cleared:'清单已清除'
+        clearedRestorable:'已清除，可以从临时保存中恢复。', cleared:'清单已清除',
+        removeAdsTitle:'无广告使用', removeAdsDescription:'一次购买即可移除应用内横幅广告。', oneTimePurchase:'一次性购买 · 无定期扣费', removeAdsLoading:'正在查询价格…', removeAdsButton:'移除广告（{price}）', restoreAdsPurchase:'恢复购买', adFreeActive:'广告已移除', purchaseUnavailable:'暂时无法获取购买信息', purchaseWorking:'正在打开购买页面…', purchaseSuccess:'广告已移除', purchasePending:'购买正在等待处理，批准后将自动生效。', restoreWorking:'正在查询购买记录…', restoreSuccess:'购买已恢复，广告已移除', restoreNotFound:'未找到可恢复的购买', purchaseError:'无法完成购买，请稍后再试。', restoreError:'无法恢复购买记录'
       },
       ko:{
         appName:'잊은 물건 체크', appDescription:'기기에만 저장되는 비공개 체크리스트입니다. 상황별 준비물 템플릿을 직접 만들 수 있습니다.', untitled:'이름 없는 목록', myList:'내 목록',
@@ -272,7 +290,8 @@
         selectType:'{name} 선택', itemCount:'준비물 {count}개', completeEmpty:'모두 확인했습니다. 이제 출발해도 좋아요!', listEmpty:'이 목록에는 아직 준비물이 없습니다. 아래에서 추가하세요.',
         uncheckItem:'{name} 체크 해제', checkItem:'{name} 체크하기', removeItem:'{name} 삭제', ready:'준비 완료! 다녀오세요!', remaining:'{count}개 남음', start:'먼저 하나를 체크해 보세요', showAll:'모두 표시', hideDone:'완료 항목 숨기기',
         use:'사용', useType:'{name} 사용', delete:'삭제', settings:'{name} 설정', chooseIcon:'{name} 아이콘 선택', iconSaved:'아이콘을 저장했습니다', noItems:'준비물이 없습니다. 아래에서 추가하세요.', editName:'{name} 이름 편집', itemNameSaved:'준비물 이름을 저장했습니다', moveUp:'{name} 위로 이동', moveDown:'{name} 아래로 이동',
-        clearedRestorable:'삭제했습니다. 임시 저장에서 복원할 수 있습니다.', cleared:'체크 목록을 초기화했습니다'
+        clearedRestorable:'삭제했습니다. 임시 저장에서 복원할 수 있습니다.', cleared:'체크 목록을 초기화했습니다',
+        removeAdsTitle:'광고 없이 사용', removeAdsDescription:'한 번 구매하면 앱의 배너 광고가 제거됩니다.', oneTimePurchase:'일회성 구매 · 정기 결제 없음', removeAdsLoading:'가격 확인 중…', removeAdsButton:'광고 제거 ({price})', restoreAdsPurchase:'구매 복원', adFreeActive:'광고가 제거되었습니다', purchaseUnavailable:'현재 구매 정보를 불러올 수 없습니다', purchaseWorking:'구매 화면을 여는 중…', purchaseSuccess:'광고를 제거했습니다', purchasePending:'구매가 보류 중이며 승인 후 적용됩니다.', restoreWorking:'구매 내역 확인 중…', restoreSuccess:'구매를 복원하고 광고를 제거했습니다', restoreNotFound:'복원할 구매 내역이 없습니다', purchaseError:'구매를 완료할 수 없습니다. 잠시 후 다시 시도하세요.', restoreError:'구매 내역을 복원할 수 없습니다'
       },
       es:{
         appName:'Lista de olvidos', appDescription:'Una lista privada que se guarda solo en tu dispositivo, con plantillas personalizables.', untitled:'Lista sin nombre', myList:'Mi lista',
@@ -284,7 +303,8 @@
         selectType:'Elegir {name}', itemCount:'{count} artículos', completeEmpty:'Todo está comprobado. ¡Listo para salir!', listEmpty:'Esta lista aún no tiene artículos. Añade uno abajo.',
         uncheckItem:'Desmarcar {name}', checkItem:'Marcar {name}', removeItem:'Eliminar {name}', ready:'Todo listo. ¡Buen viaje!', remaining:'Quedan {count}', start:'Empieza por un artículo', showAll:'Mostrar todo', hideDone:'Ocultar completados',
         use:'Usar', useType:'Usar {name}', delete:'Eliminar', settings:'Ajustes de {name}', chooseIcon:'Elegir el icono de {name}', iconSaved:'Icono guardado', noItems:'Aún no hay artículos. Añade uno abajo.', editName:'Editar el nombre de {name}', itemNameSaved:'Nombre guardado', moveUp:'Subir {name}', moveDown:'Bajar {name}',
-        clearedRestorable:'Se ha borrado. Puedes restaurar la copia temporal.', cleared:'Lista borrada'
+        clearedRestorable:'Se ha borrado. Puedes restaurar la copia temporal.', cleared:'Lista borrada',
+        removeAdsTitle:'Usar sin anuncios', removeAdsDescription:'Una compra única elimina los anuncios de banner de la app.', oneTimePurchase:'Pago único · sin cuotas periódicas', removeAdsLoading:'Consultando precio…', removeAdsButton:'Eliminar anuncios ({price})', restoreAdsPurchase:'Restaurar compra', adFreeActive:'Los anuncios se han eliminado', purchaseUnavailable:'La información de compra no está disponible', purchaseWorking:'Abriendo la compra…', purchaseSuccess:'Anuncios eliminados', purchasePending:'La compra está pendiente y se aplicará tras su aprobación.', restoreWorking:'Consultando el historial de compras…', restoreSuccess:'Compra restaurada y anuncios eliminados', restoreNotFound:'No se encontró ninguna compra para restaurar', purchaseError:'No se pudo completar la compra. Inténtalo más tarde.', restoreError:'No se pudo restaurar el historial de compras'
       }
     };
     function tr(key, values={}) { const value=STRINGS[UI_LANGUAGE][key] ?? STRINGS.ja[key] ?? key; if(Array.isArray(value))return value; return Object.entries(values).reduce((text,[name,replacement])=>text.replaceAll(`{${name}}`,String(replacement)),value); }
@@ -353,7 +373,8 @@
     ];
     const els = {
       splash:document.querySelector('#splash-screen'), typeScreen:document.querySelector('#type-screen'), appScreen:document.querySelector('#app-screen'), choiceList:document.querySelector('#choice-list'), editBeforeChoice:document.querySelector('#edit-before-choice'), changeType:document.querySelector('#change-type'), currentTypeIcon:document.querySelector('#current-type-icon'), currentTypeName:document.querySelector('#current-type-name'), checkView:document.querySelector('#check-view'), templatesView:document.querySelector('#templates-view'), checkNav:document.querySelector('#check-nav'), templatesNav:document.querySelector('#templates-nav'),
-      checkList:document.querySelector('#check-list'), quickAddForm:document.querySelector('#quick-add-form'), quickAddInput:document.querySelector('#quick-add-input'), checkedCount:document.querySelector('#checked-count'), totalCount:document.querySelector('#total-count'), progressFill:document.querySelector('#progress-fill'), progressTitle:document.querySelector('#progress-title'), progressBar:document.querySelector('[role=progressbar]'), hideCompleted:document.querySelector('#hide-completed'), resetChecks:document.querySelector('#reset-checks'), saveNote:document.querySelector('#save-note'), temporaryStatus:document.querySelector('#temporary-status'), temporarySave:document.querySelector('#temporary-save'), temporaryRestore:document.querySelector('#temporary-restore'), managerList:document.querySelector('#manager-list'), newTypeForm:document.querySelector('#new-type-form'), newTypeInput:document.querySelector('#new-type-input'), editorIcon:document.querySelector('#editor-icon'), editorTitle:document.querySelector('#editor-title'), iconPicker:document.querySelector('#icon-picker-grid'), typeNameForm:document.querySelector('#type-name-form'), typeNameInput:document.querySelector('#type-name-input'), editItemList:document.querySelector('#edit-item-list'), editorAddForm:document.querySelector('#editor-add-form'), editorAddInput:document.querySelector('#editor-add-input')
+      checkList:document.querySelector('#check-list'), quickAddForm:document.querySelector('#quick-add-form'), quickAddInput:document.querySelector('#quick-add-input'), checkedCount:document.querySelector('#checked-count'), totalCount:document.querySelector('#total-count'), progressFill:document.querySelector('#progress-fill'), progressTitle:document.querySelector('#progress-title'), progressBar:document.querySelector('[role=progressbar]'), hideCompleted:document.querySelector('#hide-completed'), resetChecks:document.querySelector('#reset-checks'), saveNote:document.querySelector('#save-note'), temporaryStatus:document.querySelector('#temporary-status'), temporarySave:document.querySelector('#temporary-save'), temporaryRestore:document.querySelector('#temporary-restore'), managerList:document.querySelector('#manager-list'), newTypeForm:document.querySelector('#new-type-form'), newTypeInput:document.querySelector('#new-type-input'), editorIcon:document.querySelector('#editor-icon'), editorTitle:document.querySelector('#editor-title'), iconPicker:document.querySelector('#icon-picker-grid'), typeNameForm:document.querySelector('#type-name-form'), typeNameInput:document.querySelector('#type-name-input'), editItemList:document.querySelector('#edit-item-list'), editorAddForm:document.querySelector('#editor-add-form'), editorAddInput:document.querySelector('#editor-add-input'),
+      purchaseCards:[...document.querySelectorAll('[data-purchase-card]')], purchaseTitles:[...document.querySelectorAll('.purchase-copy strong')], purchaseDescriptions:[...document.querySelectorAll('.purchase-copy p')], purchaseBadges:[...document.querySelectorAll('.purchase-copy small')], purchaseButtons:[...document.querySelectorAll('.purchase-button')], restorePurchaseButtons:[...document.querySelectorAll('.restore-purchase-button')], purchaseStatuses:[...document.querySelectorAll('.purchase-status')]
     };
     let workspace = loadWorkspace();
     let selectedTypeId = workspace.selectedTypeId || workspace.types[0].id;
@@ -362,10 +383,121 @@
     let temporarySnapshot = loadTemporary();
     let adMobReady = false;
     let adMobConsentReady = false;
+    let adsRemoved = false;
+    let adEligibilityConfirmed = false;
+    let adRemovalStatusKnown = false;
+    let adRemovalState = 'loading';
+    let adRemovalProduct = null;
+    let adRemovalPromise = null;
+    let purchaseBusy = false;
+    let purchaseMessage = '';
 
     function normalizeIcon(icon) { const value=String(icon || 'travel'); return ICON_OPTIONS.some((option)=>option.id===value) ? value : (LEGACY_ICONS[value] || 'travel'); }
     function nativeImpact(style='Light') { const haptics=window.Capacitor?.Plugins?.Haptics; if(haptics)haptics.impact({style}).catch(()=>{}); }
     function nativeAdMob() { return window.Capacitor?.Plugins?.AdMob || null; }
+    function nativeAdRemoval() { return window.Capacitor?.Plugins?.AdRemoval || null; }
+    function updatePurchaseUi() {
+      const isNative = Boolean(document.body.dataset.nativeShell && nativeAdRemoval());
+      els.purchaseCards.forEach((card)=>{card.hidden=!isNative;card.classList.toggle('is-active',adsRemoved);});
+      if (!isNative) return;
+      els.purchaseTitles.forEach((element)=>{element.textContent=tr('removeAdsTitle');});
+      els.purchaseDescriptions.forEach((element)=>{element.textContent=tr('removeAdsDescription');});
+      els.purchaseBadges.forEach((element)=>{element.textContent=tr('oneTimePurchase');});
+      const buttonText = adsRemoved ? tr('adFreeActive') : adRemovalState === 'ready' ? tr('removeAdsButton',{price:adRemovalProduct?.displayPrice || '¥100'}) : adRemovalState === 'loading' ? tr('removeAdsLoading') : tr('purchaseUnavailable');
+      const defaultMessage = adsRemoved ? tr('adFreeActive') : adRemovalState === 'unavailable' ? tr('purchaseUnavailable') : '';
+      els.purchaseButtons.forEach((button)=>{button.textContent=buttonText;button.disabled=purchaseBusy||adsRemoved||adRemovalState!=='ready';});
+      els.restorePurchaseButtons.forEach((button)=>{button.textContent=tr('restoreAdsPurchase');button.disabled=purchaseBusy;});
+      els.purchaseStatuses.forEach((element)=>{element.textContent=purchaseMessage||defaultMessage;});
+    }
+    async function ensureAdRemovalState(force=false) {
+      const plugin = nativeAdRemoval();
+      if (!document.body.dataset.nativeShell || !plugin) {
+        adRemovalStatusKnown = true;
+        adEligibilityConfirmed = false;
+        updatePurchaseUi();
+        return;
+      }
+      if (!force && adRemovalPromise) return adRemovalPromise;
+      adRemovalState = 'loading'; purchaseMessage = ''; updatePurchaseUi();
+      adRemovalPromise = (async()=>{
+        try {
+          const status = await plugin.getStatus();
+          adsRemoved = Boolean(status?.purchased);
+          adEligibilityConfirmed = true;
+          adRemovalStatusKnown = true;
+        } catch (_) {
+          adEligibilityConfirmed = false;
+          adRemovalStatusKnown = true;
+          adRemovalState = 'unavailable';
+          await hideAds();
+          updatePurchaseUi();
+          return;
+        }
+        if (adsRemoved) {
+          adRemovalState = 'active';
+          await hideAds();
+          updatePurchaseUi();
+          return;
+        }
+        try {
+          const product = await plugin.getProduct();
+          if (product?.id && product.id !== 'jp.khunryo.forgetcheck.removeads') throw new Error('Unexpected product');
+          if (product?.purchased) {
+            adsRemoved = true;
+            adRemovalState = 'active';
+            await hideAds();
+          } else {
+            adRemovalProduct = product?.available ? product : null;
+            adRemovalState = adRemovalProduct ? 'ready' : 'unavailable';
+          }
+        } catch (_) {
+          adRemovalProduct = null;
+          adRemovalState = 'unavailable';
+        }
+        updatePurchaseUi();
+      })();
+      return adRemovalPromise;
+    }
+    async function purchaseAdRemoval() {
+      const plugin = nativeAdRemoval();
+      if (!plugin || purchaseBusy) return;
+      await ensureAdRemovalState();
+      if (adRemovalState !== 'ready') return;
+      purchaseBusy = true; purchaseMessage = tr('purchaseWorking'); updatePurchaseUi();
+      try {
+        const result = await plugin.purchase();
+        if (result?.purchased || result?.status === 'alreadyPurchased') {
+          adsRemoved = true; adEligibilityConfirmed = true; adRemovalState = 'active'; purchaseMessage = tr('purchaseSuccess'); nativeImpact('Medium'); await hideAds();
+        } else if (result?.status === 'pending') {
+          purchaseMessage = tr('purchasePending');
+        } else if (result?.status === 'cancelled') {
+          purchaseMessage = '';
+        } else {
+          purchaseMessage = tr('purchaseUnavailable');
+        }
+      } catch (_) {
+        purchaseMessage = tr('purchaseError');
+      } finally {
+        purchaseBusy = false; updatePurchaseUi();
+      }
+    }
+    async function restoreAdRemoval() {
+      const plugin = nativeAdRemoval();
+      if (!plugin || purchaseBusy) return;
+      purchaseBusy = true; purchaseMessage = tr('restoreWorking'); updatePurchaseUi();
+      try {
+        const result = await plugin.restore();
+        if (result?.purchased) {
+          adsRemoved = true; adEligibilityConfirmed = true; adRemovalState = 'active'; purchaseMessage = tr('restoreSuccess'); nativeImpact('Medium'); await hideAds();
+        } else {
+          purchaseMessage = tr('restoreNotFound');
+        }
+      } catch (_) {
+        purchaseMessage = tr('restoreError');
+      } finally {
+        purchaseBusy = false; updatePurchaseUi();
+      }
+    }
     async function prepareAds() {
       const admob = nativeAdMob();
       if (!AD_CONFIG.enabled || !admob) return null;
@@ -388,6 +520,8 @@
       if (admob) await admob.removeBanner().catch(() => {});
     }
     async function syncAds(surface) {
+      if (document.body.dataset.nativeShell && !adRemovalStatusKnown) await ensureAdRemovalState();
+      if (adsRemoved || (document.body.dataset.nativeShell && !adEligibilityConfirmed)) { await hideAds(); return; }
       if (!AD_CONFIG.enabled || !document.body.dataset.nativeShell || !['type', 'templates'].includes(surface)) { await hideAds(); return; }
       const admob = await prepareAds();
       if (!admob || !adMobConsentReady) { await hideAds(); return; }
@@ -473,7 +607,10 @@
     els.newTypeForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.newTypeInput.value.trim();if(!name||workspace.types.some((type)=>type.name===name)){els.newTypeInput.focus();return;}const type={id:makeId('type'),name,icon:'travel',items:[]};workspace.types.push(type);selectedTypeId=type.id;els.newTypeInput.value='';saveWorkspace();renderTemplates();els.typeNameInput.focus();});
     els.typeNameForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.typeNameInput.value.trim();const type=currentType();if(!name||workspace.types.some((candidate)=>candidate.id!==type.id&&candidate.name===name))return;type.name=name;saveWorkspace();renderTemplates();});
     els.editorAddForm.addEventListener('submit',(event)=>{event.preventDefault();const name=els.editorAddInput.value.trim();const type=currentType();if(!name||type.items.some((item)=>item.name===name)){els.editorAddInput.focus();return;}type.items.push({id:makeId('item'),name,checked:false});els.editorAddInput.value='';saveWorkspace();renderTemplates();els.editorAddInput.focus();});
+    els.purchaseButtons.forEach((button)=>button.addEventListener('click',()=>{void purchaseAdRemoval();}));
+    els.restorePurchaseButtons.forEach((button)=>button.addEventListener('click',()=>{void restoreAdRemoval();}));
     renderTypeChoice(); applyStaticLanguage();
+    updatePurchaseUi(); void ensureAdRemovalState();
     window.setTimeout(()=>{els.splash.hidden=true;els.typeScreen.hidden=false;void syncAds('type');},2000);
     if(!document.body.dataset.nativeShell && 'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   </script>

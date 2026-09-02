@@ -1,4 +1,4 @@
-const CACHE = 'forget-check-v7';
+const CACHE = 'forget-check-v8';
 const CORE = [
   './',
   './index.html',

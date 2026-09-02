@@ -18,6 +18,8 @@
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A16F0C1A2F40000100FC0001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A16F0C1B2F40000100FC0001 /* PrivacyInfo.xcprivacy */; };
 		B16F0C2A2F40000100FC0001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B16F0C2D2F40000100FC0001 /* InfoPlist.strings */; };
+		C16F0C3A2F40000100FC0001 /* AdRemovalPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F0C3B2F40000100FC0001 /* AdRemovalPlugin.swift */; };
+		C16F0C3C2F40000100FC0001 /* BridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F0C3D2F40000100FC0001 /* BridgeViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		B16F0C2E2F40000100FC0001 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		B16F0C2F2F40000100FC0001 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B16F0C302F40000100FC0001 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C16F0C3B2F40000100FC0001 /* AdRemovalPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdRemovalPlugin.swift; sourceTree = "<group>"; };
+		C16F0C3D2F40000100FC0001 /* BridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,8 @@
 				9582B6822FE993A50072D4E8 /* SceneDelegate.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
+				C16F0C3D2F40000100FC0001 /* BridgeViewController.swift */,
+				C16F0C3B2F40000100FC0001 /* AdRemovalPlugin.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -173,6 +179,8 @@
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
+				C16F0C3C2F40000100FC0001 /* BridgeViewController.swift in Sources */,
+				C16F0C3A2F40000100FC0001 /* AdRemovalPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

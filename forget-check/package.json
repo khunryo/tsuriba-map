@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node build.mjs",
     "build:mobile": "node scripts/build-mobile.mjs",
+    "verify": "node scripts/verify-release.mjs",
     "ios:add": "pnpm run build:mobile && pnpm exec cap add ios",
     "ios:sync": "pnpm run build:mobile && pnpm exec cap sync ios",
     "ios:open": "pnpm exec cap open ios"

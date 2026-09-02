@@ -4,8 +4,10 @@
 
 - Capacitor 8 / WKWebView
 - アプリ画面と全データを端末内に保持するオフライン構成
-- 広告、ログイン、解析、外部API、端末権限なし
-- 仮Bundle ID: `jp.khunryo.forgetcheck`
+- 種類選択・テンプレート編集画面に非パーソナライズの小型バナー広告
+- StoreKit 2による広告削除の買い切りApp内課金
+- ログイン、外部解析SDK、独自サーバー、端末権限なし
+- Bundle ID: `jp.khunryo.forgetcheck`
 - 最低対応OS: iOS 15
 
 ## Sideloadly用の未署名IPA
@@ -29,6 +31,8 @@ Sideloadlyでの署名期限や再署名条件はApple Accountの種類に依存
 - 機内モードでの全操作
 - ノッチ、Dynamic Island、ホームインジケータ付近の表示
 - 文字サイズ変更時のボタンと入力欄
+- Sandboxで広告削除の購入、キャンセル、保留、購入復元
+- 購入後と再起動後に広告が出ないこと、未購入時だけ対象2画面に広告が出ること
 
 ## App Store登録へ進むとき
 
@@ -36,6 +40,7 @@ Sideloadlyでの署名期限や再署名条件はApple Accountの種類に依存
 2. `capacitor.config.json` とXcodeプロジェクトのBundle IDを一致させる。
 3. CodemagicのApp Store Connect連携と配布証明書を設定する。
 4. `ios-testflight` で署名済みIPAを作り、まずTestFlightへアップロードする。
-5. プライバシー申告は「収集なし」を、実装と最終確認した上で回答する。
+5. App Store Connectで非消費型商品 `jp.khunryo.forgetcheck.removeads` を作成し、提出ビルドと一緒に審査へ追加する。
+6. App PrivacyはAdMobの実データ取扱いに合わせ、広告削除購入は開発者サーバーへ購入履歴を送らない実装であることを確認する。
 
 App Store審査では、単なるWebサイトのラッパーではなく十分な実用性が求められる。忘れ物チェックはオフライン利用、端末内テンプレート、進捗、一時保存、ネイティブ振動を備えるが、審査結果を保証するものではない。
