@@ -54,8 +54,41 @@ workflows:
           rm -rf Payload
           ls -lh "$OUT_DIR"
 
+      - name: Capture a genuine 13-inch iPad screenshot
+        script: |
+          FORGET_CHECK_SIM_UDID="$(xcrun simctl list devices available -j | node -e 'let s="";process.stdin.on("data",d=>s+=d);process.stdin.on("end",()=>{const j=JSON.parse(s);const devices=Object.values(j.devices).flat();const device=devices.find(d=>d.isAvailable && d.name.includes("iPad Pro 13-inch"));if(!device){console.error("No available iPad Pro 13-inch simulator was found");process.exit(2)}process.stdout.write(device.udid)})')"
+          echo "Using simulator $FORGET_CHECK_SIM_UDID"
+          xcrun simctl boot "$FORGET_CHECK_SIM_UDID" || true
+          xcrun simctl bootstatus "$FORGET_CHECK_SIM_UDID" -b
+          xcrun simctl spawn "$FORGET_CHECK_SIM_UDID" defaults write NSGlobalDomain AppleLanguages -array en
+          xcrun simctl spawn "$FORGET_CHECK_SIM_UDID" defaults write NSGlobalDomain AppleLocale en_US
+          xcrun simctl status_bar "$FORGET_CHECK_SIM_UDID" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3
+
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=$FORGET_CHECK_SIM_UDID" \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios/simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+          FORGET_CHECK_SIM_APP="$CM_BUILD_DIR/build/ios/simulator/Build/Products/Release-iphonesimulator/App.app"
+          test -d "$FORGET_CHECK_SIM_APP"
+          xcrun simctl install "$FORGET_CHECK_SIM_UDID" "$FORGET_CHECK_SIM_APP"
+          xcrun simctl launch "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck
+          sleep 8
+
+          mkdir -p "$CM_BUILD_DIR/build/ios/screenshots"
+          xcrun simctl io "$FORGET_CHECK_SIM_UDID" screenshot --type=png \
+            "$CM_BUILD_DIR/build/ios/screenshots/ForgetCheck_iPad_13inch_CategorySelection.png"
+          sips -g pixelWidth -g pixelHeight \
+            "$CM_BUILD_DIR/build/ios/screenshots/ForgetCheck_iPad_13inch_CategorySelection.png"
+
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/screenshots/*.png
       - /tmp/xcodebuild_logs/*.log
 
   ios-testflight:
