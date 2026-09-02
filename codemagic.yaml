@@ -231,7 +231,7 @@ workflows:
           xcrun simctl terminate "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck || true
           mkdir -p "$CM_BUILD_DIR/build/forget-check-ios/screenshots"
           mkdir -p "$CM_BUILD_DIR/build/forget-check-ios/simulator-logs"
-          xcrun simctl launch --console --terminate-running "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck \
+          xcrun simctl launch --console --terminate-running-process "$FORGET_CHECK_SIM_UDID" jp.khunryo.forgetcheck \
             > "$CM_BUILD_DIR/build/forget-check-ios/simulator-logs/ForgetCheck-launch-console.txt" 2>&1 &
           FORGET_CHECK_CONSOLE_PID=$!
           sleep 8
