@@ -140,11 +140,13 @@
     .fish-octopus, .fish-squid { background-image:none; display:grid; place-items:center; font-size:30px; line-height:1; }
     .fish-octopus::before { content:'🐙'; }
     .fish-squid::before { content:'🦑'; }
-    .fish-tachiuo, .fish-madai { background-image:none; position:relative; }
+    .fish-tachiuo, .fish-madai, .fish-kurodai { background-image:none; position:relative; }
     .fish-tachiuo::before { content:''; position:absolute; left:5px; top:13px; width:39px; height:8px; border-radius:70% 24% 24% 65%; background:radial-gradient(circle at 79% 35%,#07131f 0 1px,transparent 1.5px),linear-gradient(180deg,#eef8ff,#9eb5c6 48%,#687e91); box-shadow:0 3px 6px rgba(0,0,0,.28); transform:rotate(-7deg); }
     .fish-tachiuo::after { content:''; position:absolute; left:40px; top:11px; border-left:10px solid #8ba4b6; border-top:6px solid transparent; border-bottom:6px solid transparent; transform:rotate(-7deg); }
     .fish-madai::before { content:''; position:absolute; left:8px; top:6px; width:32px; height:23px; border-radius:58% 45% 48% 58%; background:radial-gradient(circle at 76% 30%,#07131f 0 1.5px,transparent 2px),linear-gradient(145deg,#ffcec2,#ef777b 55%,#bb465d); box-shadow:inset 0 -3px 0 rgba(255,255,255,.13),0 3px 6px rgba(0,0,0,.25); }
     .fish-madai::after { content:''; position:absolute; left:36px; top:9px; border-left:12px solid #e46a76; border-top:9px solid transparent; border-bottom:9px solid transparent; }
+    .fish-kurodai::before { content:''; position:absolute; left:8px; top:6px; width:32px; height:23px; border-radius:58% 45% 48% 58%; background:radial-gradient(circle at 76% 30%,#06131d 0 1.5px,transparent 2px),linear-gradient(145deg,#dae5e8,#8398a2 55%,#344a57); box-shadow:inset 0 -3px 0 rgba(255,255,255,.12),0 3px 6px rgba(0,0,0,.25); }
+    .fish-kurodai::after { content:''; position:absolute; left:36px; top:9px; border-left:12px solid #687e89; border-top:9px solid transparent; border-bottom:9px solid transparent; }
     .species-chip strong { display: block; font-size: 12px; white-space: nowrap; }
     .species-chip small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
     .explore-date-bar { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding:11px 12px; border:1px solid rgba(100,228,210,.17); border-radius:14px; background:linear-gradient(120deg,rgba(100,228,210,.09),rgba(18,43,61,.72)); }
@@ -652,7 +654,7 @@
         <div class="community-wrap"><div class="feed" id="communityFeed"></div><div class="card model-card"><h3>モデルの状態</h3><p>みんなから集まった現地情報</p><div class="model-item"><span>予測方式</span><strong class="aqua">試算モデル</strong></div><div class="model-item"><span>共有された投稿</span><strong id="freshLogs">0件</strong></div><div class="model-item"><span>検証状態</span><strong id="dataFreshness">データ収集中</strong></div><div class="model-foot">投稿が増えるほど、地域・魚種・時間帯ごとの重み付けが細かくなります。釣れなかった記録も大切なデータです。</div><div class="ugc-safety"><strong>安心して投稿を見るために</strong><p>不適切な投稿や迷惑行為は許容しません。投稿の「通報」で直ちに非表示となり、運営者が24時間以内に確認します。</p><a href="https://shiome-fishing.khunryo.chatgpt.site/support.html" target="_blank" rel="noreferrer">運営者へ連絡・削除を依頼 →</a></div></div></div>
       </section>
 
-      <section class="section app-view view-sources" id="sources" hidden><div class="section-heading"><div><h2>予測の根拠</h2><p>生態の一般則をベースに、現地データで更新する設計です。</p></div></div><div class="source-grid"><article class="source-card"><div class="source-type">SPECIES</div><strong>魚種プロファイル</strong><p>好適水温・底質・潮通し・季節性を魚種ごとに設定。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2026/03/details_2025_03.pdf" target="_blank" rel="noreferrer">マアジ資源評価 ↗</a></article><article class="source-card"><div class="source-type">MIGRATION</div><strong>イワシ・サバの季節回遊</strong><p>産卵期と春夏の索餌回遊を月ごとの控えめな補正に使用。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2025/03/details_2024_01.pdf" target="_blank" rel="noreferrer">マイワシ資源評価 ↗</a><br><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2025/03/details_2024_05.pdf" target="_blank" rel="noreferrer">マサバ資源評価 ↗</a></article><article class="source-card"><div class="source-type">MIGRATION</div><strong>青物はブリ類が基準</strong><p>冬春の産卵南下、春夏の北上、秋冬の南下回遊を代表モデルに使用。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2024/03/details_2023_45.pdf" target="_blank" rel="noreferrer">ブリ資源評価 ↗</a></article><article class="source-card"><div class="source-type">HABITAT</div><strong>ヒラメ・マゴチ・シロギス</strong><p>砂底魚の産卵期と、暖かい時期の浅場利用を反映。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2020/details_2020_60.pdf" target="_blank" rel="noreferrer">ヒラメ資源評価 ↗</a><br><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/50/3/50_3_271/_article/-char/ja" target="_blank" rel="noreferrer">マゴチ産卵期研究 ↗</a><br><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/33/3/33_3_134/_article/-char/ja/" target="_blank" rel="noreferrer">シロギス産卵研究 ↗</a></article><article class="source-card"><div class="source-type">CEPHALOPOD</div><strong>マダコの産卵・移動</strong><p>5〜10月の産卵期と、常磐で確認された暖水に伴う北上・秋冬の南下を反映。</p><a href="https://www.ifarc.metro.tokyo.lg.jp/archive/27%2C1128%2C55%2C227.html" target="_blank" rel="noreferrer">東京都 マダコ生態 ↗</a><br><a href="https://www.pref.ibaraki.jp/nourinsuisan/suishi/gyogyo/data/gyokaikyo/documents/04-36f.pdf" target="_blank" rel="noreferrer">茨城県 常磐マダコ ↗</a></article><article class="source-card"><div class="source-type">CEPHALOPOD</div><strong>アオリイカの産卵・接岸</strong><p>水温16℃以上の沿岸来遊、5〜7月の産卵盛期と秋の沿岸行動を反映。</p><a href="https://www.jstage.jst.go.jp/article/suisan1932/61/6/61_6_838/_article/-char/ja/" target="_blank" rel="noreferrer">アオリイカ産卵生態研究 ↗</a><br><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/40/4/40_4_469/_article/-char/ja" target="_blank" rel="noreferrer">紀伊水道の産卵期研究 ↗</a></article><article class="source-card"><div class="source-type">ROCKFISH</div><strong>根魚はカサゴ類が基準</strong><p>定着性を優先し、産仔期の季節差は小さく補正。</p><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/40/2/40_2_131/_article/-char/ja/" target="_blank" rel="noreferrer">カサゴの食性と成熟 ↗</a></article><article class="source-card"><div class="source-type">TIDE</div><strong>潮汐と時合い</strong><p>満干潮の前後、潮が動く時間帯をタイドグラフで可視化。</p><a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">気象庁 潮位表 ↗</a></article><article class="source-card"><div class="source-type">LOCATION</div><strong>港湾・海岸候補</strong><p>公的な釣り場開放港と海岸線資料を基礎に、候補地点を区別して登録。</p><a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 海釣り施設 ↗</a></article><article class="source-card"><div class="source-type">CROSSCHECK</div><strong>公開釣果との照合</strong><p>不足地点の発見に公開エリア一覧を使い、投稿本文や独自集計値は転載しません。</p><a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ エリア一覧 ↗</a></article><article class="source-card"><div class="source-type">COMMUNITY</div><strong>みんなの現地情報</strong><p>釣果・水色・小魚・立入情報を投稿で蓄積。</p><a href="#community">投稿を見る →</a></article></div></section>
+      <section class="section app-view view-sources" id="sources" hidden><div class="section-heading"><div><h2>予測の根拠</h2><p>生態の一般則をベースに、現地データで更新する設計です。</p></div></div><div class="source-grid"><article class="source-card"><div class="source-type">SPECIES</div><strong>魚種プロファイル</strong><p>好適水温・底質・潮通し・季節性を魚種ごとに設定。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2026/03/details_2025_03.pdf" target="_blank" rel="noreferrer">マアジ資源評価 ↗</a></article><article class="source-card"><div class="source-type">MIGRATION</div><strong>マイワシ・マサバの季節回遊</strong><p>産卵期と春夏の索餌回遊を月ごとの控えめな補正に使用。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2025/03/details_2024_01.pdf" target="_blank" rel="noreferrer">マイワシ資源評価 ↗</a><br><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2025/03/details_2024_05.pdf" target="_blank" rel="noreferrer">マサバ資源評価 ↗</a></article><article class="source-card"><div class="source-type">MIGRATION</div><strong>ブリの季節回遊</strong><p>冬春の産卵南下、春夏の北上、秋冬の南下回遊を魚種モデルに使用。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2024/03/details_2023_45.pdf" target="_blank" rel="noreferrer">ブリ資源評価 ↗</a></article><article class="source-card"><div class="source-type">HABITAT</div><strong>ヒラメ・マゴチ・シロギス</strong><p>砂底魚の産卵期と、暖かい時期の浅場利用を反映。</p><a href="https://abchan.fra.go.jp/wpt/wp-content/uploads/2020/details_2020_60.pdf" target="_blank" rel="noreferrer">ヒラメ資源評価 ↗</a><br><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/50/3/50_3_271/_article/-char/ja" target="_blank" rel="noreferrer">マゴチ産卵期研究 ↗</a><br><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/33/3/33_3_134/_article/-char/ja/" target="_blank" rel="noreferrer">シロギス産卵研究 ↗</a></article><article class="source-card"><div class="source-type">CEPHALOPOD</div><strong>マダコの産卵・移動</strong><p>5〜10月の産卵期と、常磐で確認された暖水に伴う北上・秋冬の南下を反映。</p><a href="https://www.ifarc.metro.tokyo.lg.jp/archive/27%2C1128%2C55%2C227.html" target="_blank" rel="noreferrer">東京都 マダコ生態 ↗</a><br><a href="https://www.pref.ibaraki.jp/nourinsuisan/suishi/gyogyo/data/gyokaikyo/documents/04-36f.pdf" target="_blank" rel="noreferrer">茨城県 常磐マダコ ↗</a></article><article class="source-card"><div class="source-type">CEPHALOPOD</div><strong>アオリイカの産卵・接岸</strong><p>水温16℃以上の沿岸来遊、5〜7月の産卵盛期と秋の沿岸行動を反映。</p><a href="https://www.jstage.jst.go.jp/article/suisan1932/61/6/61_6_838/_article/-char/ja/" target="_blank" rel="noreferrer">アオリイカ産卵生態研究 ↗</a><br><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/40/4/40_4_469/_article/-char/ja" target="_blank" rel="noreferrer">紀伊水道の産卵期研究 ↗</a></article><article class="source-card"><div class="source-type">ROCKFISH</div><strong>カサゴの定着性・産仔期</strong><p>定着性を優先し、産仔期の季節差は小さく補正。</p><a href="https://www.jstage.jst.go.jp/article/aquaculturesci1953/40/2/40_2_131/_article/-char/ja/" target="_blank" rel="noreferrer">カサゴの食性と成熟 ↗</a></article><article class="source-card"><div class="source-type">BREAM</div><strong>クロダイの産卵・浅場利用</strong><p>4〜6月の産卵期、沿岸の砂泥底・藻場と、夏から初秋の河口・干潟利用を反映。</p><a href="https://www.env.go.jp/council/content/i_07/mat01-1_4.pdf" target="_blank" rel="noreferrer">環境省 クロダイ好適水域資料 ↗</a><br><a href="https://fish.shimano.com/ja-JP/content/beginners/fishingstyle/lurefishing/chinning/index.html" target="_blank" rel="noreferrer">シマノ チニング解説 ↗</a></article><article class="source-card"><div class="source-type">TIDE</div><strong>潮汐と時合い</strong><p>満干潮の前後、潮が動く時間帯をタイドグラフで可視化。</p><a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">気象庁 潮位表 ↗</a></article><article class="source-card"><div class="source-type">LOCATION</div><strong>港湾・海岸候補</strong><p>公的な釣り場開放港と海岸線資料を基礎に、候補地点を区別して登録。</p><a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 海釣り施設 ↗</a></article><article class="source-card"><div class="source-type">CROSSCHECK</div><strong>公開釣果との照合</strong><p>不足地点の発見に公開エリア一覧を使い、投稿本文や独自集計値は転載しません。</p><a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ エリア一覧 ↗</a></article><article class="source-card"><div class="source-type">COMMUNITY</div><strong>みんなの現地情報</strong><p>釣果・水色・小魚・立入情報を投稿で蓄積。</p><a href="#community">投稿を見る →</a></article></div></section>
       <p class="footer-note app-view view-sources" hidden>潮先のスコアは釣果を保証するものではありません。予測は自然科学の知見・公開データ・ユーザー投稿から「次に見るべき場所」を提案するものです。港湾名の掲載は全域での釣り許可を意味しません。立入禁止・漁業権・駐車・天候と波の安全を最優先してください。<br>データ出典・参考: <a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構</a> / <a href="https://www.data.jma.go.jp/" target="_blank" rel="noreferrer">気象庁</a> / <a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 港湾の釣り場開放状況</a> / <a href="https://anglers.jp/areas" target="_blank" rel="noreferrer">アングラーズ 公開エリア一覧</a> / 国土地理院。投稿内容と写真はサービス上に保存され、みんなの釣果画面に表示されます。<span class="legal-links"><a href="https://shiome-fishing.khunryo.chatgpt.site/privacy.html" target="_blank" rel="noreferrer">プライバシーポリシー</a><a href="https://shiome-fishing.khunryo.chatgpt.site/terms.html" target="_blank" rel="noreferrer">利用規約</a><a href="https://shiome-fishing.khunryo.chatgpt.site/support.html" target="_blank" rel="noreferrer">サポート</a></span></p>
       <p class="footer-note app-view view-sources" hidden><strong>全国沿岸候補データ:</strong> <a href="https://www.jfa.maff.go.jp/j/gyoko_gyozyo/g_zyoho_bako/gyoko_itiran/sub81.html" target="_blank" rel="noreferrer">水産庁の現行漁港一覧</a>を、<a href="https://nlftp.mlit.go.jp/ksj/gmlold/datalist/gmlold_KsjTmplt-C09.html" target="_blank" rel="noreferrer">国土交通省 国土数値情報（漁港）</a>および<a href="https://nlftp.mlit.go.jp/ksj/gmlold/datalist/gmlold_KsjTmplt-C02.html" target="_blank" rel="noreferrer">国土数値情報（港湾）</a>の代表座標と照合しています。掲載地点は周辺を確認するための候補であり、釣りや立入りの許可を示すものではありません。</p>
     </main>
@@ -672,18 +674,19 @@
     const API_ORIGIN = location.protocol==='capacitor:'||location.protocol==='ionic:' ? 'https://shiome-fishing.khunryo.chatgpt.site' : '';
     const apiUrl = path => API_ORIGIN + path;
     const SPECIES = {
-      aji: { name: 'アジ', symbol: '◒', color: '#64e4d2', season: 'マアジ', temp: '18–25℃', tempRange:[18,25], basis: 'マアジを基準に、港内の明暗・潮のヨレと、朝夕の小魚の反応を重視。', source: '水産研究・教育機構 マアジ資源評価', weights: [86, 74, 81, 66] },
-      iwashi: { name: 'イワシ', symbol: '≈', color: '#64c9ee', season: 'マイワシ', temp: '14–22℃', tempRange:[14,22], basis: 'マイワシを基準に、表層の水温帯とプランクトン、湾口の潮目を重視。', source: '水産研究・教育機構 マイワシ資源評価', weights: [72, 82, 70, 78] },
+      aji: { name: 'マアジ', symbol: '◒', color: '#64e4d2', season: 'マアジ', temp: '18–25℃', tempRange:[18,25], basis: 'マアジを対象に、港内の明暗・潮のヨレと、朝夕の小魚の反応を重視。', source: '水産研究・教育機構 マアジ資源評価', weights: [86, 74, 81, 66] },
+      iwashi: { name: 'マイワシ', symbol: '≈', color: '#64c9ee', season: 'マイワシ', temp: '14–22℃', tempRange:[14,22], basis: 'マイワシを対象に、表層の水温帯とプランクトン、湾口の潮目を重視。', source: '水産研究・教育機構 マイワシ資源評価', weights: [72, 82, 70, 78] },
       hirame: { name: 'ヒラメ', symbol: '◓', color: '#f6cb6b', season: 'ヒラメ', temp: '12–22℃', tempRange:[12,22], basis: '浅い砂・砂泥域、かけ上がり、離岸流などの地形変化を重視。', source: '水産研究・教育機構 ヒラメ資源評価', weights: [78, 88, 91, 64] },
       magochi: { name: 'マゴチ', symbol: '⌁', color: '#ff8e72', season: 'マゴチ', temp: '18–27℃', tempRange:[18,27], basis: '河口や砂浜の地形変化、濁りと潮が効くワンドを重視。', source: 'マゴチの年齢・産卵期研究', weights: [81, 84, 86, 62] },
-      saba: { name: 'サバ', symbol: '≋', color: '#b7a6ff', season: 'マサバ', temp: '16–24℃', tempRange:[16,24], basis: 'マサバを基準に、潮通しのよい港口と小魚の集積、群れの回遊を重視。', source: '水産研究・教育機構 マサバ資源評価', weights: [84, 77, 72, 86] },
-      blue: { name: 'その他青物', short: '青物', symbol: '↗', color: '#87e4a8', season: 'ブリ類基準', temp: '17–25℃', tempRange:[17,25], basis: 'ブリ類を代表モデルに、湾口・磯の潮目、小魚の量、朝夕の光量変化を重視。青物全種に共通する断定ではありません。', source: '水産研究・教育機構 ブリ資源評価', weights: [80, 76, 69, 92] },
+      saba: { name: 'マサバ', symbol: '≋', color: '#b7a6ff', season: 'マサバ', temp: '16–24℃', tempRange:[16,24], basis: 'マサバを対象に、潮通しのよい港口と小魚の集積、群れの回遊を重視。', source: '水産研究・教育機構 マサバ資源評価', weights: [84, 77, 72, 86] },
+      blue: { name: 'ブリ', symbol: '↗', color: '#87e4a8', season: 'ブリ', temp: '17–25℃', tempRange:[17,25], basis: 'ブリを対象に、湾口・磯の潮目、小魚の量、朝夕の光量変化を重視。', source: '水産研究・教育機構 ブリ資源評価', weights: [80, 76, 69, 92] },
       kisu: { name: 'シロギス', symbol: '⌇', color: '#ffd784', season: 'シロギス', temp: '18–27℃', tempRange:[18,27], basis: '遠浅の砂浜、砕波帯の沖側、砂底の底層と春から秋の水温上昇を重視。', source: 'シロギス産卵・沿岸生態研究', weights: [66, 78, 96, 72] },
-      rock: { name: '根魚', symbol: '◆', color: '#caa9ff', season: 'カサゴ類基準', temp: '12–23℃', tempRange:[12,23], basis: 'カサゴ類を代表モデルに、岩礁・テトラ・海藻帯と、身を隠せる水深を重視。根魚全種に共通する断定ではありません。', source: 'カサゴの食性・成熟研究', weights: [73, 79, 94, 69] },
-      octopus: { name: 'タコ', symbol: '●', color: '#ff8fa3', season: 'マダコ', temp: '地域差あり', basis: 'マダコを対象に、沿岸の岩礁・砂礫、岩穴、転石、護岸の隙間と夜間の活動を重視。甲殻類や貝類がいる海底を評価します。', source: '水産研究・教育機構／東京都島しょ農林水産総合センター', weights: [70, 84, 96, 86] },
-      squid: { name: 'イカ', short: 'イカ', symbol: '◇', color: '#8ed8ff', season: 'アオリイカ', temp: '16℃以上目安', basis: '岸から狙うアオリイカを対象に、藻場・岩礁・港口、沿岸の小魚、朝夕の薄明から夜間を重視。水温16℃以上で沿岸へ来遊する産卵生態も反映します。', source: 'アオリイカ産卵・回遊生態研究', weights: [76, 88, 92, 90], tempMin:16 },
-      tachiuo: { name: 'タチウオ', short: '太刀魚', symbol: '〰', color: '#c9deee', season: 'タチウオ', temp: '暖水期中心', basis: '岸から狙うタチウオを対象に、港口・常夜灯の明暗・沿岸の小魚と、夕方から夜の浅場への回遊を重視。表層から底まで反応層が変わる魚として評価します。', source: '水産研究・教育機構 タチウオ資源動向調査／シマノ魚種別解説', weights: [84, 91, 77, 96] },
-      madai: { name: 'マダイ', short: 'マダイ', symbol: '◉', color: '#ff8f91', season: 'マダイ', temp: '地域差あり', basis: '潮通しと水深があり、岩礁と砂礫が混じる場所を重視。南ほど早い春の産卵接岸と、秋の沿岸釣期を地域差のある季節要因として扱います。', source: '水産研究・教育機構 マダイ資源評価／シマノ魚種別解説', weights: [88, 84, 94, 75] }
+      rock: { name: 'カサゴ', symbol: '◆', color: '#caa9ff', season: 'カサゴ', temp: '12–23℃', tempRange:[12,23], basis: 'カサゴを対象に、岩礁・テトラ・海藻帯と、身を隠せる水深を重視。', source: 'カサゴの食性・成熟研究', weights: [73, 79, 94, 69] },
+      octopus: { name: 'マダコ', symbol: '●', color: '#ff8fa3', season: 'マダコ', temp: '地域差あり', basis: 'マダコを対象に、沿岸の岩礁・砂礫、岩穴、転石、護岸の隙間と夜間の活動を重視。甲殻類や貝類がいる海底を評価します。', source: '水産研究・教育機構／東京都島しょ農林水産総合センター', weights: [70, 84, 96, 86] },
+      squid: { name: 'アオリイカ', symbol: '◇', color: '#8ed8ff', season: 'アオリイカ', temp: '16℃以上目安', basis: '岸から狙うアオリイカを対象に、藻場・岩礁・港口、沿岸の小魚、朝夕の薄明から夜間を重視。水温16℃以上で沿岸へ来遊する産卵生態も反映します。', source: 'アオリイカ産卵・回遊生態研究', weights: [76, 88, 92, 90], tempMin:16 },
+      tachiuo: { name: 'タチウオ', symbol: '〰', color: '#c9deee', season: 'タチウオ', temp: '暖水期中心', basis: '岸から狙うタチウオを対象に、港口・常夜灯の明暗・沿岸の小魚と、夕方から夜の浅場への回遊を重視。表層から底まで反応層が変わる魚として評価します。', source: '水産研究・教育機構 タチウオ資源動向調査／シマノ魚種別解説', weights: [84, 91, 77, 96] },
+      madai: { name: 'マダイ', symbol: '◉', color: '#ff8f91', season: 'マダイ', temp: '地域差あり', basis: '潮通しと水深があり、岩礁と砂礫が混じる場所を重視。南ほど早い春の産卵接岸と、秋の沿岸釣期を地域差のある季節要因として扱います。', source: '水産研究・教育機構 マダイ資源評価／シマノ魚種別解説', weights: [88, 84, 94, 75] },
+      kurodai: { name: 'クロダイ', alias: '通称チヌ', symbol: '◐', color: '#a9c0c8', season: 'クロダイ', temp: '地域差あり', basis: 'クロダイを対象に、河口・干潟・港内の砂泥底、岩礁と砂地の境、カキ瀬・橋脚などの障害物を重視。春の産卵接岸と、夏から初秋の浅場での索餌を地域差のある季節要因として扱います。', source: '環境省 クロダイ好適水域資料／長崎県水産試験場研究報告', weights: [86, 90, 94, 80] }
     };
     const FISHING_GUIDES = {
       aji: {
@@ -691,7 +694,7 @@
         subtitle:'軽いワームを同じ層に通し、群れの深さを探します。',
         rig:'1〜2g前後のジグヘッド＋小型ストレートワーム', range:'表層→中層→底。沈める秒数で同じ層を再現',
         action:'スローなただ巻き＋短い止め', tempo:'3〜5秒ゆっくり巻く → 1〜2秒止める', diagram:'slow',
-        diagramAlt:'アジングでワームを一定の層に通し、短く止める動かし方の図', diagramLabels:['沈める','ゆっくり巻く','短く止める'],
+        diagramAlt:'マアジ用ワームを一定の層に通し、短く止める動かし方の図', diagramLabels:['沈める','ゆっくり巻く','短く止める'],
         steps:['沖へ投げ、まず浅い層から。反応がなければ沈める秒数を少しずつ増やします。','竿先を動かしすぎず、ワームが同じ層を泳ぐ速さでゆっくり巻きます。','コッという感触、重み、糸の緩みで軽く合わせ、口切れを避けて寄せます。'],
         change:'夜は常夜灯の明暗、日中は潮のヨレと底付近を優先。群れが足元に入ったらサビキも有効です。',
         caution:'風や潮で動きが分からないときは、底を取れる範囲で少し重くします。港湾作業と係留ロープを避けてください。',
@@ -702,7 +705,7 @@
         subtitle:'回遊している群れの深さへサビキとコマセを合わせます。',
         rig:'小型サビキ仕掛け＋アミエビ用カゴ', range:'表層〜中層。見える群れ、潮目、岸壁際',
         action:'コマセを出す上下動', tempo:'竿をゆっくり上下 → 仕掛けを止めて待つ', diagram:'sabiki',
-        diagramAlt:'イワシのサビキ仕掛けを上下させて止める誘い方の図', diagramLabels:['群れの層へ','上下して撒く','止めて待つ'],
+        diagramAlt:'マイワシのサビキ仕掛けを上下させて止める誘い方の図', diagramLabels:['群れの層へ','上下して撒く','止めて待つ'],
         steps:['魚が見える深さ、または周囲で釣れている深さまで仕掛けを下ろします。','竿を大きく振り回さず上下させ、カゴからコマセを出します。','仕掛けを止めて待ち、反応がなければ少しずつ深さを変えます。'],
         change:'同じ場所で反応がなければ、群れが回るまで待つか、潮通しのよい場所へ移動します。',
         caution:'コマセ禁止・使用量のルールがある釣り場もあります。釣れた魚は傷みやすいため早めに冷やしてください。',
@@ -735,7 +738,7 @@
         subtitle:'群れが見えれば表層、見えなければ深い層から探します。',
         rig:'群れの小魚サイズに合わせた小型メタルジグ', range:'ナブラの沖側から表層／反応がなければ中層〜底',
         action:'表層ただ巻き／深場リフト＆フォール', tempo:'表層は速めに巻く。深い層は持ち上げて落とす', diagram:'liftfall',
-        diagramAlt:'サバ用メタルジグを表層で巻くか、深い層で持ち上げて落とす図', diagramLabels:['群れの沖へ','巻き上げる','落として探す'],
+        diagramAlt:'マサバ用メタルジグを表層で巻くか、深い層で持ち上げて落とす図', diagramLabels:['群れの沖へ','巻き上げる','落として探す'],
         steps:['群れや鳥が見えるときは、その沖または進行方向へ投げます。','表層の群れには速めのただ巻き。直接群れへ投げ込まず横切らせます。','姿が見えなければ沈める深さを変え、リフト＆フォールで反応層を探します。'],
         change:'足元に群れが入り、家族で狙うならサビキが簡単です。釣れた深さを覚えて繰り返します。',
         caution:'横走りで隣の仕掛けと絡みやすいため、混雑時は早めに取り込みます。釣れたらすぐ冷やしてください。',
@@ -746,7 +749,7 @@
         subtitle:'表層の回遊を確認し、反応がなければ底から中層を探ります。',
         rig:'30〜50g前後のメタルジグ（底を確認できる重さ）', range:'ナブラの進行先／潮目／底〜中層',
         action:'ワンピッチジャーク', tempo:'ひとシャクリ＋ハンドル1回転を一定リズム', diagram:'onepitch',
-        diagramAlt:'青物用メタルジグを一回しゃくるごとに一回巻いて中層まで上げ、再び落とす図', diagramLabels:['着底','1回しゃくる＋1回巻く','中層から落とす'],
+        diagramAlt:'ブリ用メタルジグを一回しゃくるごとに一回巻いて中層まで上げ、再び落とす図', diagramLabels:['着底','1回しゃくる＋1回巻く','中層から落とす'],
         steps:['ナブラがあれば群れの進行方向へ、なければ遠投して底を確認します。','底から中層まで、ひとシャクリとハンドル1回転を同じリズムで続けます。','中層まで探ったら再び沈め、速さやしゃくり幅を変えて反応を探します。'],
         change:'表層で小魚を追っているときは、ミノーやジグの速めのただ巻きへ切り替えます。',
         caution:'重量物を投げるため、後方と左右を毎投確認。救命具を着け、強い引きに備えて玉網を用意します。',
@@ -764,22 +767,22 @@
         sourceName:'シマノ「キスの特徴と釣り方」', sourceUrl:'https://fish.shimano.com/ja-JP/content/beginners/fish/kisu/index.html'
       },
       rock: {
-        badge:'ルアー推奨', name:'ジグヘッド／テキサスリグ', method:'根魚ルアー／探り釣り',
+        badge:'ルアー推奨', name:'ジグヘッド／テキサスリグ', method:'カサゴのルアー／探り釣り',
         subtitle:'底や障害物から離さず、短い移動と停止で穴を探ります。',
         rig:'際はジグヘッド、沖の岩・藻場はテキサスリグ', range:'岩穴・テトラ際・沈み根・藻場の底',
         action:'底ズル引き＋リフト＆フォール', tempo:'短く引く → 小さく持ち上げる → 落として止める', diagram:'rockhop',
-        diagramAlt:'根魚用ワームを岩の間で短く引き、持ち上げて落とす動かし方の図', diagramLabels:['隙間へ落とす','底を短く引く','持ち上げて落とす'],
+        diagramAlt:'カサゴ用ワームを岩の間で短く引き、持ち上げて落とす動かし方の図', diagramLabels:['隙間へ落とす','底を短く引く','持ち上げて落とす'],
         steps:['足元の際や沖の沈み根へ落とし、確実に底を取ります。','根掛かりを避けながら短く引き、時々持ち上げて落とします。','着底直後の反応に備え、掛けたら穴へ戻られる前に底から離します。'],
         change:'一か所で反応がなければ長く待たず、次の穴や岩陰へ移って広く探ります。',
         caution:'消波ブロックへ乗らず安全な足場から狙います。根掛かりを無理に引かず、周囲を確認して外してください。',
         sourceName:'シマノ「カサゴの特徴と釣り方」', sourceUrl:'https://fish.shimano.com/ja-JP/content/beginners/fish/kasago/index.html'
       },
       octopus: {
-        badge:'専用エギ推奨', name:'タコエギで底を探る', method:'タコエギ／テンヤ',
+        badge:'専用エギ推奨', name:'マダコ用エギで底を探る', method:'マダコ用エギ／テンヤ',
         subtitle:'海底から離しすぎず、軽い跳ね上げと落下で存在を知らせます。',
         rig:'タコ専用エギ＋根ズレに強いリーダー', range:'岸壁際・捨石・岩礁・砂礫の底',
         action:'小さく跳ね上げてテンションフォール', tempo:'軽くあおる → 糸を張って落とす → 重みを確認', diagram:'takohop',
-        diagramAlt:'タコエギを海底で軽く跳ね上げ、糸を張って落とす動かし方の図', diagramLabels:['着底','軽く跳ね上げる','張って落とす'],
+        diagramAlt:'マダコ用エギを海底で軽く跳ね上げ、糸を張って落とす動かし方の図', diagramLabels:['着底','軽く跳ね上げる','張って落とす'],
         steps:['投げたら着底まで待ち、糸ふけを取って海底を確認します。','竿先を軽くあおってエギを跳ね上げ、糸を張ったまま底へ落とします。','ゴミのような重みが続いたら大きく合わせ、張り付かれる前に浮かせます。'],
         change:'根掛かりが多い場所ではズル引きを減らし、短い移動で着底を取り直します。',
         caution:'マダコは共同漁業権や禁漁期間の対象になる地域があります。必ず現地の漁協・自治体ルールを確認してください。',
@@ -817,6 +820,17 @@
         change:'春の乗っ込みと秋は、水深のある波止・磯でカゴ釣りも有効。マキエとサシエを同じ潮へ乗せます。',
         caution:'重い仕掛けの遠投前に後方を確認。強い引きに備えてドラグと玉網を準備し、コマセや仕掛けの現地ルールを守ってください。',
         sourceName:'シマノ「真鯛の特徴と釣り方」', sourceUrl:'https://fish.shimano.com/ja-JP/content/beginners/fish/madai/index.html'
+      },
+      kurodai: {
+        badge:'ルアー／エサ', name:'ボトムチニング', method:'チニング／フカセ釣り',
+        subtitle:'河口・干潟・港内で、底を感じながら甲殻類を模したルアーを通します。',
+        rig:'5〜10g前後のフリーリグまたはラバージグ＋甲殻類系ワーム', range:'河口・干潟・橋脚・カキ瀬。水深1〜2mほどの砂泥底や硬い底',
+        action:'底を感じる一定速のズル引き', tempo:'底を取る → ゆっくり一定速で巻く → 食い込むまで巻き続ける', diagram:'chinubottom',
+        diagramAlt:'クロダイ用ルアーを河口の海底すれすれで一定速度に巻き、アタリ後も巻き続ける図', diagramLabels:['底を確認','一定速で巻く','重みが乗って合わせる'],
+        steps:['流れの横へ投げて着底を確認し、糸ふけを取ります。','底から離れすぎず根掛かりしない速さで、ルアーを一定に巻き続けます。','小さなアタリでは止めずに巻き、重いアタリへ変わってから追い合わせを入れます。'],
+        change:'日中に反応がなければメタルバイブの短いシャクリとフォール、夏の浅場では小型ポッパーも候補です。',
+        caution:'カキ殻・橋脚で糸が切れやすいため、掛けたら障害物から離します。足場・立入・漁業権など現地ルールを必ず確認してください。',
+        sourceName:'シマノ「チニングとは？ 釣り方のコツ」', sourceUrl:'https://fish.shimano.com/ja-JP/content/beginners/fishingstyle/lurefishing/chinning/index.html'
       }
     };
     const SEASON_MODELS = {
@@ -825,13 +839,14 @@
       hirame:{scores:[78,82,86,88,84,73,64,60,66,76,84,82],phases:[{months:[1,2,3,4,5],text:'産卵は南ほど早く北ほど遅いため、冬から春の沿岸移動を幅広く反映しています。'},{months:[6,7,8,9],text:'稚魚の浅場利用はありますが、成魚の接岸加点は控えめです。'},{months:[10,11,12],text:'秋から初冬の浅場への移動を穏やかに加点しています。'}]},
       magochi:{scores:[40,42,50,66,82,92,94,91,82,66,50,43],phases:[{months:[5,6,7],text:'6〜7月ごろの産卵期と、暖かい浅場への移動を強く反映しています。'},{months:[4,8,9,10],text:'水温が上がる時期の砂浜・河口の浅場利用を反映しています。'},{months:[11,12,1,2,3],text:'低水温期は深場へ離れる傾向を想定し、沿岸の加点を抑えています。'}]},
       saba:{scores:[60,66,76,84,88,91,94,93,87,78,69,62],phases:[{months:[3,4,5,6],text:'伊豆諸島周辺などの春の産卵回遊を反映しています。'},{months:[6,7,8,9,10],text:'春から秋の北上・索餌回遊と沿岸への群れの入りを想定します。'},{months:[11,12,1,2],text:'秋冬の南下・越冬移動を反映し、地域差を考えて加点を抑えています。'}]},
-      blue:{scores:[78,74,70,68,76,86,92,94,92,89,86,82],phases:[{months:[1,2,3,4,5],text:'代表種のブリが冬から春に産卵のため南下する回遊を反映しています。'},{months:[5,6,7,8,9],text:'春から夏の北上と、夏から初秋の索餌回遊を反映しています。'},{months:[10,11,12],text:'秋冬の南下回遊を反映しています。青物の種類・地域で時期は変わります。'}]},
+      blue:{scores:[78,74,70,68,76,86,92,94,92,89,86,82],phases:[{months:[1,2,3,4,5],text:'ブリが冬から春に産卵のため南下する回遊を反映しています。'},{months:[5,6,7,8,9],text:'春から夏の北上と、夏から初秋の索餌回遊を反映しています。'},{months:[10,11,12],text:'秋冬の南下回遊を反映しています。地域・年齢群で時期は変わります。'}]},
       kisu:{scores:[34,37,48,66,80,90,95,95,91,79,57,41],phases:[{months:[6,7,8,9,10],text:'初夏から秋の産卵期と、暖かい浅い砂浜への接岸を反映しています。'},{months:[4,5,11],text:'浅場と深場の間を移る時期として穏やかに評価します。'},{months:[12,1,2,3],text:'低水温期は深場へ移るため、岸から狙う予測を控えめにしています。'}]},
-      rock:{scores:[84,82,78,70,63,58,56,57,64,73,82,87],phases:[{months:[11,12,1,2],text:'代表種のカサゴ類の交尾・産仔期を考慮しています。大きな回遊はしない前提です。'},{months:[3,4,5,6,7,8,9,10],text:'カサゴ類は定着性が強いため、季節差より岩礁や隠れ場所を優先します。'}]},
+      rock:{scores:[84,82,78,70,63,58,56,57,64,73,82,87],phases:[{months:[11,12,1,2],text:'カサゴの交尾・産仔期を考慮しています。大きな回遊はしない前提です。'},{months:[3,4,5,6,7,8,9,10],text:'カサゴは定着性が強いため、季節差より岩礁や隠れ場所を優先します。'}]},
       octopus:{scores:[75,70,67,70,78,86,91,92,89,84,80,78],phases:[{months:[5,6,7,8,9,10],text:'マダコの主な産卵期（地域により5〜10月）と沿岸の岩礁・砂礫利用を反映しています。'},{months:[11,12,1,2],text:'常磐では暖水とともに北上した群が秋冬に南下し、冬の漁期を作る地域特性も考慮しています。'},{months:[3,4],text:'地域差が大きい移行期のため、季節補正を小さくしています。'}]},
       squid:{scores:[44,48,58,78,94,96,91,80,88,92,80,56],phases:[{months:[4,5,6,7],text:'アオリイカが水温16℃を超えるころ沿岸へ来遊し、主に5〜7月に産卵する生態を反映しています。'},{months:[8,9,10,11],text:'夏に生まれた個体が成長し、夏から秋に沿岸で行動する時期を反映しています。'},{months:[12,1,2,3],text:'低水温期は深場へ移る傾向を想定し、沿岸の加点を抑えています。'}]},
       tachiuo:{scores:[48,50,56,66,76,86,92,95,96,92,76,58],phases:[{months:[4,5,6,7,8,9,10,11],text:'瀬戸内海周辺で水温上昇後に北上し、4〜11月に産卵する生態と、暖水期の沿岸回遊を反映しています。産卵の盛期は春と秋にみられます。'},{months:[6,7,8,9,10],text:'夜に小魚を追って沿岸へ寄りやすい時期として、岸からの予測を高めています。'},{months:[12,1,2,3],text:'水温低下後は深場や南側へ移る地域が多いため、岸からの加点を抑えています。地域・年による回遊差があります。'}]},
-      madai:{scores:[55,64,82,94,96,88,73,72,84,92,83,64],phases:[{months:[2,3,4,5,6],text:'産卵期は南ほど早く、九州西岸では2〜5月、壱岐・対馬周辺では4〜6月となる地域差と、春の接岸を反映しています。'},{months:[9,10,11],text:'春と並ぶ沿岸の釣期として、秋の索餌とカゴ釣りの適期を反映しています。'},{months:[7,8,12,1],text:'若魚と成魚、地域、水深で動きが異なるため、季節補正を控えめにしています。'}]}
+      madai:{scores:[55,64,82,94,96,88,73,72,84,92,83,64],phases:[{months:[2,3,4,5,6],text:'産卵期は南ほど早く、九州西岸では2〜5月、壱岐・対馬周辺では4〜6月となる地域差と、春の接岸を反映しています。'},{months:[9,10,11],text:'春と並ぶ沿岸の釣期として、秋の索餌とカゴ釣りの適期を反映しています。'},{months:[7,8,12,1],text:'若魚と成魚、地域、水深で動きが異なるため、季節補正を控えめにしています。'}]},
+      kurodai:{scores:[58,62,76,92,96,90,88,94,95,89,76,64],phases:[{months:[3,4,5,6],text:'4〜6月ごろの産卵期と、その前後に成魚が沿岸へ来遊する傾向を反映しています。開始時期には海域差があります。'},{months:[7,8,9,10],text:'夏から初秋は、河口・干潟など暖かい浅場で甲殻類や小魚を探す傾向を反映しています。'},{months:[11,12,1,2],text:'冬も狙える地域はありますが、深場への移動や海域差を考慮して季節加点を抑えています。'}]}
     };
     const SPOTS = [
       { id:'走水港', name:'走水港', prefecture:'神奈川県', region:'関東', type:'港', lat:35.24, lon:139.72, base: [88, 73, 52, 48, 77, 62, 69], tide:['04:51','11:42','18:09','23:31'], water:'23.8℃', tideNow:'上げ', note:'港口の潮通しと朝マズメ。アジ狙いなら係留船の明暗境界へ。' },
@@ -946,7 +961,8 @@
       octopus:{shape:'reef',length:.48,width:.62,layer:'岩礁・転石・護岸の隙間'},
       squid:{shape:'reef',length:.88,width:.82,layer:'藻場・岩礁沿い・港口の中層'},
       tachiuo:{shape:'pelagic',length:1.48,width:.42,layer:'港口・明暗境界の表層〜底'},
-      madai:{shape:'bottom',length:.92,width:1.04,layer:'潮通しのよい岩礁・砂礫の底〜中層'}
+      madai:{shape:'bottom',length:.92,width:1.04,layer:'潮通しのよい岩礁・砂礫の底〜中層'},
+      kurodai:{shape:'bottom',length:.88,width:1.08,layer:'河口・干潟・港内の砂泥底とカキ瀬'}
     };
     const FLOW_PROFILES = {
       '走水港':{bearing:72,offshore:82,strength:.96,label:'東京湾口へ抜ける流れ'},
@@ -977,6 +993,7 @@
       if(state.species==='squid') return Object.assign(profile,{terrain:s.type==='港'?'港口・明暗・沈み根':s.type==='磯'?'藻場・岩礁沿い':'藻場が隣接する潮通し',best:'朝夕の薄明〜夜'});
       if(state.species==='tachiuo') return Object.assign(profile,{terrain:s.type==='港'?'港口・常夜灯の明暗・回遊ライン':s.type==='磯'?'沖の潮目・足元の深み':'潮目と水深のあるかけ上がり',best:'夕マズメ〜夜・朝マズメ'});
       if(state.species==='madai') return Object.assign(profile,{terrain:s.type==='港'?'水深のある波止・港口・砂礫底':s.type==='磯'?'潮通しのよい岩礁と砂礫の境':'水深のある砂礫底・沈み根',best:'朝夕のマズメ・春の乗っ込みと秋'});
+      if(state.species==='kurodai') return Object.assign(profile,{terrain:s.type==='港'?'岸壁際・橋脚・捨石・カキ殻':s.type==='磯'?'ワンドの砂礫底・岩と砂の境':'河口・干潟・砂泥底のかけ上がり',best:'朝夕のマズメ・潮が動く時間'});
       return profile;
     }
     function profileFor(s){ return Object.assign({ best:'朝夕のマズメ・潮が動く時間', status:'参考情報／現地確認が必要' },TYPE_PROFILES[s.type]||TYPE_PROFILES['港'],SPOT_PROFILES[s.id]||{},speciesProfileFor(s)); }
@@ -1049,7 +1066,7 @@
       try{const stations=await tideStationsPromise,station=nearestTideStation(s,stations),year=state.date.slice(0,4);let text=await bundledTideText(year,station.code);if(!text)text=await officialTideText(year,station.code);const data=parseJmaTide(text,state.date,station);data.spotId=s.id;if(state.tideKey!==requestKey)return;state.tideData=data;state.tideLoading=false;window.render();}
       catch(e){if(state.tideKey!==requestKey)return;let station=null;try{station=nearestTideStation(s,await tideStationsPromise);}catch(_){}const data=fallbackTideData(s,state.date,station);data.spotId=s.id;state.tideData=data;state.tideLoading=false;state.tideError='';window.render();}
     }
-    const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22],octopus:[0,4,20,23],squid:[5,18,21,23],tachiuo:[5,18,20,23],madai:[5,7,17,19]};
+    const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22],octopus:[0,4,20,23],squid:[5,18,21,23],tachiuo:[5,18,20,23],madai:[5,7,17,19],kurodai:[5,7,18,21]};
     function hourDistance(a,b){ const d=Math.abs(a-b); return Math.min(d,24-d); }
     function timeLiftAt(s,h){
       const peaks=ACTIVE_HOURS[state.species]||[6,18];
@@ -1069,7 +1086,7 @@
       return {hour,period,window:windowText,reason:hasLive?'魚種の活性時間と気象庁の潮位変化が重なる時間':'魚種の活性傾向と登録された潮時が重なる時間'};
     }
     function baseForSpecies(s){
-      const special={octopus:{'港':72,'磯':84,'サーフ':47},squid:{'港':76,'磯':82,'サーフ':52},tachiuo:{'港':84,'磯':67,'サーフ':56},madai:{'港':68,'磯':84,'サーフ':55}};
+      const special={octopus:{'港':72,'磯':84,'サーフ':47},squid:{'港':76,'磯':82,'サーフ':52},tachiuo:{'港':84,'磯':67,'サーフ':56},madai:{'港':68,'磯':84,'サーフ':55},kurodai:{'港':82,'磯':78,'サーフ':85}};
       if(special[state.species]) return special[state.species][s.type]??60;
       const idx=Object.keys(SPECIES).indexOf(state.species),fallback=state.species==='kisu'?(s.type==='サーフ'?76:s.type==='港'?54:42):60;
       const raw=state.species==='rock'&&s.base.length===7?s.base[6]:s.base[idx];
@@ -1101,9 +1118,9 @@
       const clamp=value=>Math.max(25,Math.min(95,Math.round(value))),motion=tideMotionFor(s),tideHours=s.tide.map(t=>Number(t.split(':')[0])+Number(t.split(':')[1])/60),tideDistance=Math.min(...tideHours.map(h=>hourDistance(state.hour,h)));
       const tide=motion?clamp(48+Math.min(42,Math.abs(motion.rate)*3.1)):clamp(84-Math.min(46,tideDistance*8));
       const time=clamp(42+(timeLiftFor(s)+10)*3.1);
-      const typeMatch={aji:{'港':9,'磯':1,'サーフ':-7},iwashi:{'港':7,'磯':1,'サーフ':-2},hirame:{'港':-8,'磯':-5,'サーフ':12},magochi:{'港':-5,'磯':-9,'サーフ':12},saba:{'港':8,'磯':5,'サーフ':-4},blue:{'港':4,'磯':11,'サーフ':1},kisu:{'港':-9,'磯':-12,'サーフ':14},rock:{'港':3,'磯':13,'サーフ':-12},octopus:{'港':9,'磯':14,'サーフ':-13},squid:{'港':8,'磯':13,'サーフ':-8},tachiuo:{'港':12,'磯':3,'サーフ':-6},madai:{'港':3,'磯':13,'サーフ':-7}};
+      const typeMatch={aji:{'港':9,'磯':1,'サーフ':-7},iwashi:{'港':7,'磯':1,'サーフ':-2},hirame:{'港':-8,'磯':-5,'サーフ':12},magochi:{'港':-5,'磯':-9,'サーフ':12},saba:{'港':8,'磯':5,'サーフ':-4},blue:{'港':4,'磯':11,'サーフ':1},kisu:{'港':-9,'磯':-12,'サーフ':14},rock:{'港':3,'磯':13,'サーフ':-12},octopus:{'港':9,'磯':14,'サーフ':-13},squid:{'港':8,'磯':13,'サーフ':-8},tachiuo:{'港':12,'磯':3,'サーフ':-6},madai:{'港':3,'磯':13,'サーフ':-7},kurodai:{'港':10,'磯':7,'サーフ':11}};
       const terrain=clamp(base*.62+fish.weights[2]*.38+(typeMatch[state.species]?.[s.type]||0));
-      const baitType=(['aji','iwashi','saba','tachiuo'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi','madai'].includes(state.species)&&s.type!=='港'?4:0)+(state.species==='octopus'&&s.type!=='サーフ'?6:0)+(state.species==='squid'&&s.type!=='サーフ'?6:0);
+      const baitType=(['aji','iwashi','saba','tachiuo'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi','madai'].includes(state.species)&&s.type!=='港'?4:0)+(state.species==='octopus'&&s.type!=='サーフ'?6:0)+(state.species==='squid'&&s.type!=='サーフ'?6:0)+(state.species==='kurodai'?(s.type==='磯'?3:7):0);
       const bait=clamp(base*.58+fish.weights[1]*.42+baitType);
       const result=[['潮の動き',tide],['餌場適性',bait],['地形相性',terrain],['時間帯',time]],temperature=temperatureScoreFor(s);
       if(temperature!==null)result.push(['水温相性',temperature]);
@@ -1139,7 +1156,8 @@
         takohop:`<path d="M52 166 Q90 135 128 165 Q167 135 206 165 Q246 135 286 165 Q327 135 368 165 Q409 135 450 164 L486 160" ${stroke}/><path d="M470 160 l18 -6 -7 12 z" fill="${color}"/><path d="M486 160 q-8 13 -16 0 q-7 13 -14 0" ${soft}/>` ,
         rangehunt:`<path d="M54 83 C111 79 151 84 205 79" ${stroke}/><path d="M205 79 C222 91 231 106 244 119" ${soft} stroke-dasharray="5 5" marker-end="url(#${arrowId})"/><path d="M248 119 C303 113 350 119 399 112" ${stroke}/><path d="M399 112 C415 127 423 143 436 158" ${soft} stroke-dasharray="5 5" marker-end="url(#${arrowId})"/><path d="M436 158 Q456 132 486 151" ${stroke}/><path d="M470 151 l18 -6 -7 12 z" fill="${color}"/>`,
         steadyup:`<path d="M54 165 C121 162 176 140 230 116 S343 78 414 72" ${stroke}/><path d="M414 72 C438 97 450 129 462 160" ${soft} stroke-dasharray="6 5" marker-end="url(#${arrowId})"/><circle cx="54" cy="165" r="6" fill="${color}"/><path d="M470 160 l18 -6 -7 12 z" fill="${color}"/>`,
-        jerkfall:`<path d="M54 166 L86 132 L119 145 L151 104 L185 119 L219 73" ${stroke}/><path d="M219 73 C274 88 320 112 373 143 C411 165 446 166 486 158" ${soft} stroke-dasharray="6 5" marker-end="url(#${arrowId})"/><path d="M470 158 l18 -6 -7 12 z" fill="${color}"/>`
+        jerkfall:`<path d="M54 166 L86 132 L119 145 L151 104 L185 119 L219 73" ${stroke}/><path d="M219 73 C274 88 320 112 373 143 C411 165 446 166 486 158" ${soft} stroke-dasharray="6 5" marker-end="url(#${arrowId})"/><path d="M470 158 l18 -6 -7 12 z" fill="${color}"/>`,
+        chinubottom:`<path d="M52 163 C112 161 154 154 207 160 S307 153 365 159 S434 151 486 154" ${stroke}/><path d="M70 174 l13 -12 14 12 M247 174 l11 -16 14 16 M401 174 l14 -19 16 19" fill="#173747" stroke="rgba(200,230,234,.28)" stroke-width="2"/><circle cx="207" cy="160" r="6" fill="#07131f" stroke="${color}" stroke-width="3"/><path d="M470 154 l18 -6 -7 12 z" fill="${color}"/>`
       };
       return drawings[kind]||drawings.slow;
     }
@@ -1153,7 +1171,7 @@
       card.style.setProperty('--guide-color',fish.color);
       root.innerHTML=`<div class="guide-head"><div><div class="guide-kicker">HOW TO / ${esc(fish.name)}</div><h3>${esc(guide.name)}</h3><div class="guide-sub">${esc(guide.subtitle)}</div></div><span class="guide-badge">${esc(guide.badge)}</span></div><div class="guide-layout"><div class="guide-facts"><div class="guide-fact"><span>基本の仕掛け</span><strong>${esc(guide.rig)}</strong></div><div class="guide-fact"><span>狙う層・場所</span><strong>${esc(guide.range)}</strong></div><div class="guide-fact wide"><span>基本アクション</span><strong>${esc(guide.action)}</strong></div></div><div class="guide-action"><div class="guide-action-head"><span>水中の動かし方イメージ</span><strong>${esc(guide.action)}</strong></div>${fishingGuideDiagram(guide,fish.color)}<div class="guide-tempo"><b>動かすテンポ：</b>${esc(guide.tempo)}</div></div></div><div class="guide-steps">${guide.steps.map((step,index)=>`<div class="guide-step"><b>${index+1}</b>${esc(step)}</div>`).join('')}</div><div class="guide-change"><b>反応がないとき：</b>${esc(guide.change)}</div><div class="guide-foot"><p><b>安全・ルール：</b>${esc(guide.caution)} 道具の重さや動かす速さは海況・水深・対象サイズに合わせる目安です。</p><a href="${esc(guide.sourceUrl)}" target="_blank" rel="noreferrer">参考：${esc(guide.sourceName)} ↗</a></div>`;
     }
-    function renderSpecies(){ const wrap = document.getElementById('speciesRow'); wrap.innerHTML = Object.entries(SPECIES).map(([key, s]) => `<button class="species-chip ${key===state.species?'active':''}" style="--chip-color:${s.color}" data-species="${key}" aria-label="${s.name}を選ぶ" aria-pressed="${key===state.species}"><span class="fish-icon fish-${key}" aria-hidden="true"></span><strong>${s.short||s.name}</strong><small>${s.season} / ${s.temp}</small></button>`).join(''); }
+    function renderSpecies(){ const wrap = document.getElementById('speciesRow'); wrap.innerHTML = Object.entries(SPECIES).map(([key, s]) => `<button class="species-chip ${key===state.species?'active':''}" style="--chip-color:${s.color}" data-species="${key}" aria-label="${s.name}${s.alias?'（'+s.alias+'）':''}を選ぶ" aria-pressed="${key===state.species}"><span class="fish-icon fish-${key}" aria-hidden="true"></span><strong>${s.name}</strong><small>${s.alias||s.season} / ${s.temp}</small></button>`).join(''); }
     function renderDates(){ const wrap = document.getElementById('dateStrip'); wrap.innerHTML = [-1,0,1,2,3].map((offset,i) => { const d=addDays(state.date, offset),f=fmtDate(d),label=offset===0?'選択中':`${f.month}/${f.day}`,moon=['◒','◑','◐','◓','◒'][i]; return `<button class="date-chip ${offset===0?'active':''}" data-date="${d}"><span>${label} ${f.week}</span><strong>${f.month}月${f.day}日</strong><small>${moon} ${i%2?'中潮':'大潮'}</small></button>`; }).join(''); }
     function renderHeroDates(){ const select=document.getElementById('heroDate'); const offsets=[0,1,2,3,4],dates=offsets.map(offset=>addDays(todayJst,offset)); if(!dates.includes(state.date))dates.push(state.date); select.innerHTML=dates.map((date,index)=>{const f=fmtDate(date),label=date===todayJst?'今日':index===1?'明日':`${f.month}/${f.day}`;return `<option value="${date}" ${date===state.date?'selected':''}>${label} ${f.month}/${f.day} (${f.week})</option>`;}).join(''); }
     function renderDateControl(){ const f=fmtDate(state.date); document.getElementById('exploreDate').value=state.date; document.getElementById('exploreDateLabel').textContent=`${state.date.slice(0,4)}年${f.month}月${f.day}日（${f.week}）`; }
@@ -1202,7 +1220,7 @@
       const motion=tideMotionFor();liveEl.textContent=motion?`${motion.label}・${motion.strength}（${motion.rate>0?'+':''}${motion.rate}cm/h）`:'—';sourceEl.innerHTML=data.estimated?`最寄りの潮位地点：${esc(data.station.name)}｜気象庁データへ接続できない場合の参考曲線です。実際の潮位値ではありません。地点または日付を選び直すと公式データを再取得します。`:`最寄りの潮位地点：${esc(data.station.name)}（約${Math.round(data.station.distance)}km）｜<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/" target="_blank" rel="noreferrer">出典：気象庁 潮位表</a>を潮先が15分間隔に補間・加工。天文潮位であり、実測潮位・潮流方向・航海用途の情報ではありません。`;
     }
     function updateLogSpots(prefecture,selectedId=state.selected){const select=document.getElementById('logSpot'),items=SPOTS.filter(s=>s.prefecture===prefecture).sort((a,b)=>a.name.localeCompare(b.name,'ja'));select.innerHTML=items.map(s=>`<option value="${esc(s.name)}" ${s.id===selectedId?'selected':''}>${esc(s.name)}</option>`).join('');}
-    function populateLog(){ let species=document.getElementById('logSpecies');if(species.tagName==='SELECT'){const input=document.createElement('input');input.id='logSpecies';input.name='species';input.type='text';input.required=true;input.maxLength=30;input.placeholder='例：アジ、カサゴ、クロダイ';input.setAttribute('list','logSpeciesSuggestions');input.autocomplete='off';species.replaceWith(input);species=input;const list=document.createElement('datalist');list.id='logSpeciesSuggestions';list.innerHTML=Object.values(SPECIES).map(s=>`<option value="${esc(s.name)}"></option>`).join('');species.after(list);}let pref=document.getElementById('logPrefecture');if(!pref){const field=document.createElement('div');field.className='field';field.innerHTML='<label for="logPrefecture">都道府県</label><select id="logPrefecture" required></select>';document.getElementById('logSpot').closest('.field').before(field);pref=field.querySelector('select');pref.addEventListener('change',()=>updateLogSpots(pref.value,''));}const selected=spot(state.selected),prefectures=[...new Set(SPOTS.map(s=>s.prefecture))].sort((a,b)=>a.localeCompare(b,'ja'));pref.innerHTML=prefectures.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');pref.value=selected.prefecture;updateLogSpots(pref.value,selected.id);species.value=selectedSpecies().name;document.getElementById('logDate').value=state.date;document.getElementById('logTime').value=String(state.hour).padStart(2,'0')+':00'; }
+    function populateLog(){ let species=document.getElementById('logSpecies');if(species.tagName==='SELECT'){const input=document.createElement('input');input.id='logSpecies';input.name='species';input.type='text';input.required=true;input.maxLength=30;input.placeholder='例：マアジ、カサゴ、クロダイ';input.setAttribute('list','logSpeciesSuggestions');input.autocomplete='off';species.replaceWith(input);species=input;const list=document.createElement('datalist');list.id='logSpeciesSuggestions';list.innerHTML=Object.values(SPECIES).map(s=>`<option value="${esc(s.name)}"></option>`).join('');species.after(list);}let pref=document.getElementById('logPrefecture');if(!pref){const field=document.createElement('div');field.className='field';field.innerHTML='<label for="logPrefecture">都道府県</label><select id="logPrefecture" required></select>';document.getElementById('logSpot').closest('.field').before(field);pref=field.querySelector('select');pref.addEventListener('change',()=>updateLogSpots(pref.value,''));}const selected=spot(state.selected),prefectures=[...new Set(SPOTS.map(s=>s.prefecture))].sort((a,b)=>a.localeCompare(b,'ja'));pref.innerHTML=prefectures.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');pref.value=selected.prefecture;updateLogSpots(pref.value,selected.id);species.value=selectedSpecies().name;document.getElementById('logDate').value=state.date;document.getElementById('logTime').value=String(state.hour).padStart(2,'0')+':00'; }
     function hasUgcConsent(){try{return localStorage.getItem('shiome_ugc_consent_v1')==='accepted';}catch(e){return false;}}
     function requestOpenLog(){if(hasUgcConsent()){openLog();return;}document.getElementById('ugcConsentModal').hidden=false;document.getElementById('ugcAgeCheck').focus();}
     function openLog(){ populateLog();setLogStatus('必須項目は釣り場・魚種・釣行日です。');document.getElementById('logModal').hidden=false;document.getElementById('logCount').focus(); }
