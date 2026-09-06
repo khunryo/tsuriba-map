@@ -51,6 +51,7 @@
     .launch-inner { position:relative; z-index:1; width:min(100%,430px); text-align:center; }
     .shiome-wordmark { position:relative; display:block; width:auto; aspect-ratio:540/260; overflow:hidden; isolation:isolate; }
     .shiome-wordmark > img { position:absolute; display:block; width:284.45%; max-width:none; height:auto; left:-25.93%; top:-117.31%; filter:contrast(2.2) brightness(1.05); mix-blend-mode:screen; }
+    .launch-wordmark { width:min(76vw,290px); margin:0 auto 2px; -webkit-mask-image:radial-gradient(ellipse 76% 72% at 50% 52%,#000 62%,transparent 100%); mask-image:radial-gradient(ellipse 76% 72% at 50% 52%,#000 62%,transparent 100%); filter:drop-shadow(0 9px 24px rgba(0,0,0,.46)); animation:launch-wordmark-in .9s cubic-bezier(.22,.8,.3,1) both; }
     .launch-en { color:rgba(218,246,249,.82); font-size:10px; font-weight:750; letter-spacing:.25em; }
     .launch-copy-wrap { position:relative; margin:31px auto 0; padding:18px 0; }
     .launch-ripples { position:absolute; inset:50% auto auto 50%; width:min(104vw,520px); height:170px; transform:translate(-50%,-50%); pointer-events:none; }
@@ -66,8 +67,9 @@
     .launch-line::after { content:""; display:block; width:55%; height:100%; border-radius:inherit; background:var(--aqua); animation:launch-line 1.25s ease-in-out infinite; }
     @keyframes launch-line { from { transform:translateX(-110%); } to { transform:translateX(205%); } }
     @keyframes launch-copy-ripple { 0% { opacity:0; transform:translate(-50%,-50%) scale(.54); } 24% { opacity:.85; } 100% { opacity:0; transform:translate(-50%,-50%) scale(1.08); } }
+    @keyframes launch-wordmark-in { from { opacity:0; transform:translateY(7px) scale(.97); } to { opacity:1; transform:none; } }
     @media (min-width:700px) { .launch-screen { background-image:url('og.png'); background-position:center; } }
-    @media (prefers-reduced-motion:reduce) { .launch-line::after,.launch-ripples i { animation:none; } }
+    @media (prefers-reduced-motion:reduce) { .launch-wordmark,.launch-line::after,.launch-ripples i { animation:none; } }
     .app { min-height: 100vh; display: flex; }
     .sidebar { position: sticky; top: 0; width: 244px; height: 100vh; padding: 26px 18px 18px; border-right: 1px solid var(--line); background: rgba(7, 19, 31, .88); backdrop-filter: blur(18px); display: flex; flex-direction: column; z-index: 5; }
     .brand { display: flex; align-items: center; gap: 11px; padding: 0 9px 35px; }
@@ -610,6 +612,7 @@
 <body data-view="explore">
   <div class="launch-screen" id="launchScreen" role="status" aria-label="潮目を起動しています">
     <div class="launch-inner">
+      <span class="shiome-wordmark launch-wordmark" role="img" aria-label="潮目"><img src="og.png" alt=""></span>
       <div class="launch-en">SHIOME / FISHING INTELLIGENCE</div>
       <div class="launch-copy-wrap"><div class="launch-ripples" aria-hidden="true"><i></i><i></i><i></i></div><p class="launch-copy"><span class="copy-tide">潮</span>と<span class="copy-bait">魚の特性</span>に合わせて、<br><span class="copy-place">いちばん良い場所</span>、<span class="copy-time">いちばん良い時間</span>へ。</p></div>
       <div class="launch-line" aria-hidden="true"></div>
