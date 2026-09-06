@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $fileList = @(
   'index.html',
@@ -16,7 +16,10 @@ $fileList = @(
   'terms.html',
   'support.html',
   'app-ads.txt',
-  'assets/fish-species-sprite-v1.png'
+  'assets/fish-species-sprite-v1.png',
+  'assets/fish-tachiuo.svg',
+  'assets/fish-madai.svg',
+  'assets/fish-kurodai.svg'
 )
 $contentTypes = @{
   '.html' = 'text/html; charset=utf-8'
@@ -50,7 +53,7 @@ async function ensurePostsSchema(env){
   if(postsSchemaReady)return;
   if(!env.DB)throw new Error('D1 unavailable');
   await env.DB.batch([
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS posts (id TEXT PRIMARY KEY NOT NULL, spot TEXT NOT NULL, species TEXT NOT NULL, catch_count INTEGER NOT NULL DEFAULT 0, max_size_cm REAL, method TEXT, memo TEXT, fishing_date TEXT NOT NULL, fishing_time TEXT, weather TEXT, wave_m REAL, depth_m REAL, photo_key TEXT, photo_type TEXT, author_id TEXT, owner_token_hash TEXT, hidden INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS posts (id TEXT PRIMARY KEY NOT NULL, spot TEXT NOT NULL, species TEXT NOT NULL, catch_count INTEGER NOT NULL DEFAULT 0, max_size_cm REAL, method TEXT, memo TEXT, fishing_date TEXT NOT NULL, fishing_time TEXT, weather TEXT, wave_m REAL, depth_m REAL, photo_key TEXT, photo_type TEXT, author_id TEXT, display_name TEXT, owner_token_hash TEXT, hidden INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS post_reports (id TEXT PRIMARY KEY NOT NULL, post_id TEXT NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_post_reports_post_id ON post_reports(post_id)'),
@@ -59,6 +62,7 @@ async function ensurePostsSchema(env){
   ]);
   const columns=await env.DB.prepare('PRAGMA table_info(posts)').all(),names=new Set((columns.results||[]).map(x=>x.name));
   if(!names.has('author_id'))await env.DB.prepare('ALTER TABLE posts ADD COLUMN author_id TEXT').run();
+  if(!names.has('display_name'))await env.DB.prepare('ALTER TABLE posts ADD COLUMN display_name TEXT').run();
   if(!names.has('owner_token_hash'))await env.DB.prepare('ALTER TABLE posts ADD COLUMN owner_token_hash TEXT').run();
   if(!names.has('hidden'))await env.DB.prepare('ALTER TABLE posts ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0').run();
   postsSchemaReady=true;
@@ -104,7 +108,7 @@ async function postsResponse(request,env){
   if(!env.DB)return jsonResponse({error:'POST_DB_NOT_READY'},503);
   await ensurePostsSchema(env);
   if(request.method==='GET'){
-    const result=await env.DB.prepare('SELECT id, spot, species, catch_count, max_size_cm, method, memo, fishing_date, fishing_time, weather, wave_m, depth_m, photo_key, author_id, created_at FROM posts WHERE hidden = 0 ORDER BY created_at DESC LIMIT 30').all();
+    const result=await env.DB.prepare('SELECT id, spot, species, catch_count, max_size_cm, method, memo, fishing_date, fishing_time, weather, wave_m, depth_m, photo_key, author_id, display_name, created_at FROM posts WHERE hidden = 0 ORDER BY created_at DESC LIMIT 30').all();
     return jsonResponse({posts:(result.results||[]).map(row=>({...row,photo_url:row.photo_key?'/api/post-photo/'+encodeURIComponent(row.id):null}))});
   }
   if(request.method!=='POST')return jsonResponse({error:'Method not allowed'},405);
@@ -116,9 +120,9 @@ async function postsResponse(request,env){
   const authorId=/^[0-9a-f-]{36}$/i.test(textField(form,'author_id',36))?textField(form,'author_id',36):crypto.randomUUID();
   const suspended=await env.DB.prepare('SELECT author_id FROM suspended_authors WHERE author_id = ? LIMIT 1').bind(authorId).first();
   if(suspended)return jsonResponse({error:'POST_AUTHOR_SUSPENDED'},403);
-  const spot=cleanText(textField(form,'spot',80)),species=cleanText(textField(form,'species',40)),date=textField(form,'date',10),time=textField(form,'time',5),weather=cleanText(textField(form,'weather',20)),method=cleanText(textField(form,'method',30)),memo=cleanText(textField(form,'memo',500));
+  const spot=cleanText(textField(form,'spot',80)),species=cleanText(textField(form,'species',40)),displayName=cleanText(textField(form,'display_name',20))||'釣り人',date=textField(form,'date',10),time=textField(form,'time',5),weather=cleanText(textField(form,'weather',20)),method=cleanText(textField(form,'method',30)),memo=cleanText(textField(form,'memo',500));
   if(!spot||!species||!/^\d{4}-\d{2}-\d{2}$/.test(date))return jsonResponse({error:'POST_REQUIRED_FIELDS'},400);
-  if(objectionable([spot,species,memo].join(' ')))return jsonResponse({error:'POST_REJECTED_CONTENT'},400);
+  if(objectionable([spot,species,displayName,memo].join(' ')))return jsonResponse({error:'POST_REJECTED_CONTENT'},400);
   if(time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))return jsonResponse({error:'POST_INVALID_TIME'},400);
   const catchCount=optionalNumber(form,'count',0,999),maxSize=optionalNumber(form,'max_size_cm',0,300),wave=optionalNumber(form,'wave_m',0,30),depth=optionalNumber(form,'depth_m',0,2000);
   const photo=form.get('photo'),hasPhoto=photo&&typeof photo.arrayBuffer==='function'&&photo.size>0;
@@ -128,10 +132,10 @@ async function postsResponse(request,env){
   const id=crypto.randomUUID(),createdAt=new Date().toISOString(),photoKey=hasPhoto?'posts/'+id+'/photo':null,ownerToken=textField(form,'owner_token',100),ownerTokenHash=ownerToken?await sha256(ownerToken):null;
   if(hasPhoto)await env.UPLOADS.put(photoKey,await photo.arrayBuffer(),{httpMetadata:{contentType:photo.type},customMetadata:{postId:id}});
   try{
-    await env.DB.prepare('INSERT INTO posts (id, spot, species, catch_count, max_size_cm, method, memo, fishing_date, fishing_time, weather, wave_m, depth_m, photo_key, photo_type, author_id, owner_token_hash, hidden, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)').bind(id,spot,species,catchCount??0,maxSize,method||null,memo||null,date,time||null,weather||null,wave,depth,photoKey,hasPhoto?photo.type:null,authorId,ownerTokenHash,createdAt).run();
+    await env.DB.prepare('INSERT INTO posts (id, spot, species, catch_count, max_size_cm, method, memo, fishing_date, fishing_time, weather, wave_m, depth_m, photo_key, photo_type, author_id, display_name, owner_token_hash, hidden, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)').bind(id,spot,species,catchCount??0,maxSize,method||null,memo||null,date,time||null,weather||null,wave,depth,photoKey,hasPhoto?photo.type:null,authorId,displayName,ownerTokenHash,createdAt).run();
   }catch(error){if(photoKey&&env.UPLOADS)await env.UPLOADS.delete(photoKey);throw error;}
   recent.push(now);postRate.set(ip,recent);
-  return jsonResponse({post:{id,spot,species,catch_count:catchCount??0,max_size_cm:maxSize,method,memo,fishing_date:date,fishing_time:time,weather,wave_m:wave,depth_m:depth,author_id:authorId,photo_url:photoKey?'/api/post-photo/'+encodeURIComponent(id):null,created_at:createdAt}},201);
+  return jsonResponse({post:{id,spot,species,catch_count:catchCount??0,max_size_cm:maxSize,method,memo,fishing_date:date,fishing_time:time,weather,wave_m:wave,depth_m:depth,author_id:authorId,display_name:displayName,photo_url:photoKey?'/api/post-photo/'+encodeURIComponent(id):null,created_at:createdAt}},201);
 }
 async function postActionResponse(request,path,env){
   if(!env.DB)return jsonResponse({error:'POST_DB_NOT_READY'},503);await ensurePostsSchema(env);
