@@ -40,7 +40,7 @@ launch_background = Image.open(ROOT / "assets" / "launch-bg-portrait-v1.png").co
 preview_width = 420
 preview_height = round(launch_background.height * preview_width / launch_background.width)
 preview = launch_background.resize((preview_width, preview_height), Image.Resampling.LANCZOS)
-logo_width = 210
+logo_width = 147
 logo_height = round(logo.height * logo_width / logo.width)
 logo_preview = logo.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
 preview.alpha_composite(logo_preview, ((preview_width - logo_width) // 2, round(preview_height * 0.29)))
