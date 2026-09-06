@@ -19,9 +19,9 @@ const files = [
   "icon-512-maskable.png",
   "apple-touch-icon-180.png",
   "assets/fish-species-sprite-v1.png",
-  "assets/fish-tachiuo.svg",
-  "assets/fish-madai.svg",
-  "assets/fish-kurodai.svg",
+  "assets/fish-tachiuo-v2.png",
+  "assets/fish-madai-v2.png",
+  "assets/fish-kurodai-v2.png",
 ];
 
 await rm(out, { recursive: true, force: true });

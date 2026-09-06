@@ -17,9 +17,9 @@ $fileList = @(
   'support.html',
   'app-ads.txt',
   'assets/fish-species-sprite-v1.png',
-  'assets/fish-tachiuo.svg',
-  'assets/fish-madai.svg',
-  'assets/fish-kurodai.svg'
+  'assets/fish-tachiuo-v2.png',
+  'assets/fish-madai-v2.png',
+  'assets/fish-kurodai-v2.png'
 )
 $contentTypes = @{
   '.html' = 'text/html; charset=utf-8'
