@@ -24,6 +24,7 @@ const files = [
   "assets/fish-madai-v2.png",
   "assets/fish-kurodai-v2.png",
   "assets/launch-bg-portrait-v1.png",
+  "assets/shiome-wordmark-transparent.png",
 ];
 
 await rm(out, { recursive: true, force: true });
