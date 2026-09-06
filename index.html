@@ -52,6 +52,7 @@
     .shiome-wordmark { position:relative; display:block; width:auto; aspect-ratio:540/260; overflow:hidden; isolation:isolate; }
     .shiome-wordmark > img { position:absolute; display:block; width:284.45%; max-width:none; height:auto; left:-25.93%; top:-117.31%; filter:contrast(2.2) brightness(1.05); mix-blend-mode:screen; }
     .launch-wordmark { display:block; width:min(39vw,147px); height:auto; margin:0 auto 12px; filter:drop-shadow(0 7px 18px rgba(0,0,0,.34)); animation:launch-wordmark-in .9s cubic-bezier(.22,.8,.3,1) both; }
+    .launch-tagline { margin:0 0 10px; color:rgba(247,242,232,.94); font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:clamp(12px,3.25vw,14px); font-weight:500; letter-spacing:.17em; text-shadow:0 2px 15px rgba(0,7,22,.88); }
     .launch-en { color:rgba(218,246,249,.82); font-size:10px; font-weight:750; letter-spacing:.25em; }
     .launch-copy-wrap { position:relative; margin:31px auto 0; padding:18px 0; }
     .launch-ripples { position:absolute; inset:50% auto auto 50%; width:min(104vw,520px); height:170px; transform:translate(-50%,-50%); pointer-events:none; }
@@ -613,6 +614,7 @@
   <div class="launch-screen" id="launchScreen" role="status" aria-label="潮目を起動しています">
     <div class="launch-inner">
       <img class="launch-wordmark" src="assets/shiome-wordmark-transparent.png" alt="潮目">
+      <div class="launch-tagline">今日の釣り場を、科学する。</div>
       <div class="launch-en">SHIOME / FISHING INTELLIGENCE</div>
       <div class="launch-copy-wrap"><div class="launch-ripples" aria-hidden="true"><i></i><i></i><i></i></div><p class="launch-copy"><span class="copy-tide">潮</span>と<span class="copy-bait">魚の特性</span>に合わせて、<br><span class="copy-place">いちばん良い場所</span>、<span class="copy-time">いちばん良い時間</span>へ。</p></div>
       <div class="launch-line" aria-hidden="true"></div>
