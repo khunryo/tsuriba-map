@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07131f">
-  <meta name="description" content="潮先は、魚種・潮汐・水温・地形・みんなの釣果から今日の釣り場を提案する釣りアプリです。">
+  <meta name="description" content="潮目は、魚種・潮汐・水温・地形・みんなの釣果から今日の釣り場を提案する釣りアプリです。">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="潮先｜今日の釣り場を、科学する">
+  <meta property="og:title" content="潮目｜今日の釣り場を、科学する">
   <meta property="og:description" content="魚種・潮汐・水温・地形・みんなの釣果から、今日の釣り場を提案します。">
   <meta property="og:url" content="https://shiome-fishing.khunryo.chatgpt.site/">
   <meta property="og:image" content="https://shiome-fishing.khunryo.chatgpt.site/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="潮先">
-  <title>潮先｜今日の釣り場を、科学する</title>
+  <meta name="apple-mobile-web-app-title" content="潮目">
+  <title>潮目｜今日の釣り場を、科学する</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
@@ -45,15 +45,14 @@
     button { color: inherit; }
     button, select { cursor: pointer; }
     a { color: inherit; }
-    .launch-screen { position:fixed; inset:0; z-index:5000; display:grid; place-items:center; min-height:100dvh; overflow:hidden; padding:max(28px,env(safe-area-inset-top)) 28px max(28px,env(safe-area-inset-bottom)); color:#eefbfb; background:linear-gradient(174deg,#061824 0%,#073044 46%,#075068 100%); transition:opacity .58s ease,visibility .58s step-end; }
-    .launch-screen::before { content:""; position:absolute; inset:-20%; background:radial-gradient(ellipse at 24% 20%,rgba(129,241,230,.2),transparent 24%),radial-gradient(ellipse at 76% 34%,rgba(72,194,224,.18),transparent 27%),repeating-radial-gradient(ellipse at 50% -8%,transparent 0 34px,rgba(183,250,244,.07) 36px,transparent 39px 68px); filter:blur(1px); animation:launch-water 5.5s ease-in-out infinite alternate; }
-    .launch-screen::after { content:""; position:absolute; left:-18%; right:-18%; bottom:-12%; height:43%; border-radius:50% 50% 0 0/22% 22% 0 0; background:linear-gradient(180deg,rgba(106,228,219,.09),rgba(3,36,53,.48)); box-shadow:0 -18px 50px rgba(78,210,220,.1),0 -45px 0 -43px rgba(184,255,246,.25),0 -82px 0 -79px rgba(110,221,226,.18); animation:launch-swell 3.8s ease-in-out infinite alternate; }
+    .launch-screen { position:fixed; inset:0; z-index:5000; display:grid; place-items:center; min-height:100dvh; overflow:hidden; padding:max(28px,env(safe-area-inset-top)) 28px max(28px,env(safe-area-inset-bottom)); color:#eefbfb; background:#02132b url('og.png') 68% center/cover no-repeat; transition:opacity .58s ease,visibility .58s step-end; }
+    .launch-screen::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,12,34,.3),rgba(0,18,42,.52) 54%,rgba(0,11,27,.84)); backdrop-filter:blur(1px); }
+    .launch-screen::after { content:""; position:absolute; inset:auto -18% -13%; height:46%; border-radius:50% 50% 0 0/22% 22% 0 0; background:linear-gradient(180deg,rgba(4,157,181,.08),rgba(1,18,39,.72)); box-shadow:0 -18px 55px rgba(65,220,225,.12),0 -47px 0 -44px rgba(184,255,246,.28); animation:launch-swell 3.8s ease-in-out infinite alternate; }
     .launch-screen.is-hiding { opacity:0; visibility:hidden; pointer-events:none; }
     .launch-inner { position:relative; z-index:1; width:min(100%,430px); text-align:center; }
-    .launch-mark { width:86px; height:86px; margin:0 auto 20px; border-radius:25px; overflow:hidden; box-shadow:0 18px 50px rgba(100,228,210,.24); animation:launch-float 1.8s ease-in-out infinite; }
-    .launch-mark img { display:block; width:100%; height:100%; object-fit:cover; }
-    .launch-name { margin:0; font-size:34px; font-weight:850; letter-spacing:.18em; text-indent:.18em; }
-    .launch-en { margin-top:5px; color:rgba(180,216,224,.62); font-size:9px; font-weight:700; letter-spacing:.2em; }
+    .shiome-wordmark { position:relative; display:block; width:auto; aspect-ratio:540/260; overflow:hidden; isolation:isolate; }
+    .shiome-wordmark > img { position:absolute; display:block; width:284.45%; max-width:none; height:auto; left:-25.93%; top:-117.31%; filter:contrast(2.2) brightness(1.05); mix-blend-mode:screen; }
+    .launch-en { color:rgba(218,246,249,.82); font-size:10px; font-weight:750; letter-spacing:.25em; }
     .launch-copy-wrap { position:relative; margin:31px auto 0; padding:18px 0; }
     .launch-ripples { position:absolute; inset:50% auto auto 50%; width:min(104vw,520px); height:170px; transform:translate(-50%,-50%); pointer-events:none; }
     .launch-ripples i { position:absolute; left:50%; top:50%; width:100%; height:100%; transform:translate(-50%,-50%) scale(.62); border-top:1px solid rgba(173,249,241,.2); border-radius:50%; animation:launch-copy-ripple 3.1s ease-out infinite; }
@@ -68,17 +67,16 @@
     .launch-line::after { content:""; display:block; width:55%; height:100%; border-radius:inherit; background:var(--aqua); animation:launch-line 1.25s ease-in-out infinite; }
     @keyframes launch-water { from { transform:translate3d(-1.5%,-1%,0) scale(1); } to { transform:translate3d(1.5%,1%,0) scale(1.035); } }
     @keyframes launch-swell { from { transform:translateX(-1.5%) rotate(-.4deg); } to { transform:translateX(1.5%) rotate(.4deg); } }
-    @keyframes launch-float { 50% { transform:translateY(-4px); } }
     @keyframes launch-line { from { transform:translateX(-110%); } to { transform:translateX(205%); } }
     @keyframes launch-copy-ripple { 0% { opacity:0; transform:translate(-50%,-50%) scale(.54); } 24% { opacity:.85; } 100% { opacity:0; transform:translate(-50%,-50%) scale(1.08); } }
-    @media (prefers-reduced-motion:reduce) { .launch-screen::before,.launch-screen::after,.launch-mark,.launch-line::after,.launch-ripples i { animation:none; } }
+    @media (prefers-reduced-motion:reduce) { .launch-screen::before,.launch-screen::after,.launch-line::after,.launch-ripples i { animation:none; } }
     .app { min-height: 100vh; display: flex; }
     .sidebar { position: sticky; top: 0; width: 244px; height: 100vh; padding: 26px 18px 18px; border-right: 1px solid var(--line); background: rgba(7, 19, 31, .88); backdrop-filter: blur(18px); display: flex; flex-direction: column; z-index: 5; }
     .brand { display: flex; align-items: center; gap: 11px; padding: 0 9px 35px; }
     .brand-mark { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--aqua), var(--cyan)); color: #061a25; box-shadow: 0 8px 22px rgba(100, 228, 210, .22); }
     .brand-mark { overflow:hidden; }
     .brand-mark img { display:block; width:100%; height:100%; object-fit:cover; }
-    .brand-name { font-size: 21px; font-weight: 800; letter-spacing: .08em; line-height: 1; }
+    .brand-wordmark { width:88px; }
     .brand-sub { display: block; margin-top: 4px; color: var(--muted-2); font-size: 9px; letter-spacing: .12em; }
     .nav-label { padding: 0 12px; color: var(--muted-2); font-size: 10px; font-weight: 700; letter-spacing: .15em; }
     .nav { display: grid; gap: 6px; margin-top: 11px; }
@@ -284,6 +282,10 @@
     .guide-picker-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:8px; }
     .guide-picker-head strong { font-size:13px; }
     .guide-picker-head span { color:var(--muted); font-size:9px; }
+    .guide-method-switch { display:flex; gap:7px; margin:0 0 12px; padding:5px; border:1px solid var(--line); border-radius:12px; background:rgba(2,15,25,.34); }
+    .guide-method-switch button { flex:1; min-height:38px; border:1px solid transparent; border-radius:9px; color:var(--muted); background:transparent; font-size:11px; font-weight:800; }
+    .guide-method-switch button.active { border-color:color-mix(in srgb,var(--guide-color) 40%,transparent); color:#06222b; background:var(--guide-color); box-shadow:0 7px 18px color-mix(in srgb,var(--guide-color) 18%,transparent); }
+    .guide-method-switch button:only-child { color:var(--guide-color); background:color-mix(in srgb,var(--guide-color) 8%,transparent); }
     .fishing-guide-card { overflow:hidden; border-color:color-mix(in srgb,var(--guide-color) 28%,var(--line)); background:linear-gradient(145deg,color-mix(in srgb,var(--guide-color) 7%,var(--surface)),var(--surface) 58%); }
     .guide-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; }
     .guide-kicker { color:var(--guide-color); font-size:9px; font-weight:850; letter-spacing:.15em; }
@@ -308,6 +310,10 @@
     .guide-step b { position:absolute; left:10px; top:10px; width:19px; height:19px; display:grid; place-items:center; border-radius:50%; color:#06222b; background:var(--guide-color); font-size:9px; }
     .guide-change { margin-top:10px; padding:10px 11px; border-left:2px solid var(--guide-color); border-radius:0 8px 8px 0; color:#d3e5e7; background:color-mix(in srgb,var(--guide-color) 6%,transparent); font-size:10px; line-height:1.6; }
     .guide-change b { color:var(--guide-color); }
+    .guide-quick { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .guide-quick div { padding:11px 12px; border:1px solid color-mix(in srgb,var(--guide-color) 24%,var(--line)); border-radius:10px; background:color-mix(in srgb,var(--guide-color) 5%,rgba(2,15,25,.3)); }
+    .guide-quick span { display:block; color:var(--muted); font-size:9px; }
+    .guide-quick strong { display:block; margin-top:4px; color:#e8f5f7; font-size:11px; line-height:1.55; }
     .guide-foot { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-top:10px; color:var(--muted-2); font-size:9px; line-height:1.55; }
     .guide-foot p { flex:1; margin:0; }
     .guide-foot a { flex:0 0 auto; color:var(--cyan); text-decoration:none; }
@@ -465,7 +471,7 @@
       .mobile-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; letter-spacing: .08em; }
       .mobile-brand .brand-mark { width: 30px; height: 30px; border-radius: 10px; }
       .mobile-brand .brand-mark img { width:100%; height:100%; }
-      .mobile-brand span { font-size: 17px; }
+      .mobile-brand .brand-wordmark { width:72px; }
       .mobile-header .ghost-btn { display:none; }
       button, select, input, textarea { touch-action: manipulation; }
       .primary-btn, .ghost-btn, .species-chip, .spot-row, .date-card { min-height: 44px; }
@@ -543,6 +549,7 @@
       .guide-facts { grid-template-columns:1fr; }
       .guide-fact.wide { grid-column:auto; }
       .guide-steps { grid-template-columns:1fr; }
+      .guide-quick { grid-template-columns:1fr; }
       .guide-action svg { min-height:0; }
       .guide-foot { display:block; }
       .guide-foot a { display:inline-block; margin-top:7px; }
@@ -603,11 +610,9 @@
   <script src="nationwide_ports.generated.js"></script>
 </head>
 <body data-view="explore">
-  <div class="launch-screen" id="launchScreen" role="status" aria-label="潮先を起動しています">
+  <div class="launch-screen" id="launchScreen" role="status" aria-label="潮目を起動しています">
     <div class="launch-inner">
-      <div class="launch-mark" aria-hidden="true"><img src="icon-192.png" alt=""></div>
-      <h1 class="launch-name">潮先</h1>
-      <div class="launch-en">SHIOSAKI / FISHING INTELLIGENCE</div>
+      <div class="launch-en">SHIOME / FISHING INTELLIGENCE</div>
       <div class="launch-copy-wrap"><div class="launch-ripples" aria-hidden="true"><i></i><i></i><i></i></div><p class="launch-copy"><span class="copy-tide">潮</span>と<span class="copy-bait">魚の特性</span>に合わせて、<br><span class="copy-place">いちばん良い場所</span>、<span class="copy-time">いちばん良い時間</span>へ。</p></div>
       <div class="launch-line" aria-hidden="true"></div>
     </div>
@@ -616,7 +621,7 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><img src="icon-192.png" alt=""></div>
-        <div><div class="brand-name">潮先</div><span class="brand-sub">SHIOSAKI / FISHING INTELLIGENCE</span></div>
+        <div><span class="shiome-wordmark brand-wordmark" role="img" aria-label="潮目"><img src="og.png" alt=""></span><span class="brand-sub">SHIOME / FISHING INTELLIGENCE</span></div>
       </div>
       <div class="nav-label">MENU</div>
       <nav class="nav" aria-label="メインメニュー">
@@ -635,7 +640,7 @@
 
     <main class="main">
       <div class="mobile-header">
-        <div class="mobile-brand"><div class="brand-mark"><img src="icon-192.png" alt=""></div><span>潮先</span></div>
+        <div class="mobile-brand"><div class="brand-mark"><img src="icon-192.png" alt=""></div><span class="shiome-wordmark brand-wordmark" role="img" aria-label="潮目"><img src="og.png" alt=""></span></div>
         <button class="ghost-btn" data-action="open-log">＋ 記録する</button>
       </div>
       <header class="topbar">
@@ -706,7 +711,7 @@
 
       <section class="section detail-grid app-view view-tide" hidden>
         <div class="card detail-summary"><div class="card-pad" id="detailCard"></div></div>
-        <div class="card tide-card"><div class="card-pad"><div class="tide-head"><h3>潮位のリズム</h3><span id="tideLocation">—</span></div><canvas id="tideCanvas" aria-label="選択地点のタイドグラフ"></canvas><div class="tide-events" id="tideEvents"></div><div class="tide-live"><span id="tideLiveLabel">選択時間の潮位変化</span><strong id="tideLiveValue">読み込み中</strong></div><div class="tide-source" id="tideSource">気象庁の天文潮位をもとに潮先が補間・加工して表示。実測潮位・潮流方向とは異なります。</div></div></div>
+        <div class="card tide-card"><div class="card-pad"><div class="tide-head"><h3>潮位のリズム</h3><span id="tideLocation">—</span></div><canvas id="tideCanvas" aria-label="選択地点のタイドグラフ"></canvas><div class="tide-events" id="tideEvents"></div><div class="tide-live"><span id="tideLiveLabel">選択時間の潮位変化</span><strong id="tideLiveValue">読み込み中</strong></div><div class="tide-source" id="tideSource">気象庁の天文潮位をもとに潮目が補間・加工して表示。実測潮位・潮流方向とは異なります。</div></div></div>
       </section>
 
       <section class="section app-view view-community" id="community" hidden>
@@ -717,7 +722,7 @@
       </section>
 
       <section class="section app-view view-sources" id="sources" hidden><div class="section-heading"><div><h2>予測の根拠</h2><p>公的データと魚種ごとの一般的な生態条件を使い、現地データで更新する設計です。</p></div></div><div class="source-grid"><article class="source-card"><div class="source-type">SPECIES</div><strong>魚種プロファイル</strong><p>好適水温・底質・潮通し・季節性を魚種ごとに設定。</p><a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構 ↗</a></article><article class="source-card"><div class="source-type">TIDE</div><strong>潮汐と時合い</strong><p>満干潮の前後、潮が動く時間帯をタイドグラフで可視化。</p><a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">気象庁 潮位表 ↗</a></article><article class="source-card"><div class="source-type">LOCATION</div><strong>港湾・海岸候補</strong><p>公的な釣り場開放港と海岸線資料を基礎に、候補地点を区別して登録。</p><a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 海釣り施設 ↗</a></article><article class="source-card"><div class="source-type">COMMUNITY</div><strong>みんなの現地情報</strong><p>釣果・水色・小魚・立入情報を投稿で蓄積。</p><a href="#community">投稿を見る →</a></article></div></section>
-      <p class="footer-note app-view view-sources" hidden>潮先のスコアは釣果を保証するものではありません。予測は一般的な魚の生態、公的データ、ユーザー投稿から「次に見るべき場所」を提案するものです。港湾名の掲載は全域での釣り許可を意味しません。立入禁止・漁業権・駐車・天候と波の安全を最優先してください。<br>公的データ: <a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構</a> / <a href="https://www.data.jma.go.jp/" target="_blank" rel="noreferrer">気象庁</a> / <a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 港湾の釣り場開放状況</a> / 国土地理院。投稿内容と写真はサービス上に保存され、みんなの釣果画面に表示されます。<span class="legal-links"><a href="https://shiome-fishing.khunryo.chatgpt.site/privacy.html" target="_blank" rel="noreferrer">プライバシーポリシー</a><a href="https://shiome-fishing.khunryo.chatgpt.site/terms.html" target="_blank" rel="noreferrer">利用規約</a><a href="https://shiome-fishing.khunryo.chatgpt.site/support.html" target="_blank" rel="noreferrer">サポート</a></span></p>
+      <p class="footer-note app-view view-sources" hidden>潮目のスコアは釣果を保証するものではありません。予測は一般的な魚の生態、公的データ、ユーザー投稿から「次に見るべき場所」を提案するものです。港湾名の掲載は全域での釣り許可を意味しません。立入禁止・漁業権・駐車・天候と波の安全を最優先してください。<br>公的データ: <a href="https://www.fra.go.jp/" target="_blank" rel="noreferrer">水産研究・教育機構</a> / <a href="https://www.data.jma.go.jp/" target="_blank" rel="noreferrer">気象庁</a> / <a href="https://www.mlit.go.jp/kowan/content/001758857.pdf" target="_blank" rel="noreferrer">国土交通省 港湾の釣り場開放状況</a> / 国土地理院。投稿内容と写真はサービス上に保存され、みんなの釣果画面に表示されます。<span class="legal-links"><a href="https://shiome-fishing.khunryo.chatgpt.site/privacy.html" target="_blank" rel="noreferrer">プライバシーポリシー</a><a href="https://shiome-fishing.khunryo.chatgpt.site/terms.html" target="_blank" rel="noreferrer">利用規約</a><a href="https://shiome-fishing.khunryo.chatgpt.site/support.html" target="_blank" rel="noreferrer">サポート</a></span></p>
       <p class="footer-note app-view view-sources" hidden><strong>全国沿岸候補データ:</strong> <a href="https://www.jfa.maff.go.jp/j/gyoko_gyozyo/g_zyoho_bako/gyoko_itiran/sub81.html" target="_blank" rel="noreferrer">水産庁の現行漁港一覧</a>を、<a href="https://nlftp.mlit.go.jp/ksj/gmlold/datalist/gmlold_KsjTmplt-C09.html" target="_blank" rel="noreferrer">国土交通省 国土数値情報（漁港）</a>および<a href="https://nlftp.mlit.go.jp/ksj/gmlold/datalist/gmlold_KsjTmplt-C02.html" target="_blank" rel="noreferrer">国土数値情報（港湾）</a>の代表座標と照合しています。掲載地点は周辺を確認するための候補であり、釣りや立入りの許可を示すものではありません。</p>
     </main>
   </div>
@@ -841,17 +846,19 @@
     };
     const FISHING_GUIDES = {
       aji: {
-        badge:'ルアー推奨', name:'ジグ単アジング', method:'ジグ単アジング／サビキ',
+        badge:'ルアー', name:'ジグ単アジング', method:'ジグ単アジング',
+        best:'朝夕の薄明、夜の常夜灯の明暗、潮が動き始める時間', beginner:'最初は表層から。釣れた沈下秒数を覚えて、同じ深さを繰り返します。',
         subtitle:'軽いワームを同じ層に通し、群れの深さを探します。',
         rig:'1〜2g前後のジグヘッド＋小型ストレートワーム', range:'表層→中層→底。沈める秒数で同じ層を再現',
         action:'スローなただ巻き＋短い止め', tempo:'3〜5秒ゆっくり巻く → 1〜2秒止める', diagram:'slow',
         diagramAlt:'マアジ用ワームを一定の層に通し、短く止める動かし方の図', diagramLabels:['沈める','ゆっくり巻く','短く止める'],
         steps:['沖へ投げ、まず浅い層から。反応がなければ沈める秒数を少しずつ増やします。','竿先を動かしすぎず、ワームが同じ層を泳ぐ速さでゆっくり巻きます。','コッという感触、重み、糸の緩みで軽く合わせ、口切れを避けて寄せます。'],
-        change:'夜は常夜灯の明暗、日中は潮のヨレと底付近を優先。群れが足元に入ったらサビキも有効です。',
+        change:'夜は常夜灯の明暗、日中は潮のヨレと底付近を優先。ワームの色と重さを一段ずつ変えます。',
         caution:'風や潮で動きが分からないときは、底を取れる範囲で少し重くします。港湾作業と係留ロープを避けてください。'
       },
       iwashi: {
         badge:'エサ釣り中心', name:'足元のサビキ釣り', method:'サビキ釣り',
+        best:'群れが見える時間、湾口から潮が入る時間、周囲で釣れ始めた直後', beginner:'コマセと針を同じ深さにそろえ、大きく動かさず止める時間を作ります。',
         subtitle:'回遊している群れの深さへサビキとコマセを合わせます。',
         rig:'小型サビキ仕掛け＋アミエビ用カゴ', range:'表層〜中層。見える群れ、潮目、岸壁際',
         action:'コマセを出す上下動', tempo:'竿をゆっくり上下 → 仕掛けを止めて待つ', diagram:'sabiki',
@@ -862,6 +869,7 @@
       },
       hirame: {
         badge:'ルアー推奨', name:'ミノー／ジグヘッドワーム', method:'ミノー／ジグヘッドワーム',
+        best:'朝夕の薄明、潮が動く時間、波が作る離岸流や地形変化が見えるとき', beginner:'ルアーを底へ擦り続けず、底から少し上を保って広く通します。',
         subtitle:'離岸流やかけ上がりを横切り、底の少し上を広く探ります。',
         rig:'浅場はミノー、深場や向かい風はワーム／メタルジグ', range:'離岸流・流れ込み・かけ上がりの底から少し上',
         action:'ただ巻き → ストップ＆ゴー', tempo:'5回転ほど巻く → 約1秒止める', diagram:'stopgo',
@@ -872,6 +880,7 @@
       },
       magochi: {
         badge:'ルアー推奨', name:'ワームで底を刻む', method:'ジグヘッドワーム／メタルジグ',
+        best:'水温が上がる時期の朝夕、河口の濁りと潮が重なる時間', beginner:'毎回の着底を確認し、砂底の溝や硬さが変わる場所を重点的に探ります。',
         subtitle:'砂泥底から離しすぎず、持ち上げて落とす動きで追わせます。',
         rig:'底が分かる重さのジグヘッド＋シャッド系ワーム', range:'河口・砂浜の溝・かけ上がり・砂と岩の境',
         action:'リフト＆フォール＋停止', tempo:'持ち上げる → 張り気味に落とす → 2秒ほど止める', diagram:'bottomhop',
@@ -881,17 +890,19 @@
         caution:'波打ち際まで追うことがあります。足元まで丁寧に巻き、エラぶたや針は素手で扱わないでください。'
       },
       saba: {
-        badge:'ルアー／サビキ', name:'小型メタルジグ', method:'小型メタルジグ／サビキ',
+        badge:'ルアー', name:'小型メタルジグ', method:'小型メタルジグ',
+        best:'鳥・小魚・ナブラが見える時間、港口で潮が効く朝夕', beginner:'群れへ直接投げ込まず進行方向へ投げ、釣れた深さを再現します。',
         subtitle:'群れが見えれば表層、見えなければ深い層から探します。',
         rig:'群れの小魚サイズに合わせた小型メタルジグ', range:'ナブラの沖側から表層／反応がなければ中層〜底',
         action:'表層ただ巻き／深場リフト＆フォール', tempo:'表層は速めに巻く。深い層は持ち上げて落とす', diagram:'liftfall',
         diagramAlt:'マサバ用メタルジグを表層で巻くか、深い層で持ち上げて落とす図', diagramLabels:['群れの沖へ','巻き上げる','落として探す'],
         steps:['群れや鳥が見えるときは、その沖または進行方向へ投げます。','表層の群れには速めのただ巻き。直接群れへ投げ込まず横切らせます。','姿が見えなければ沈める深さを変え、リフト＆フォールで反応層を探します。'],
-        change:'足元に群れが入り、家族で狙うならサビキが簡単です。釣れた深さを覚えて繰り返します。',
+        change:'表層で反応がなければ沈下秒数を増やし、釣れた深さと巻き速度を繰り返します。',
         caution:'横走りで隣の仕掛けと絡みやすいため、混雑時は早めに取り込みます。釣れたらすぐ冷やしてください。'
       },
       blue: {
         badge:'ルアー推奨', name:'ライトショアジギング', method:'ライトショアジギング',
+        best:'朝夕の薄明、潮目が寄る時間、小魚や鳥の動きが出た直後', beginner:'ナブラがなければ底から中層を順番に探り、同じテンポを崩さないようにします。',
         subtitle:'表層の回遊を確認し、反応がなければ底から中層を探ります。',
         rig:'30〜50g前後のメタルジグ（底を確認できる重さ）', range:'ナブラの進行先／潮目／底〜中層',
         action:'ワンピッチジャーク', tempo:'ひとシャクリ＋ハンドル1回転を一定リズム', diagram:'onepitch',
@@ -902,6 +913,7 @@
       },
       kisu: {
         badge:'エサ釣り中心', name:'ちょい投げ／引き釣り', method:'ちょい投げ／引き釣り',
+        best:'暖かい時期の日中、波が穏やかで砂底を探りやすい時間', beginner:'仕掛けを速く回収せず、重く感じる溝やアタリが出た距離で止めます。',
         subtitle:'砂底をゆっくり引き、重く感じる溝やヨブで待ちます。',
         rig:'天秤オモリ＋2〜3本針＋イソメ類', range:'砂底のヨブ・かけ上がり・河口の砂泥底',
         action:'ゆっくりズル引き＋止め', tempo:'竿でゆっくり引く → 糸ふけを巻く → 数秒止める', diagram:'bottomdrag',
@@ -911,7 +923,8 @@
         caution:'投げる前に後方と遊泳者を確認。針が複数あるため、回収時と魚を外すときも注意してください。'
       },
       rock: {
-        badge:'ルアー推奨', name:'ジグヘッド／テキサスリグ', method:'カサゴのルアー／探り釣り',
+        badge:'ルアー', name:'ジグヘッド／テキサスリグ', method:'ジグヘッドワーム／テキサスリグ',
+        best:'夕方から夜、日中なら岩陰・岸壁際・深い穴に影が残る時間', beginner:'一つの穴で粘らず、着底直後を意識して隙間を順番に探ります。',
         subtitle:'底や障害物から離さず、短い移動と停止で穴を探ります。',
         rig:'際はジグヘッド、沖の岩・藻場はテキサスリグ', range:'岩穴・テトラ際・沈み根・藻場の底',
         action:'底ズル引き＋リフト＆フォール', tempo:'短く引く → 小さく持ち上げる → 落として止める', diagram:'rockhop',
@@ -922,6 +935,7 @@
       },
       octopus: {
         badge:'専用エギ推奨', name:'マダコ用エギで底を探る', method:'マダコ用エギ／テンヤ',
+        best:'潮が速すぎない時間、底を明確に感じられる海況、夜明け前後', beginner:'常に底を確認し、急に重くなったら引っ張り合わず一気に底から離します。',
         subtitle:'海底から離しすぎず、軽い跳ね上げと落下で存在を知らせます。',
         rig:'タコ専用エギ＋根ズレに強いリーダー', range:'岸壁際・捨石・岩礁・砂礫の底',
         action:'小さく跳ね上げてテンションフォール', tempo:'軽くあおる → 糸を張って落とす → 重みを確認', diagram:'takohop',
@@ -932,6 +946,7 @@
       },
       squid: {
         badge:'ルアー推奨', name:'アオリイカのエギング', method:'エギング',
+        best:'朝夕の薄明、潮が動く時間、藻場や港口へ小魚が寄るとき', beginner:'シャクリよりフォールを丁寧に。糸の停止や横移動を見て合わせます。',
         subtitle:'シャクリで気付かせ、姿勢を安定させたフォールで抱かせます。',
         rig:'エギ＋エギングタックル', range:'藻場・沈み根・港口の底〜中層',
         action:'2〜3回シャクる → 安定フォール', tempo:'跳ね上げる → 数秒落とす → 着底を取り直す', diagram:'jerkfall',
@@ -941,7 +956,8 @@
         caution:'藻場をむやみに引っ掛けず、地域の禁漁・採捕規制を確認。取り込み時は墨の向きを人に向けないでください。'
       },
       tachiuo: {
-        badge:'ルアー推奨', name:'ワーム／メタルジグでレンジを探す', method:'ワーム／メタルジグ／電気ウキ',
+        badge:'ルアー', name:'ワーム／メタルジグでレンジを探す', method:'ワーム／メタルジグ',
+        best:'夕方から夜、港口や常夜灯の明暗へ小魚が集まる時間', beginner:'表層から順番に沈下秒数を増やし、反応した深さを同じ秒数で再現します。',
         subtitle:'夕方から夜、沈める秒数を変えて群れが通る深さを探します。',
         rig:'バイブレーション・メタルジグ・ワーム＋必要に応じて耐切創リーダー', range:'港口・常夜灯の明暗。表層から底まで回遊するタナ',
         action:'スロー巻き＋シャクリ＆フォール', tempo:'沈下秒数を数える → ゆっくり巻く → ときどき上げて落とす', diagram:'rangehunt',
@@ -951,17 +967,19 @@
         caution:'歯に触れるだけで大けがにつながります。フィッシュグリップと長いプライヤーを使い、素手で口元を持たないでください。'
       },
       madai: {
-        badge:'ルアー／エサ', name:'ショア鯛ラバ／カゴ釣り', method:'ショア鯛ラバ／カゴ釣り',
+        badge:'ルアー', name:'ショア鯛ラバで底を探る', method:'ショア鯛ラバ／タイジグ',
+        best:'春・秋の朝夕、潮が動く時間、水深と潮通しを確保できるとき', beginner:'確実に底を取り、巻き始めたら速度を変えず、重みが乗るまで巻き続けます。',
         subtitle:'潮通しと水深のある場所で、底から一定速度で巻いて反応層を探します。',
-        rig:'岸用鯛ラバまたはタイジグ。春・秋はカゴ釣りも候補', range:'海峡部・深い波止・磯の岩礁と砂礫の境、底〜中層',
+        rig:'岸用鯛ラバまたはタイジグ', range:'海峡部・深い波止・磯の岩礁と砂礫の境、底〜中層',
         action:'着底から一定速のただ巻き', tempo:'張りを保って着底 → 5〜10回一定速で巻く → 再び沈める', diagram:'steadyup',
         diagramAlt:'マダイ用鯛ラバを張りを保って着底させ、底から一定速度で巻き上げて再び落とす図', diagramLabels:['張って着底','一定速で巻く','速さ・層を変更'],
         steps:['潮通しのよい方向へ投げ、糸を張り気味にして確実に底を取ります。','底から一定速度で巻き続けます。小さなアタリでも急に止めず、重みが乗るまで同じ速さを保ちます。','反応がなければ巻く速さと巻き上げる高さを変え、再着底後に別の層を探します。'],
-        change:'春の乗っ込みと秋は、水深のある波止・磯でカゴ釣りも有効。マキエとサシエを同じ潮へ乗せます。',
-        caution:'重い仕掛けの遠投前に後方を確認。強い引きに備えてドラグと玉網を準備し、コマセや仕掛けの現地ルールを守ってください。'
+        change:'反応がなければ巻く速度と巻き上げる高さを一段ずつ変え、底を取り直します。',
+        caution:'重い仕掛けの遠投前に後方を確認。強い引きに備えてドラグと玉網を準備してください。'
       },
       kurodai: {
-        badge:'ルアー／エサ', name:'ボトムチニング', method:'チニング／フカセ釣り',
+        badge:'ルアー', name:'ボトムチニング', method:'チニング',
+        best:'河口や干潟へ潮が差す時間、夏の朝夕、濁りが少し入るとき', beginner:'底を離さない一定速を保ち、小さなアタリでは止めず重みが乗ってから合わせます。',
         subtitle:'河口・干潟・港内で、底を感じながら甲殻類を模したルアーを通します。',
         rig:'5〜10g前後のフリーリグまたはラバージグ＋甲殻類系ワーム', range:'河口・干潟・橋脚・カキ瀬。水深1〜2mほどの砂泥底や硬い底',
         action:'底を感じる一定速のズル引き', tempo:'底を取る → ゆっくり一定速で巻く → 食い込むまで巻き続ける', diagram:'chinubottom',
@@ -971,16 +989,13 @@
         caution:'カキ殻・橋脚で糸が切れやすいため、掛けたら障害物から離します。足場・立入・漁業権など現地ルールを必ず確認してください。'
       }
     };
-    const ECOLOGY_SOURCES = {
-      aji:[{name:'水産研究・教育機構 マアジ資源評価',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2026/03/details_2025_03.pdf'}],
-      iwashi:[{name:'水産研究・教育機構 マイワシ資源評価',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2025/03/details_2024_01.pdf'}],
-      hirame:[{name:'水産研究・教育機構 ヒラメ資源評価',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2020/details_2020_60.pdf'}],
-      saba:[{name:'水産研究・教育機構 マサバ資源評価',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2025/03/details_2024_05.pdf'}],
-      blue:[{name:'水産研究・教育機構 ブリ資源評価',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2024/03/details_2023_45.pdf'}],
-      octopus:[{name:'東京都島しょ農林水産総合センター マダコの生態',url:'https://www.ifarc.metro.tokyo.lg.jp/archive/27%2C1128%2C55%2C227.html'}],
-      tachiuo:[{name:'水産研究・教育機構 タチウオ資源評価調査',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2021/trends_2021_14.pdf'}],
-      madai:[{name:'水産研究・教育機構 マダイ資源評価調査',url:'https://abchan.fra.go.jp/wpt/wp-content/uploads/2021/trends_2021_23.pdf'}],
-      kurodai:[{name:'環境省 クロダイの生息・好適水域資料',url:'https://www.env.go.jp/council/content/i_07/mat01-1_4.pdf'}]
+    const FISHING_METHOD_ALTERNATIVES = {
+      aji:{bait:{badge:'エサ釣り',name:'サビキで群れの層を狙う',method:'サビキ釣り',subtitle:'コマセとサビキを群れの深さに合わせ、止めて食わせます。',best:'朝夕の回遊時間、夜の常夜灯周り、周囲で釣れ始めた直後',beginner:'釣れた深さを覚え、コマセの煙幕の中へ針を止めるのが基本です。',rig:'小型サビキ仕掛け＋アミエビ用カゴ',range:'岸壁際・港口の表層〜底。群れが通る深さ',action:'小さく上下してコマセを出し、仕掛けを止める',tempo:'2〜3回ゆっくり上下 → 5秒ほど止める',diagram:'sabiki',diagramAlt:'マアジ用サビキを群れの層で上下させ、止めて待つ図',diagramLabels:['群れの層へ','コマセを出す','止めて待つ'],steps:['足元へ下ろし、表層から順番に深さを変えて群れを探します。','竿を大きく振らず、短く上下させてカゴからコマセを出します。','仕掛けを止めて待ち、掛かった深さを保って次も同じ層を狙います。'],change:'反応がなければ底付近まで探り、常夜灯の明暗や潮のヨレへ移動します。',caution:'コマセの使用可否と量を確認し、係留ロープや港湾作業を避けてください。'}},
+      saba:{bait:{badge:'エサ釣り',name:'サビキ／カゴ釣り',method:'サビキ釣り／カゴ釣り',subtitle:'回遊する群れへコマセと付けエサの深さを合わせます。',best:'朝夕の回遊、港口で潮が動く時間、周囲に群れが入った直後',beginner:'サバが掛かったら横へ走らせず、周囲の仕掛けと絡む前に取り込みます。',rig:'サビキ仕掛け＋コマセカゴ。遠投時はカゴ仕掛け',range:'港口・岸壁際の表層〜中層。群れに応じて深さを変更',action:'コマセを出して止める／潮へ同調させる',tempo:'小さく上下 → 仕掛けを止める → 反応層を再現',diagram:'sabiki',diagramAlt:'マサバ用サビキを群れの層へ入れ、コマセを出して止める図',diagramLabels:['群れの層へ','コマセを出す','止めて待つ'],steps:['周囲の釣れ方や魚影を見て、仕掛けを入れる深さを決めます。','短く上下してコマセを出し、その中でサビキを止めます。','掛かったら隣へ走る前に一定の速さで巻き上げます。'],change:'足元に群れが来なければ、カゴ釣りで潮目や港口の沖を狙います。',caution:'混雑時は仕掛けを長く流さず、コマセ禁止・使用量のルールを守ってください。'}},
+      rock:{bait:{badge:'エサ釣り',name:'ブラクリ／胴突きの探り釣り',method:'ブラクリ／胴突き仕掛け',subtitle:'岩穴や岸壁際へ真っすぐ落とし、底を離さず待ちます。',best:'夕方から夜、日中は岸壁の影や岩穴が暗い時間',beginner:'遠投より足元を優先し、一つの穴で粘らず隙間を順番に探ります。',rig:'ブラクリまたは胴突き仕掛け＋魚の切り身・虫エサ',range:'岸壁際・捨石・岩穴・沈み根の底',action:'底まで落とす → 少し持ち上げる → 止める',tempo:'着底 → 10〜20cm上げる → 数秒待つ',diagram:'rockhop',diagramAlt:'カサゴ用のエサ仕掛けを岩の隙間へ落とし、少し上げて待つ図',diagramLabels:['隙間へ落とす','少し持ち上げる','止めて待つ'],steps:['安全な足場から岸壁際や岩の隙間へ仕掛けを真っすぐ下ろします。','着底後に少しだけ上げ、根掛かりを避けながらエサを見せます。','アタリが出たら穴へ戻られる前に竿を上げ、底から離します。'],change:'反応がなければ数十秒で次の穴へ。エサの大きさとオモリを海況に合わせます。',caution:'消波ブロックへ乗らず、根掛かりを無理にあおらないでください。'}},
+      tachiuo:{bait:{badge:'エサ釣り',name:'電気ウキでタナを探る',method:'電気ウキ釣り',subtitle:'キビナゴなどを漂わせ、ウキ下を変えて回遊層を探します。',best:'夕方から夜、港口や常夜灯の明暗へ小魚が寄る時間',beginner:'最初から深くせず、浅いタナからウキ下を少しずつ伸ばします。',rig:'電気ウキ仕掛け＋キビナゴ等＋耐切創性を考えたハリス',range:'港口・常夜灯周りの表層〜底。反応するタナ',action:'潮へ流し、誘いを入れて再び待つ',tempo:'流して待つ → ときどき竿で軽く誘う → タナを変更',diagram:'rangehunt',diagramAlt:'タチウオの電気ウキ仕掛けを異なる深さへ入れて回遊層を探る図',diagramLabels:['浅いタナから','潮へ流す','ウキ下を変更'],steps:['周囲へ声を掛けて投入し、まず浅めのウキ下から流します。','時々ゆっくり竿を上げてエサを動かし、再び自然に沈めます。','ウキが沈んでも急がず、魚が引き込んでから糸を張って合わせます。'],change:'アタリがなければウキ下を少しずつ深くし、反応したタナを繰り返します。',caution:'歯に触れないよう長いプライヤーを使い、夜間は救命具と灯火を準備してください。'}},
+      madai:{bait:{badge:'エサ釣り',name:'遠投カゴ釣り',method:'カゴ釣り',subtitle:'マキエとサシエを同じ潮へ乗せ、底寄りから反応層を探ります。',best:'春・秋の朝夕、潮が動き、水深と潮通しがある時間',beginner:'ウキ下を測って底を避け、マキエとサシエが同じ筋を流れるようにします。',rig:'遠投ウキ＋カゴ＋ハリス＋オキアミ等',range:'深い波止・磯の潮下。底付近から中層',action:'潮へ流し、一定範囲を繰り返す',tempo:'投入 → マキエを出す → 潮へ流して待つ',diagram:'slow',diagramAlt:'マダイのカゴ仕掛けを潮へ流し、底寄りのタナで待つ図',diagramLabels:['タナを決める','潮へ同調','同じ筋を流す'],steps:['水深を想定し、仕掛けが底を引きずらないウキ下に調整します。','潮上へ投入してマキエを出し、サシエを同じ流れへ乗せます。','反応が出た距離とタナを覚え、同じ投入点と流し方を繰り返します。'],change:'エサ取りが多ければ投入点をずらし、反応がなければウキ下を段階的に変更します。',caution:'重い仕掛けの遠投前に後方を確認し、コマセ・仕掛けの現地ルールを守ってください。'}},
+      kurodai:{bait:{badge:'エサ釣り',name:'ウキフカセ釣り',method:'ウキフカセ釣り',subtitle:'マキエとサシエを潮へなじませ、底付近から自然に流します。',best:'河口・港内へ潮が差す時間、春の接岸期、濁りが少し入るとき',beginner:'仕掛けだけを先に流さず、マキエの帯へサシエを合わせることを優先します。',rig:'円すいウキ＋ハリス＋チヌ針＋オキアミ等',range:'港内・河口・カキ瀬・砂泥底の底付近',action:'マキエと同じ潮へ自然に流す',tempo:'マキエを打つ → 仕掛けを入れる → 張りすぎず流す',diagram:'slow',diagramAlt:'クロダイのウキフカセ仕掛けをマキエと同じ潮へ入れて自然に流す図',diagramLabels:['マキエを打つ','同じ筋へ投入','底付近を流す'],steps:['水深と流れを見て、サシエが底付近へ入るウキ下を決めます。','マキエを先に打ち、その帯へ仕掛けを入れて自然に流します。','ウキの沈みや糸の走りを確認し、糸を張ってから竿を立てます。'],change:'エサ取りが多ければマキエと投入点を分け、反応がなければタナを少しずつ変更します。',caution:'カキ殻や障害物による糸切れに注意し、コマセ・立入・漁業権のルールを確認してください。'}}
     };
     const SEASON_MODELS = {
       aji:{scores:[54,55,60,69,78,84,88,90,87,80,69,59],phases:[{months:[3,4,5,6,7],text:'南ほど早く、春から初夏に産卵群が沿岸へ集まりやすい時期です。'},{months:[8,9,10],text:'夏から秋は沿岸で成長・索餌する群を想定します。'},{months:[11,12,1,2],text:'冬は海域差が大きいため、季節加点を抑えています。'}]},
@@ -1166,7 +1181,7 @@
     function writeTideCache(year,stationCode,value){try{const cache=JSON.parse(localStorage.getItem(TIDE_CACHE_KEY)||'{}'),key=stationCode+'|'+year;cache[key]={savedAt:Date.now(),text:value};Object.entries(cache).sort((a,b)=>(b[1].savedAt||0)-(a[1].savedAt||0)).slice(TIDE_CACHE_LIMIT).forEach(([oldKey])=>delete cache[oldKey]);localStorage.setItem(TIDE_CACHE_KEY,JSON.stringify(cache));}catch(e){}}
     async function officialTideText(year,stationCode){const cached=readTideCache(year,stationCode);if(cached)return cached;const res=await fetch(apiUrl('/api/tide?station='+encodeURIComponent(stationCode)+'&year='+encodeURIComponent(year)));if(!res.ok)throw new Error('tide request');const text=await res.text();if(!text.trim())throw new Error('empty tide response');writeTideCache(year,stationCode,text);return text;}
     const todayJst = new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    const state = { species:'aji', date:todayJst, hour:6, region:'関東', prefecture:'神奈川県', homePref:loadHomePref(), mapMode:'score', scope:'地方', selected:'走水港', mapTappedSpot:null, tidePickMode:'ranking', communitySpot:'', favorites:loadFavorites(), blockedAuthors:loadBlockedAuthors(), ownedPosts:loadOwnedPosts(), authorId:deviceAuthorId(), displayName:loadDisplayName(), zoom:1, logs: loadLogs(), tideData:null, tideKey:'', tideLoading:false, tideError:'', userLocation:null, locationMessage:'', locating:false };
+    const state = { species:'aji', guideMethods:{}, date:todayJst, hour:6, region:'関東', prefecture:'神奈川県', homePref:loadHomePref(), mapMode:'score', scope:'地方', selected:'走水港', mapTappedSpot:null, tidePickMode:'ranking', communitySpot:'', favorites:loadFavorites(), blockedAuthors:loadBlockedAuthors(), ownedPosts:loadOwnedPosts(), authorId:deviceAuthorId(), displayName:loadDisplayName(), zoom:1, logs: loadLogs(), tideData:null, tideKey:'', tideLoading:false, tideError:'', userLocation:null, locationMessage:'', locating:false };
     function loadLogs(){ try { return JSON.parse(localStorage.getItem('shiome_logs') || '[]'); } catch(e) { return []; } }
     function selectedSpecies(){ return SPECIES[state.species]; }
     function spot(id){ return SPOTS.find(s => s.id === id) || SPOTS[0]; }
@@ -1184,7 +1199,7 @@
         window.render();toast('現在地に近い釣り場を表示しました');
       },error=>{
         state.locating=false;
-        state.locationMessage=error.code===1?'位置情報が許可されていません。iPhoneの設定から「潮先」の位置情報を許可してください。':error.code===2?'現在地を確認できませんでした。電波状況を確認してください。':'現在地の取得が時間切れになりました。もう一度お試しください。';
+        state.locationMessage=error.code===1?'位置情報が許可されていません。iPhoneの設定から「潮目」の位置情報を許可してください。':error.code===2?'現在地を確認できませんでした。電波状況を確認してください。':'現在地の取得が時間切れになりました。もう一度お試しください。';
         renderMapControls();toast('現在地を取得できませんでした');
       },{enableHighAccuracy:true,timeout:12000,maximumAge:300000});
     }
@@ -1320,9 +1335,9 @@
       return `<svg viewBox="0 0 540 205" role="img" aria-label="${esc(guide.diagramAlt)}" preserveAspectRatio="xMidYMid meet"><defs><marker id="${arrowId}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${color}"/></marker><linearGradient id="guide-water-${state.species}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12374d" stop-opacity=".52"/><stop offset="1" stop-color="#07131f" stop-opacity=".15"/></linearGradient></defs><rect x="10" y="43" width="520" height="145" rx="10" fill="url(#guide-water-${state.species})"/><path d="M18 54 Q43 47 68 54 T118 54 T168 54 T218 54 T268 54 T318 54 T368 54 T418 54 T468 54 T522 54" fill="none" stroke="rgba(133,216,232,.28)" stroke-width="2"/><text x="24" y="70" fill="rgba(190,225,232,.52)" font-size="9">水面</text><path d="M18 178 Q72 169 126 178 T234 178 T342 178 T450 178 T522 178 L522 188 L18 188 Z" fill="#173747" stroke="rgba(184,218,225,.25)" stroke-width="2"/><text x="24" y="171" fill="rgba(190,225,232,.48)" font-size="9">海底</text>${guideActionDrawing(guide.diagram,color,arrowId)}${labels}</svg>`;
     }
     function renderFishingGuide(){
-      const guide=FISHING_GUIDES[state.species]||FISHING_GUIDES.aji,fish=selectedSpecies(),ecologySources=ECOLOGY_SOURCES[state.species]||[],root=document.getElementById('fishingGuideCard'),card=root.closest('.fishing-guide-card');
+      const baseGuide=FISHING_GUIDES[state.species]||FISHING_GUIDES.aji,alternatives=FISHING_METHOD_ALTERNATIVES[state.species]||{},fish=selectedSpecies(),root=document.getElementById('fishingGuideCard'),card=root.closest('.fishing-guide-card'),baseMethod=baseGuide.badge.includes('エサ釣り中心')?'bait':'lure',methods=alternatives.bait?['lure','bait']:[baseMethod],selectedMethod=methods.includes(state.guideMethods[state.species])?state.guideMethods[state.species]:baseMethod,guide=selectedMethod===baseMethod?baseGuide:{...baseGuide,...alternatives[selectedMethod]},methodSwitch=methods.length>1?`<div class="guide-method-switch" role="group" aria-label="${esc(fish.name)}の釣り方を選ぶ">${methods.map(method=>`<button type="button" class="${method===selectedMethod?'active':''}" data-guide-method="${method}" aria-pressed="${method===selectedMethod}">${method==='lure'?'ルアー':'エサ'}</button>`).join('')}</div>`:'';
       card.style.setProperty('--guide-color',fish.color);
-      root.innerHTML=`<div class="guide-head"><div><div class="guide-kicker">HOW TO / ${esc(fish.name)}</div><h3>${esc(guide.name)}</h3><div class="guide-sub">${esc(guide.subtitle)}</div></div><span class="guide-badge">${esc(guide.badge)}</span></div><div class="guide-layout"><div class="guide-facts"><div class="guide-fact"><span>基本の仕掛け</span><strong>${esc(guide.rig)}</strong></div><div class="guide-fact"><span>狙う層・場所</span><strong>${esc(guide.range)}</strong></div><div class="guide-fact wide"><span>基本アクション</span><strong>${esc(guide.action)}</strong></div></div><div class="guide-action"><div class="guide-action-head"><span>水中の動かし方イメージ</span><strong>${esc(guide.action)}</strong></div>${fishingGuideDiagram(guide,fish.color)}<div class="guide-tempo"><b>動かすテンポ：</b>${esc(guide.tempo)}</div></div></div><div class="guide-steps">${guide.steps.map((step,index)=>`<div class="guide-step"><b>${index+1}</b>${esc(step)}</div>`).join('')}</div><div class="guide-change"><b>反応がないとき：</b>${esc(guide.change)}</div><div class="guide-ecology"><strong>ヒートマップに反映している${esc(fish.name)}の生態</strong><p>${esc(fish.basis)}</p><small>潮は気象庁の天文潮位から上げ下げと変化量を推定しています。実測潮流や海中の3D流況を直接解析したものではなく、地点の地形・季節・時間帯・水温・餌場条件と組み合わせた相対評価です。</small><div class="guide-ecology-links">${ecologySources.map(source=>`<a href="${esc(source.url)}" target="_blank" rel="noreferrer">生態資料：${esc(source.name)} ↗</a>`).join('')}<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/station.php" target="_blank" rel="noreferrer">潮位資料：気象庁 潮位表 ↗</a></div></div><div class="guide-foot"><p><b>安全・ルール：</b>${esc(guide.caution)} 道具の重さや動かす速さは海況・水深・対象サイズに合わせる目安です。</p></div>`;
+      root.innerHTML=`<div class="guide-head"><div><div class="guide-kicker">HOW TO / ${esc(fish.name)}</div><h3>${esc(guide.name)}</h3><div class="guide-sub">${esc(guide.subtitle)}</div></div><span class="guide-badge">${esc(guide.badge)}</span></div>${methodSwitch}<div class="guide-quick"><div><span>狙いやすい時間・状況</span><strong>${esc(guide.best)}</strong></div><div><span>最初に意識するコツ</span><strong>${esc(guide.beginner)}</strong></div></div><div class="guide-layout"><div class="guide-facts"><div class="guide-fact"><span>基本の仕掛け</span><strong>${esc(guide.rig)}</strong></div><div class="guide-fact"><span>狙う層・場所</span><strong>${esc(guide.range)}</strong></div><div class="guide-fact wide"><span>基本アクション</span><strong>${esc(guide.action)}</strong></div></div><div class="guide-action"><div class="guide-action-head"><span>水中の動かし方イメージ</span><strong>${esc(guide.action)}</strong></div>${fishingGuideDiagram(guide,fish.color)}<div class="guide-tempo"><b>動かすテンポ：</b>${esc(guide.tempo)}</div></div></div><div class="guide-steps">${guide.steps.map((step,index)=>`<div class="guide-step"><b>${index+1}</b>${esc(step)}</div>`).join('')}</div><div class="guide-change"><b>反応がないとき：</b>${esc(guide.change)}</div><div class="guide-ecology"><strong>ヒートマップに反映している${esc(fish.name)}の生態</strong><p>${esc(fish.basis)}</p><small>潮は気象庁の天文潮位から上げ下げと変化量を推定しています。実測潮流や海中の3D流況を直接解析したものではなく、地点の地形・季節・時間帯・水温・餌場条件と組み合わせた相対評価です。</small></div><div class="guide-foot"><p><b>安全・ルール：</b>${esc(guide.caution)} 道具の重さや動かす速さは海況・水深・対象サイズに合わせる目安です。</p></div>`;
     }
     function renderSpecies(){ const fish=selectedSpecies(),html=Object.entries(SPECIES).map(([key, s]) => `<button class="species-chip ${key===state.species?'active':''}" style="--chip-color:${s.color}" data-species="${key}" aria-label="${s.name}${s.alias?'（'+s.alias+'）':''}を選ぶ" aria-pressed="${key===state.species}"><span class="fish-icon fish-${key}" aria-hidden="true"></span><strong>${s.name}</strong><small>${s.alias||s.season} / ${s.temp}</small></button>`).join(''); ['speciesRow','guideSpeciesRow'].forEach(id=>{const wrap=document.getElementById(id);if(wrap)wrap.innerHTML=html;}); const guide=document.getElementById('guide'),label=document.getElementById('guideSelectedSpecies');if(guide)guide.style.setProperty('--guide-color',fish.color);if(label)label.textContent=fish.name+(fish.alias?`（${fish.alias}）`:''); }
     function renderDates(){ const wrap = document.getElementById('dateStrip'); wrap.innerHTML = [-1,0,1,2,3].map((offset,i) => { const d=addDays(state.date, offset),f=fmtDate(d),label=offset===0?'選択中':`${f.month}/${f.day}`,moon=['◒','◑','◐','◓','◒'][i]; return `<button class="date-chip ${offset===0?'active':''}" data-date="${d}"><span>${label} ${f.week}</span><strong>${f.month}月${f.day}日</strong><small>${moon} ${i%2?'中潮':'大潮'}</small></button>`; }).join(''); }
@@ -1378,7 +1393,7 @@
       const c=document.getElementById('tideCanvas'),box=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1,W=Math.max(300,box.width),H=Math.max(160,box.height),g=c.getContext('2d'),eventsEl=document.getElementById('tideEvents'),liveEl=document.getElementById('tideLiveValue'),sourceEl=document.getElementById('tideSource');
       c.width=W*dpr;c.height=H*dpr;g.scale(dpr,dpr);g.clearRect(0,0,W,H);g.fillStyle='#091d2c';g.fillRect(0,0,W,H);
       const data=state.tideData&&state.tideData.spotId===state.selected&&state.tideData.date===state.date?state.tideData:null;
-      if(!data){g.fillStyle='rgba(198,224,229,.66)';g.font='11px system-ui';g.textAlign='center';g.fillText(state.tideError||'潮位データを読み込んでいます…',W/2,H/2);g.textAlign='left';eventsEl.innerHTML='';liveEl.textContent=state.tideError||'読み込み中';sourceEl.textContent='気象庁の天文潮位をもとに潮先が補間・加工して表示。実測潮位・潮流方向とは異なります。';return;}
+      if(!data){g.fillStyle='rgba(198,224,229,.66)';g.font='11px system-ui';g.textAlign='center';g.fillText(state.tideError||'潮位データを読み込んでいます…',W/2,H/2);g.textAlign='left';eventsEl.innerHTML='';liveEl.textContent=state.tideError||'読み込み中';sourceEl.textContent='気象庁の天文潮位をもとに潮目が補間・加工して表示。実測潮位・潮流方向とは異なります。';return;}
       const p={l:31,r:14,t:17,b:24},vals=Array.from({length:97},(_,i)=>[i/4,tideAt(data,i/4)]),raw=data.hourly,yMin=Math.min(...raw)-12,yMax=Math.max(...raw)+12,X=h=>p.l+(W-p.l-p.r)*h/24,Y=v=>p.t+(H-p.t-p.b)*(1-(v-yMin)/(yMax-yMin));
       g.strokeStyle='rgba(130,195,213,.1)';g.lineWidth=1;for(let h=0;h<=24;h+=6){const x=X(h);g.beginPath();g.moveTo(x,p.t);g.lineTo(x,H-p.b);g.stroke();g.fillStyle='rgba(159,201,212,.52)';g.font='9px system-ui';g.fillText(String(h).padStart(2,'0')+':00',x-10,H-7);}
       [yMin+12,(yMin+yMax)/2,yMax-12].forEach(v=>{const y=Y(v);g.beginPath();g.moveTo(p.l,y);g.lineTo(W-p.r,y);g.stroke();g.fillStyle='rgba(159,201,212,.42)';g.font='8px system-ui';g.fillText(Math.round(v)+'',3,y+3);});
@@ -1387,7 +1402,7 @@
       data.events.forEach(m=>{const x=X(m.t),y=Y(m.h);g.beginPath();g.arc(x,y,3.4,0,Math.PI*2);g.fillStyle=m.label==='満潮'?'#f6cb6b':'#64c9ee';g.fill();});
       const nowX=X(state.hour),nowY=Y(tideAt(data,state.hour));g.strokeStyle='rgba(255,255,255,.86)';g.setLineDash([3,3]);g.beginPath();g.moveTo(nowX,p.t);g.lineTo(nowX,H-p.b);g.stroke();g.setLineDash([]);g.beginPath();g.arc(nowX,nowY,4,0,Math.PI*2);g.fillStyle='#fff';g.fill();
       const fmt=t=>String(Math.floor(t)).padStart(2,'0')+':'+String(Math.round((t%1)*60)).padStart(2,'0');eventsEl.innerHTML=data.events.slice(0,4).map(m=>`<span class="tide-event">${m.label} ${m.h}cm<br><b>${fmt(m.t)}</b></span>`).join('');
-      const motion=tideMotionFor();liveEl.textContent=motion?`${motion.label}・${motion.strength}（${motion.rate>0?'+':''}${motion.rate}cm/h）`:'—';sourceEl.innerHTML=data.estimated?`最寄りの潮位地点：${esc(data.station.name)}｜気象庁データへ接続できない場合の参考曲線です。実際の潮位値ではありません。地点または日付を選び直すと公式データを再取得します。`:`最寄りの潮位地点：${esc(data.station.name)}（約${Math.round(data.station.distance)}km）｜<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/" target="_blank" rel="noreferrer">出典：気象庁 潮位表</a>を潮先が15分間隔に補間・加工。天文潮位であり、実測潮位・潮流方向・航海用途の情報ではありません。`;
+      const motion=tideMotionFor();liveEl.textContent=motion?`${motion.label}・${motion.strength}（${motion.rate>0?'+':''}${motion.rate}cm/h）`:'—';sourceEl.innerHTML=data.estimated?`最寄りの潮位地点：${esc(data.station.name)}｜気象庁データへ接続できない場合の参考曲線です。実際の潮位値ではありません。地点または日付を選び直すと公式データを再取得します。`:`最寄りの潮位地点：${esc(data.station.name)}（約${Math.round(data.station.distance)}km）｜<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/" target="_blank" rel="noreferrer">出典：気象庁 潮位表</a>を潮目が15分間隔に補間・加工。天文潮位であり、実測潮位・潮流方向・航海用途の情報ではありません。`;
     }
     function updateLogSpots(prefecture,selectedId=state.selected){const select=document.getElementById('logSpot'),items=SPOTS.filter(s=>s.prefecture===prefecture).sort((a,b)=>a.name.localeCompare(b.name,'ja'));select.innerHTML=items.map(s=>`<option value="${esc(s.name)}" ${s.id===selectedId?'selected':''}>${esc(s.name)}</option>`).join('');}
     function populateLog(){ let species=document.getElementById('logSpecies');if(species.tagName==='SELECT'){const input=document.createElement('input');input.id='logSpecies';input.name='species';input.type='text';input.required=true;input.maxLength=30;input.placeholder='例：マアジ、カサゴ、クロダイ';input.setAttribute('list','logSpeciesSuggestions');input.autocomplete='off';species.replaceWith(input);species=input;const list=document.createElement('datalist');list.id='logSpeciesSuggestions';list.innerHTML=Object.values(SPECIES).map(s=>`<option value="${esc(s.name)}"></option>`).join('');species.after(list);}let pref=document.getElementById('logPrefecture');if(!pref){const field=document.createElement('div');field.className='field';field.innerHTML='<label for="logPrefecture">都道府県</label><select id="logPrefecture" required></select>';document.getElementById('logSpot').closest('.field').before(field);pref=field.querySelector('select');pref.addEventListener('change',()=>updateLogSpots(pref.value,''));}const selected=spot(state.selected),prefectures=[...new Set(SPOTS.map(s=>s.prefecture))].sort((a,b)=>a.localeCompare(b,'ja'));pref.innerHTML=prefectures.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');pref.value=selected.prefecture;updateLogSpots(pref.value,selected.id);species.value=selectedSpecies().name;document.getElementById('logDate').value=state.date;document.getElementById('logTime').value=String(state.hour).padStart(2,'0')+':00'; }
@@ -1432,6 +1447,7 @@
       window.scrollTo(0,0);
       document.dispatchEvent(new CustomEvent('shiome:viewchange',{detail:{view}}));
     }
+    document.addEventListener('click',e=>{const button=e.target.closest('button[data-guide-method]');if(!button)return;state.guideMethods[state.species]=button.dataset.guideMethod;renderFishingGuide();});
     document.addEventListener('click', e => { const anchor=e.target.closest('a[href="#sources"],a[href="#community"]');if(anchor){e.preventDefault();switchView(anchor.getAttribute('href').slice(1));return;} const row=e.target.closest('.spot-row'); if(row?.dataset.spot){state.selected=row.dataset.spot;window.render();return;} const b=e.target.closest('button'); if(!b)return; if(b.dataset.species){state.species=b.dataset.species;window.render();return;} if(b.dataset.date){state.date=b.dataset.date;window.render();return;} if(b.dataset.favoriteSpot){const s=spot(b.dataset.favoriteSpot);state.region=s.region;state.prefecture=s.prefecture;state.scope='県';state.selected=s.id;window.render();setTimeout(()=>document.querySelector('.detail-grid')?.scrollIntoView({behavior:'smooth',block:'start'}),60);return;} if(b.dataset.tidePick){state.tidePickMode=b.dataset.tidePick;window.render();document.dispatchEvent(new CustomEvent('shiome:tidepick'));return;} if(b.dataset.spot){state.selected=b.dataset.spot;window.render();return;} if(b.dataset.mapMode){state.mapMode=b.dataset.mapMode;window.render();return;} if(b.dataset.scope){state.scope=b.dataset.scope;state.zoom=1;window.render();return;} if(b.dataset.zoom){state.zoom=Math.max(.75,Math.min(2.3,state.zoom+(b.dataset.zoom==='in'?.18:-.18)));drawMap();return;} if(b.dataset.scroll){if(b.dataset.scroll==='community')state.communitySpot='';switchView(b.dataset.scroll);return;} if(b.dataset.action==='today'){state.date=new Date(Date.now()+9*3600000).toISOString().slice(0,10);window.render();return;} if(b.dataset.action==='home-location'){state.region=regionForPref(state.homePref);state.prefecture=state.homePref;state.scope='県';state.zoom=1;window.render();toast(state.homePref+'を表示しました');return;} if(b.dataset.action==='set-home'){state.homePref=state.prefecture;try{localStorage.setItem('shiome_home_pref',state.homePref);}catch(e){}window.render();toast(state.homePref+'をホームに設定しました');return;} if(b.dataset.action==='open-log'){requestOpenLog();return;} if(b.dataset.action==='close-log'){closeLog();return;} if(b.dataset.action==='close-ugc-consent'){closeUgcConsent();return;} if(b.dataset.action==='accept-ugc-consent'){if(!document.getElementById('ugcAgeCheck').checked||!document.getElementById('ugcTermsCheck').checked)return;try{localStorage.setItem('shiome_ugc_consent_v1','accepted');}catch(e){}closeUgcConsent();openLog();return;} if(b.dataset.action==='open-sources'){switchView('sources');return;} if(b.dataset.action==='view-guide'){switchView('guide');return;} if(b.dataset.action==='view-catches'){state.communitySpot=spot(state.selected).name;renderCommunity();switchView('community');return;} if(b.dataset.action==='report-post'){if(!confirm('この投稿を不適切な内容として通報しますか？通報後、この投稿は直ちに非表示になります。'))return;fetch(apiUrl('/api/posts/'+encodeURIComponent(b.dataset.postId)+'/report'),{method:'POST',body:new URLSearchParams({reason:'不適切な投稿'})}).then(r=>{if(!r.ok)throw new Error();state.logs=state.logs.filter(x=>x.id!==b.dataset.postId);renderCommunity();toast('通報を受け付け、投稿を非表示にしました');}).catch(()=>toast('通報できませんでした'));return;} if(b.dataset.action==='block-author'){if(!confirm('この投稿者の投稿をこの端末で非表示にしますか？'))return;state.blockedAuthors.push(b.dataset.authorId);try{localStorage.setItem('shiosaki_blocked_authors',JSON.stringify([...new Set(state.blockedAuthors)]));}catch(e){}renderCommunity();toast('この投稿者を非表示にしました');return;} if(b.dataset.action==='delete-post'){if(!confirm('自分の投稿を削除しますか？この操作は元に戻せません。'))return;const token=state.ownedPosts[b.dataset.postId];fetch(apiUrl('/api/posts/'+encodeURIComponent(b.dataset.postId)),{method:'DELETE',headers:{'x-owner-token':token||''}}).then(r=>{if(!r.ok)throw new Error();state.logs=state.logs.filter(x=>x.id!==b.dataset.postId);delete state.ownedPosts[b.dataset.postId];localStorage.setItem('shiosaki_owned_posts',JSON.stringify(state.ownedPosts));renderCommunity();toast('投稿を削除しました');}).catch(()=>toast('投稿を削除できませんでした'));return;} if(b.dataset.action==='save-spot'){const id=state.selected,i=state.favorites.indexOf(id);if(i>=0){state.favorites.splice(i,1);toast('お気に入りから外しました');}else{state.favorites.unshift(id);toast('お気に入りに保存しました');}try{localStorage.setItem('shiome_favorites',JSON.stringify(state.favorites));}catch(e){}window.render();return;} });
     document.getElementById('heroDate').addEventListener('change', e=>{state.date=e.target.value;window.render();}); document.getElementById('dateInput').addEventListener('change',e=>{state.date=e.target.value;window.render();}); document.getElementById('regionSelect').addEventListener('change',e=>{state.region=e.target.value;state.scope='地方';window.render();}); document.getElementById('prefSelect').addEventListener('change',e=>{state.prefecture=e.target.value;state.scope='県';window.render();}); document.getElementById('rankRegionSelect').addEventListener('change',e=>{state.region=e.target.value;state.scope='地方';window.render();}); document.getElementById('rankPrefSelect').addEventListener('change',e=>{state.prefecture=e.target.value;state.scope='県';window.render();}); window.addEventListener('resize',()=>{drawMap();drawTide();});
     document.getElementById('exploreDate').addEventListener('change',e=>{if(e.target.value){state.date=e.target.value;window.render();}});

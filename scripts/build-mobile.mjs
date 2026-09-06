@@ -18,6 +18,7 @@ const files = [
   "icon-512.png",
   "icon-512-maskable.png",
   "apple-touch-icon-180.png",
+  "og.png",
   "assets/fish-species-sprite-v1.png",
   "assets/fish-tachiuo-v2.png",
   "assets/fish-madai-v2.png",
