@@ -140,6 +140,11 @@
     .fish-octopus, .fish-squid { background-image:none; display:grid; place-items:center; font-size:30px; line-height:1; }
     .fish-octopus::before { content:'🐙'; }
     .fish-squid::before { content:'🦑'; }
+    .fish-tachiuo, .fish-madai { background-image:none; position:relative; }
+    .fish-tachiuo::before { content:''; position:absolute; left:5px; top:13px; width:39px; height:8px; border-radius:70% 24% 24% 65%; background:radial-gradient(circle at 79% 35%,#07131f 0 1px,transparent 1.5px),linear-gradient(180deg,#eef8ff,#9eb5c6 48%,#687e91); box-shadow:0 3px 6px rgba(0,0,0,.28); transform:rotate(-7deg); }
+    .fish-tachiuo::after { content:''; position:absolute; left:40px; top:11px; border-left:10px solid #8ba4b6; border-top:6px solid transparent; border-bottom:6px solid transparent; transform:rotate(-7deg); }
+    .fish-madai::before { content:''; position:absolute; left:8px; top:6px; width:32px; height:23px; border-radius:58% 45% 48% 58%; background:radial-gradient(circle at 76% 30%,#07131f 0 1.5px,transparent 2px),linear-gradient(145deg,#ffcec2,#ef777b 55%,#bb465d); box-shadow:inset 0 -3px 0 rgba(255,255,255,.13),0 3px 6px rgba(0,0,0,.25); }
+    .fish-madai::after { content:''; position:absolute; left:36px; top:9px; border-left:12px solid #e46a76; border-top:9px solid transparent; border-bottom:9px solid transparent; }
     .species-chip strong { display: block; font-size: 12px; white-space: nowrap; }
     .species-chip small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
     .explore-date-bar { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding:11px 12px; border:1px solid rgba(100,228,210,.17); border-radius:14px; background:linear-gradient(120deg,rgba(100,228,210,.09),rgba(18,43,61,.72)); }
@@ -676,7 +681,9 @@
       kisu: { name: 'シロギス', symbol: '⌇', color: '#ffd784', season: 'シロギス', temp: '18–27℃', tempRange:[18,27], basis: '遠浅の砂浜、砕波帯の沖側、砂底の底層と春から秋の水温上昇を重視。', source: 'シロギス産卵・沿岸生態研究', weights: [66, 78, 96, 72] },
       rock: { name: '根魚', symbol: '◆', color: '#caa9ff', season: 'カサゴ類基準', temp: '12–23℃', tempRange:[12,23], basis: 'カサゴ類を代表モデルに、岩礁・テトラ・海藻帯と、身を隠せる水深を重視。根魚全種に共通する断定ではありません。', source: 'カサゴの食性・成熟研究', weights: [73, 79, 94, 69] },
       octopus: { name: 'タコ', symbol: '●', color: '#ff8fa3', season: 'マダコ', temp: '地域差あり', basis: 'マダコを対象に、沿岸の岩礁・砂礫、岩穴、転石、護岸の隙間と夜間の活動を重視。甲殻類や貝類がいる海底を評価します。', source: '水産研究・教育機構／東京都島しょ農林水産総合センター', weights: [70, 84, 96, 86] },
-      squid: { name: 'イカ', short: 'イカ', symbol: '◇', color: '#8ed8ff', season: 'アオリイカ', temp: '16℃以上目安', basis: '岸から狙うアオリイカを対象に、藻場・岩礁・港口、沿岸の小魚、朝夕の薄明から夜間を重視。水温16℃以上で沿岸へ来遊する産卵生態も反映します。', source: 'アオリイカ産卵・回遊生態研究', weights: [76, 88, 92, 90], tempMin:16 }
+      squid: { name: 'イカ', short: 'イカ', symbol: '◇', color: '#8ed8ff', season: 'アオリイカ', temp: '16℃以上目安', basis: '岸から狙うアオリイカを対象に、藻場・岩礁・港口、沿岸の小魚、朝夕の薄明から夜間を重視。水温16℃以上で沿岸へ来遊する産卵生態も反映します。', source: 'アオリイカ産卵・回遊生態研究', weights: [76, 88, 92, 90], tempMin:16 },
+      tachiuo: { name: 'タチウオ', short: '太刀魚', symbol: '〰', color: '#c9deee', season: 'タチウオ', temp: '暖水期中心', basis: '岸から狙うタチウオを対象に、港口・常夜灯の明暗・沿岸の小魚と、夕方から夜の浅場への回遊を重視。表層から底まで反応層が変わる魚として評価します。', source: '水産研究・教育機構 タチウオ資源動向調査／シマノ魚種別解説', weights: [84, 91, 77, 96] },
+      madai: { name: 'マダイ', short: 'マダイ', symbol: '◉', color: '#ff8f91', season: 'マダイ', temp: '地域差あり', basis: '潮通しと水深があり、岩礁と砂礫が混じる場所を重視。南ほど早い春の産卵接岸と、秋の沿岸釣期を地域差のある季節要因として扱います。', source: '水産研究・教育機構 マダイ資源評価／シマノ魚種別解説', weights: [88, 84, 94, 75] }
     };
     const FISHING_GUIDES = {
       aji: {
@@ -788,6 +795,28 @@
         change:'追ってきても抱かないときは、軽く小さくシャクってから長めに止め、間を作ります。',
         caution:'藻場をむやみに引っ掛けず、地域の禁漁・採捕規制を確認。取り込み時は墨の向きを人に向けないでください。',
         sourceName:'シマノ「エギング 実釣編」', sourceUrl:'https://fish.shimano.com/ja-JP/content/fishingstyle/article/salt_beginner/eging/fishing.html'
+      },
+      tachiuo: {
+        badge:'ルアー推奨', name:'ワーム／メタルジグでレンジを探す', method:'ワーム／メタルジグ／電気ウキ',
+        subtitle:'夕方から夜、沈める秒数を変えて群れが通る深さを探します。',
+        rig:'バイブレーション・メタルジグ・ワーム＋必要に応じて耐切創リーダー', range:'港口・常夜灯の明暗。表層から底まで回遊するタナ',
+        action:'スロー巻き＋シャクリ＆フォール', tempo:'沈下秒数を数える → ゆっくり巻く → ときどき上げて落とす', diagram:'rangehunt',
+        diagramAlt:'タチウオ用ルアーの沈下秒数を変え、異なる深さをゆっくり巻いてシャクリと落下を入れる図', diagramLabels:['沈下秒数で層決め','ゆっくり巻く','上げて落とす'],
+        steps:['まず表層から始め、反応がなければ着水後の秒数を増やして中層、底付近へと順番に深くします。','決めた層を外さないようゆっくり巻き、ワームやジグは時々小さく上げてから落とします。','触るだけで掛からないときは巻きをさらに遅くし、同じ沈下秒数から再開して反応層を再現します。'],
+        change:'朝夕の時合は表層から、完全に暗くなったら常夜灯の明暗や港口を優先。反応した沈下秒数を覚えます。',
+        caution:'歯に触れるだけで大けがにつながります。フィッシュグリップと長いプライヤーを使い、素手で口元を持たないでください。',
+        sourceName:'シマノ「タチウオの特徴と釣り方」', sourceUrl:'https://fish.shimano.com/ja-JP/content/beginners/fish/tachiuo/index.html'
+      },
+      madai: {
+        badge:'ルアー／エサ', name:'ショア鯛ラバ／カゴ釣り', method:'ショア鯛ラバ／カゴ釣り',
+        subtitle:'潮通しと水深のある場所で、底から一定速度で巻いて反応層を探します。',
+        rig:'岸用鯛ラバまたはタイジグ。春・秋はカゴ釣りも候補', range:'海峡部・深い波止・磯の岩礁と砂礫の境、底〜中層',
+        action:'着底から一定速のただ巻き', tempo:'張りを保って着底 → 5〜10回一定速で巻く → 再び沈める', diagram:'steadyup',
+        diagramAlt:'マダイ用鯛ラバを張りを保って着底させ、底から一定速度で巻き上げて再び落とす図', diagramLabels:['張って着底','一定速で巻く','速さ・層を変更'],
+        steps:['潮通しのよい方向へ投げ、糸を張り気味にして確実に底を取ります。','底から一定速度で巻き続けます。小さなアタリでも急に止めず、重みが乗るまで同じ速さを保ちます。','反応がなければ巻く速さと巻き上げる高さを変え、再着底後に別の層を探します。'],
+        change:'春の乗っ込みと秋は、水深のある波止・磯でカゴ釣りも有効。マキエとサシエを同じ潮へ乗せます。',
+        caution:'重い仕掛けの遠投前に後方を確認。強い引きに備えてドラグと玉網を準備し、コマセや仕掛けの現地ルールを守ってください。',
+        sourceName:'シマノ「真鯛の特徴と釣り方」', sourceUrl:'https://fish.shimano.com/ja-JP/content/beginners/fish/madai/index.html'
       }
     };
     const SEASON_MODELS = {
@@ -800,7 +829,9 @@
       kisu:{scores:[34,37,48,66,80,90,95,95,91,79,57,41],phases:[{months:[6,7,8,9,10],text:'初夏から秋の産卵期と、暖かい浅い砂浜への接岸を反映しています。'},{months:[4,5,11],text:'浅場と深場の間を移る時期として穏やかに評価します。'},{months:[12,1,2,3],text:'低水温期は深場へ移るため、岸から狙う予測を控えめにしています。'}]},
       rock:{scores:[84,82,78,70,63,58,56,57,64,73,82,87],phases:[{months:[11,12,1,2],text:'代表種のカサゴ類の交尾・産仔期を考慮しています。大きな回遊はしない前提です。'},{months:[3,4,5,6,7,8,9,10],text:'カサゴ類は定着性が強いため、季節差より岩礁や隠れ場所を優先します。'}]},
       octopus:{scores:[75,70,67,70,78,86,91,92,89,84,80,78],phases:[{months:[5,6,7,8,9,10],text:'マダコの主な産卵期（地域により5〜10月）と沿岸の岩礁・砂礫利用を反映しています。'},{months:[11,12,1,2],text:'常磐では暖水とともに北上した群が秋冬に南下し、冬の漁期を作る地域特性も考慮しています。'},{months:[3,4],text:'地域差が大きい移行期のため、季節補正を小さくしています。'}]},
-      squid:{scores:[44,48,58,78,94,96,91,80,88,92,80,56],phases:[{months:[4,5,6,7],text:'アオリイカが水温16℃を超えるころ沿岸へ来遊し、主に5〜7月に産卵する生態を反映しています。'},{months:[8,9,10,11],text:'夏に生まれた個体が成長し、夏から秋に沿岸で行動する時期を反映しています。'},{months:[12,1,2,3],text:'低水温期は深場へ移る傾向を想定し、沿岸の加点を抑えています。'}]}
+      squid:{scores:[44,48,58,78,94,96,91,80,88,92,80,56],phases:[{months:[4,5,6,7],text:'アオリイカが水温16℃を超えるころ沿岸へ来遊し、主に5〜7月に産卵する生態を反映しています。'},{months:[8,9,10,11],text:'夏に生まれた個体が成長し、夏から秋に沿岸で行動する時期を反映しています。'},{months:[12,1,2,3],text:'低水温期は深場へ移る傾向を想定し、沿岸の加点を抑えています。'}]},
+      tachiuo:{scores:[48,50,56,66,76,86,92,95,96,92,76,58],phases:[{months:[4,5,6,7,8,9,10,11],text:'瀬戸内海周辺で水温上昇後に北上し、4〜11月に産卵する生態と、暖水期の沿岸回遊を反映しています。産卵の盛期は春と秋にみられます。'},{months:[6,7,8,9,10],text:'夜に小魚を追って沿岸へ寄りやすい時期として、岸からの予測を高めています。'},{months:[12,1,2,3],text:'水温低下後は深場や南側へ移る地域が多いため、岸からの加点を抑えています。地域・年による回遊差があります。'}]},
+      madai:{scores:[55,64,82,94,96,88,73,72,84,92,83,64],phases:[{months:[2,3,4,5,6],text:'産卵期は南ほど早く、九州西岸では2〜5月、壱岐・対馬周辺では4〜6月となる地域差と、春の接岸を反映しています。'},{months:[9,10,11],text:'春と並ぶ沿岸の釣期として、秋の索餌とカゴ釣りの適期を反映しています。'},{months:[7,8,12,1],text:'若魚と成魚、地域、水深で動きが異なるため、季節補正を控えめにしています。'}]}
     };
     const SPOTS = [
       { id:'走水港', name:'走水港', prefecture:'神奈川県', region:'関東', type:'港', lat:35.24, lon:139.72, base: [88, 73, 52, 48, 77, 62, 69], tide:['04:51','11:42','18:09','23:31'], water:'23.8℃', tideNow:'上げ', note:'港口の潮通しと朝マズメ。アジ狙いなら係留船の明暗境界へ。' },
@@ -913,7 +944,9 @@
       kisu:{shape:'bottom',length:.92,width:1.42,layer:'遠浅の砂底・砕波帯の沖側'},
       rock:{shape:'reef',length:.52,width:.66,layer:'岩礁・テトラ際'},
       octopus:{shape:'reef',length:.48,width:.62,layer:'岩礁・転石・護岸の隙間'},
-      squid:{shape:'reef',length:.88,width:.82,layer:'藻場・岩礁沿い・港口の中層'}
+      squid:{shape:'reef',length:.88,width:.82,layer:'藻場・岩礁沿い・港口の中層'},
+      tachiuo:{shape:'pelagic',length:1.48,width:.42,layer:'港口・明暗境界の表層〜底'},
+      madai:{shape:'bottom',length:.92,width:1.04,layer:'潮通しのよい岩礁・砂礫の底〜中層'}
     };
     const FLOW_PROFILES = {
       '走水港':{bearing:72,offshore:82,strength:.96,label:'東京湾口へ抜ける流れ'},
@@ -942,6 +975,8 @@
       const profile={method:(FISHING_GUIDES[state.species]||FISHING_GUIDES.aji).method};
       if(state.species==='octopus') return Object.assign(profile,{terrain:s.type==='港'?'岸壁際・捨石・穴や隙間':s.type==='磯'?'岩礁の穴・転石周り':'砂礫と岩礁の境界',best:'日没後〜夜・潮が緩み始める時間'});
       if(state.species==='squid') return Object.assign(profile,{terrain:s.type==='港'?'港口・明暗・沈み根':s.type==='磯'?'藻場・岩礁沿い':'藻場が隣接する潮通し',best:'朝夕の薄明〜夜'});
+      if(state.species==='tachiuo') return Object.assign(profile,{terrain:s.type==='港'?'港口・常夜灯の明暗・回遊ライン':s.type==='磯'?'沖の潮目・足元の深み':'潮目と水深のあるかけ上がり',best:'夕マズメ〜夜・朝マズメ'});
+      if(state.species==='madai') return Object.assign(profile,{terrain:s.type==='港'?'水深のある波止・港口・砂礫底':s.type==='磯'?'潮通しのよい岩礁と砂礫の境':'水深のある砂礫底・沈み根',best:'朝夕のマズメ・春の乗っ込みと秋'});
       return profile;
     }
     function profileFor(s){ return Object.assign({ best:'朝夕のマズメ・潮が動く時間', status:'参考情報／現地確認が必要' },TYPE_PROFILES[s.type]||TYPE_PROFILES['港'],SPOT_PROFILES[s.id]||{},speciesProfileFor(s)); }
@@ -1014,7 +1049,7 @@
       try{const stations=await tideStationsPromise,station=nearestTideStation(s,stations),year=state.date.slice(0,4);let text=await bundledTideText(year,station.code);if(!text)text=await officialTideText(year,station.code);const data=parseJmaTide(text,state.date,station);data.spotId=s.id;if(state.tideKey!==requestKey)return;state.tideData=data;state.tideLoading=false;window.render();}
       catch(e){if(state.tideKey!==requestKey)return;let station=null;try{station=nearestTideStation(s,await tideStationsPromise);}catch(_){}const data=fallbackTideData(s,state.date,station);data.spotId=s.id;state.tideData=data;state.tideLoading=false;state.tideError='';window.render();}
     }
-    const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22],octopus:[0,4,20,23],squid:[5,18,21,23]};
+    const ACTIVE_HOURS={aji:[5,19,23],iwashi:[6,9,16],hirame:[5,18],magochi:[6,10,17],saba:[6,9,16],blue:[5,7,17],kisu:[7,10,16],rock:[5,19,22],octopus:[0,4,20,23],squid:[5,18,21,23],tachiuo:[5,18,20,23],madai:[5,7,17,19]};
     function hourDistance(a,b){ const d=Math.abs(a-b); return Math.min(d,24-d); }
     function timeLiftAt(s,h){
       const peaks=ACTIVE_HOURS[state.species]||[6,18];
@@ -1034,7 +1069,7 @@
       return {hour,period,window:windowText,reason:hasLive?'魚種の活性時間と気象庁の潮位変化が重なる時間':'魚種の活性傾向と登録された潮時が重なる時間'};
     }
     function baseForSpecies(s){
-      const special={octopus:{'港':72,'磯':84,'サーフ':47},squid:{'港':76,'磯':82,'サーフ':52}};
+      const special={octopus:{'港':72,'磯':84,'サーフ':47},squid:{'港':76,'磯':82,'サーフ':52},tachiuo:{'港':84,'磯':67,'サーフ':56},madai:{'港':68,'磯':84,'サーフ':55}};
       if(special[state.species]) return special[state.species][s.type]??60;
       const idx=Object.keys(SPECIES).indexOf(state.species),fallback=state.species==='kisu'?(s.type==='サーフ'?76:s.type==='港'?54:42):60;
       const raw=state.species==='rock'&&s.base.length===7?s.base[6]:s.base[idx];
@@ -1066,9 +1101,9 @@
       const clamp=value=>Math.max(25,Math.min(95,Math.round(value))),motion=tideMotionFor(s),tideHours=s.tide.map(t=>Number(t.split(':')[0])+Number(t.split(':')[1])/60),tideDistance=Math.min(...tideHours.map(h=>hourDistance(state.hour,h)));
       const tide=motion?clamp(48+Math.min(42,Math.abs(motion.rate)*3.1)):clamp(84-Math.min(46,tideDistance*8));
       const time=clamp(42+(timeLiftFor(s)+10)*3.1);
-      const typeMatch={aji:{'港':9,'磯':1,'サーフ':-7},iwashi:{'港':7,'磯':1,'サーフ':-2},hirame:{'港':-8,'磯':-5,'サーフ':12},magochi:{'港':-5,'磯':-9,'サーフ':12},saba:{'港':8,'磯':5,'サーフ':-4},blue:{'港':4,'磯':11,'サーフ':1},kisu:{'港':-9,'磯':-12,'サーフ':14},rock:{'港':3,'磯':13,'サーフ':-12},octopus:{'港':9,'磯':14,'サーフ':-13},squid:{'港':8,'磯':13,'サーフ':-8}};
+      const typeMatch={aji:{'港':9,'磯':1,'サーフ':-7},iwashi:{'港':7,'磯':1,'サーフ':-2},hirame:{'港':-8,'磯':-5,'サーフ':12},magochi:{'港':-5,'磯':-9,'サーフ':12},saba:{'港':8,'磯':5,'サーフ':-4},blue:{'港':4,'磯':11,'サーフ':1},kisu:{'港':-9,'磯':-12,'サーフ':14},rock:{'港':3,'磯':13,'サーフ':-12},octopus:{'港':9,'磯':14,'サーフ':-13},squid:{'港':8,'磯':13,'サーフ':-8},tachiuo:{'港':12,'磯':3,'サーフ':-6},madai:{'港':3,'磯':13,'サーフ':-7}};
       const terrain=clamp(base*.62+fish.weights[2]*.38+(typeMatch[state.species]?.[s.type]||0));
-      const baitType=(['aji','iwashi','saba'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi'].includes(state.species)&&s.type!=='港'?4:0)+(state.species==='octopus'&&s.type!=='サーフ'?6:0)+(state.species==='squid'&&s.type!=='サーフ'?6:0);
+      const baitType=(['aji','iwashi','saba','tachiuo'].includes(state.species)&&s.type==='港'?6:0)+(['blue','hirame','magochi','madai'].includes(state.species)&&s.type!=='港'?4:0)+(state.species==='octopus'&&s.type!=='サーフ'?6:0)+(state.species==='squid'&&s.type!=='サーフ'?6:0);
       const bait=clamp(base*.58+fish.weights[1]*.42+baitType);
       const result=[['潮の動き',tide],['餌場適性',bait],['地形相性',terrain],['時間帯',time]],temperature=temperatureScoreFor(s);
       if(temperature!==null)result.push(['水温相性',temperature]);
@@ -1102,6 +1137,8 @@
         bottomdrag:`<path d="M52 168 C112 166 151 158 207 165 S315 158 374 165 S440 158 486 160" ${stroke}/><circle cx="207" cy="165" r="7" fill="#07131f" stroke="${color}" stroke-width="3"/><circle cx="374" cy="165" r="7" fill="#07131f" stroke="${color}" stroke-width="3"/><path d="M470 160 l18 -6 -7 12 z" fill="${color}"/>`,
         rockhop:`<path d="M52 166 Q101 121 148 165 L196 165 Q239 112 282 163 L335 162 Q374 127 414 160 L486 154" ${stroke}/><path d="M122 174 l18 -24 20 24 M265 174 l17 -28 22 28 M399 174 l15 -22 20 22" fill="#173747" stroke="rgba(200,230,234,.28)" stroke-width="2"/><path d="M470 154 l18 -6 -7 12 z" fill="${color}"/>`,
         takohop:`<path d="M52 166 Q90 135 128 165 Q167 135 206 165 Q246 135 286 165 Q327 135 368 165 Q409 135 450 164 L486 160" ${stroke}/><path d="M470 160 l18 -6 -7 12 z" fill="${color}"/><path d="M486 160 q-8 13 -16 0 q-7 13 -14 0" ${soft}/>` ,
+        rangehunt:`<path d="M54 83 C111 79 151 84 205 79" ${stroke}/><path d="M205 79 C222 91 231 106 244 119" ${soft} stroke-dasharray="5 5" marker-end="url(#${arrowId})"/><path d="M248 119 C303 113 350 119 399 112" ${stroke}/><path d="M399 112 C415 127 423 143 436 158" ${soft} stroke-dasharray="5 5" marker-end="url(#${arrowId})"/><path d="M436 158 Q456 132 486 151" ${stroke}/><path d="M470 151 l18 -6 -7 12 z" fill="${color}"/>`,
+        steadyup:`<path d="M54 165 C121 162 176 140 230 116 S343 78 414 72" ${stroke}/><path d="M414 72 C438 97 450 129 462 160" ${soft} stroke-dasharray="6 5" marker-end="url(#${arrowId})"/><circle cx="54" cy="165" r="6" fill="${color}"/><path d="M470 160 l18 -6 -7 12 z" fill="${color}"/>`,
         jerkfall:`<path d="M54 166 L86 132 L119 145 L151 104 L185 119 L219 73" ${stroke}/><path d="M219 73 C274 88 320 112 373 143 C411 165 446 166 486 158" ${soft} stroke-dasharray="6 5" marker-end="url(#${arrowId})"/><path d="M470 158 l18 -6 -7 12 z" fill="${color}"/>`
       };
       return drawings[kind]||drawings.slow;
